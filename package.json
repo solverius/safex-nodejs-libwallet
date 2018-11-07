@@ -1,7 +1,7 @@
 {
-  "name": "monero-nodejs-libwallet",
-  "version": "0.3.3",
-  "description": "Monero libwallet native addon. Under development at the moment",
+  "name": "safex-nodejs-libwallet",
+  "version": "v0.1.13",
+  "description": "Safex libwallet native addon based on Monero native addon from Exantech",
   "main": "index.js",
   "typings": "index.d.ts",
   "directories": {
@@ -9,10 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/exantech/monero-nodejs-libwallet.git"
+    "url": "git+https://github.com/atanmarko/safex-nodejs-libwallet.git"
   },
   "keywords": [
-    "Monero",
+    "Safex",
     "crypto",
     "currency",
     "cryptocurrency",
@@ -20,13 +20,12 @@
     "nodejs"
   ],
   "author": "exantech",
+  "contributors": [
+    "Marko Atanasievski"
+  ],
   "license": "LGPL-3.0-or-later",
   "gypfile": true,
-  "bugs": {
-    "url": "https://github.com/exantech/monero-nodejs-libwallet/issues",
-    "email": "hello@exan.tech"
-  },
-  "homepage": "https://github.com/exantech/monero-nodejs-libwallet#readme",
+  "homepage": "https://github.com/atanmarko/safex-nodejs-libwallet#readme",
   "engines": {
     "node": "8 - 9"
   },
@@ -44,11 +43,10 @@
     "node-pre-gyp"
   ],
   "binary": {
-    "module_name": "monero",
+    "module_name": "safex",
     "module_path": "./lib/binding/",
-    "remote_path": "./{module_name}/v{version}/{configuration}/",
-    "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
-    "host": "https://monero-nodejs-addon.s3.amazonaws.com"
+    "remote_path": "atanmarko/safex-nodejs-libwallet/releases/download/{version}",
+    "host": "https://github.com"
   },
   "scripts": {
     "build": "node-pre-gyp configure build",

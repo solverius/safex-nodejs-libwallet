@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <wallet2_api.h>
+#include <wallet_api.h>
 #include "wallettasks.h"
 
 using namespace v8;
@@ -29,10 +29,7 @@ NAN_MODULE_INIT(PendingTransaction::Init) {
         {"dust", Dust},
         {"fee", Fee},
         {"transactionsIds", TransactionsIds},
-        {"transactionsCount", TransactionsCount},
-        {"multisigSignData", MultisigSignData},
-        {"signersKeys", SignersKeys},
-        {"signMultisigTransaction", SignMultisigTransaction},
+        {"transactionsCount", TransactionsCount}
     };
 
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(PendingTransaction::New);
@@ -62,7 +59,7 @@ NAN_METHOD(PendingTransaction::New) {
   }
 }
 
-Local<Object> PendingTransaction::NewInstance(Monero::PendingTransaction* tx) {
+Local<Object> PendingTransaction::NewInstance(Safex::PendingTransaction* tx) {
     const unsigned argc = 0;
     Local<Value> argv[1] = { Nan::Null() };
     Local<Function> cons = Nan::New(constructor);
@@ -125,42 +122,6 @@ NAN_METHOD(PendingTransaction::TransactionsCount) {
     info.GetReturnValue().Set(Nan::New((uint32_t)obj->transaction->txCount()));
 }
 
-NAN_METHOD(PendingTransaction::MultisigSignData) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
 
-    auto signData = obj->transaction->multisigSignData();
-    if (obj->transaction->status() != Monero::Wallet::Status_Ok) {
-        Nan::ThrowError(obj->transaction->errorString().c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(Nan::New(signData.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(PendingTransaction::SignersKeys) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
-
-    auto keys = obj->transaction->signersKeys();
-    auto res = Nan::New<Array>(keys.size());
-    for (size_t i = 0; i < keys.size(); ++i) {
-        auto key = keys[i];
-        if (res->Set(Nan::GetCurrentContext(), i, Nan::New(key.c_str()).ToLocalChecked()).IsNothing()) {
-            Nan::ThrowError("Error occured during insertion value into the array");
-            return;
-        }
-    }
-
-    info.GetReturnValue().Set(res);
-}
-
-NAN_METHOD(PendingTransaction::SignMultisigTransaction) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
-
-    obj->transaction->signMultisigTx();
-    if (obj->transaction->status() != Monero::Wallet::Status_Ok) {
-        Nan::ThrowError(obj->transaction->errorString().c_str());
-        return;
-    }
-}
 
 }

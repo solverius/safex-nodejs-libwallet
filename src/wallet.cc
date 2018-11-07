@@ -35,13 +35,13 @@ bool toVectorString(Local<Value> args, std::vector<std::string>& append) {
     return true;
 }
 
-std::map<std::string, Monero::NetworkType> nettypes {
-    {"mainnet", Monero::MAINNET},
-    {"testnet", Monero::TESTNET},
-    {"stagenet", Monero::STAGENET}
+std::map<std::string, Safex::NetworkType> nettypes {
+    {"mainnet", Safex::MAINNET},
+    {"testnet", Safex::TESTNET},
+    {"stagenet", Safex::STAGENET}
 };
 
-bool getNettype(const std::string& netstring, Monero::NetworkType& type) {
+bool getNettype(const std::string& netstring, Safex::NetworkType& type) {
     auto it = nettypes.find(netstring);
     if (it == nettypes.end()) {
         return false;
@@ -51,8 +51,8 @@ bool getNettype(const std::string& netstring, Monero::NetworkType& type) {
     return true;
 }
 
-bool convertNettype(Monero::NetworkType type, std::string& netstring) {
-    auto it = std::find_if(nettypes.begin(), nettypes.end(), [type] (const std::pair<std::string, Monero::NetworkType> item) { return item.second == type; });
+bool convertNettype(Safex::NetworkType type, std::string& netstring) {
+    auto it = std::find_if(nettypes.begin(), nettypes.end(), [type] (const std::pair<std::string, Safex::NetworkType> item) { return item.second == type; });
     if (it == nettypes.end()) {
         return false;
     }
@@ -65,7 +65,7 @@ Local<String> convertAmount(uint64_t amount) {
     return Nan::New(std::to_string(amount).c_str()).ToLocalChecked();
 }
 
-Local<Object> makeTransactionInfoObject(const Monero::TransactionInfo* transaction) {
+Local<Object> makeTransactionInfoObject(const Safex::TransactionInfo* transaction) {
     auto transfersNative = transaction->transfers();
     auto transfers = Nan::New<Array>(transfersNative.size());
 
@@ -102,7 +102,7 @@ Local<Object> makeTransactionInfoObject(const Monero::TransactionInfo* transacti
                 Nan::New("subAddresses").ToLocalChecked(),
                 subaddrs);
 
-    const char* direction = transaction->direction() == Monero::TransactionInfo::Direction_In ? "in" : "out";
+    const char* direction = transaction->direction() == Safex::TransactionInfo::Direction_In ? "in" : "out";
     result->Set(Nan::GetCurrentContext(),
                 Nan::New("direction").ToLocalChecked(),
                 Nan::New(direction).ToLocalChecked());
@@ -176,7 +176,7 @@ NAN_METHOD(Wallet::WalletExists) {
     }
 
     std::string path = toStdString(info[0]);
-    auto manager = Monero::WalletManagerFactory::getWalletManager();
+    auto manager = Safex::WalletManagerFactory::getWalletManager();
     bool exists = manager->walletExists(path);
     info.GetReturnValue().Set(Nan::New(exists));
 }
@@ -263,18 +263,8 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"startRefresh", StartRefresh},
         {"pauseRefresh", PauseRefresh},
         {"createTransaction", CreateTransaction},
-        {"publicMultisigSignerKey", PublicMultisigSignerKey},
-        {"getMultisigInfo", GetMultisigInfo},
-        {"makeMultisig", MakeMultisig},
-        {"finalizeMultisig", FinalizeMultisig},
-        {"exportMultisigImages", ExportMultisigImages},
-        {"importMultisigImages", ImportMultisigImages},
-        {"restoreMultisigTransaction", RestoreMultisigTransaction},
-        {"multisigState", MultisigState},
         {"signMessage", SignMessage},
         {"verifySignedMessage", VerifySignedMessage},
-        {"signMultisigParticipant", SignMultisigParticipant},
-        {"verifyMessageWithPublicKey", VerifyMessageWithPublicKey},
         {"history", TransactionHistory}
     };
 
@@ -288,7 +278,7 @@ NAN_MODULE_INIT(Wallet::Init) {
     constructor.Reset(tpl->GetFunction());
 }
 
-v8::Local<v8::Object> Wallet::NewInstance(Monero::Wallet* wallet) {
+v8::Local<v8::Object> Wallet::NewInstance(Safex::Wallet* wallet) {
     const unsigned argc = 0;
     Local<Value> argv[1] = { Nan::Null() };
     Local<Function> cons = Nan::New(constructor);
@@ -480,13 +470,13 @@ NAN_METHOD(Wallet::Connected) {
 
     std::string status;
     switch (obj->wallet_->connected()) {
-    case Monero::Wallet::ConnectionStatus_Connected:
+    case Safex::Wallet::ConnectionStatus_Connected:
         status = "connected";
         break;
-    case Monero::Wallet::ConnectionStatus_Disconnected:
+    case Safex::Wallet::ConnectionStatus_Disconnected:
         status = "disconnected";
         break;
-    case Monero::Wallet::ConnectionStatus_WrongVersion:
+    case Safex::Wallet::ConnectionStatus_WrongVersion:
         status = "incompatible";
         break;
     default:
@@ -546,7 +536,7 @@ NAN_METHOD(Wallet::Synchronized) {
 }
 
 NAN_METHOD(Wallet::GenPaymentId) {
-    info.GetReturnValue().Set(Nan::New(Monero::Wallet::genPaymentId().c_str()).ToLocalChecked());
+    info.GetReturnValue().Set(Nan::New(Safex::Wallet::genPaymentId().c_str()).ToLocalChecked());
 }
 
 NAN_METHOD(Wallet::PaymentIdValid) {
@@ -555,7 +545,7 @@ NAN_METHOD(Wallet::PaymentIdValid) {
         return;
     }
 
-    info.GetReturnValue().Set(Nan::New(Monero::Wallet::paymentIdValid(toStdString(info[0]))));
+    info.GetReturnValue().Set(Nan::New(Safex::Wallet::paymentIdValid(toStdString(info[0]))));
 }
 
 NAN_METHOD(Wallet::AddressValid) {
@@ -564,12 +554,12 @@ NAN_METHOD(Wallet::AddressValid) {
         return;
     }
 
-    Monero::NetworkType nettype;
+    Safex::NetworkType nettype;
     if (!getNettype(toStdString(info[1]), nettype)) {
         Nan::ThrowError("wrong network type argument");
         return;
     }
-    bool valid = Monero::Wallet::addressValid(toStdString(info[0]), nettype);
+    bool valid = Safex::Wallet::addressValid(toStdString(info[0]), nettype);
     info.GetReturnValue().Set(Nan::New(valid));
 }
 
@@ -632,151 +622,7 @@ NAN_METHOD(Wallet::CreateTransaction) {
     info.GetReturnValue().Set(promise);
 }
 
-NAN_METHOD(Wallet::PublicMultisigSignerKey) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
-    auto signerKey = obj->wallet_->publicMultisigSignerKey();
-    if (signerKey.empty()) {
-        Nan::ThrowError("The wallet is not multisig");
-        return;
-    }
-
-    info.GetReturnValue().Set(Nan::New(signerKey.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::GetMultisigInfo) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    auto msigInfo = obj->wallet_->getMultisigInfo();
-
-    int status;
-    std::string errorString;
-    obj->wallet_->statusWithErrorString(status, errorString);
-    if (status != Monero::Wallet::Status_Ok) {
-        Nan::ThrowError(errorString.c_str());
-        return;
-    }
-
-    return info.GetReturnValue().Set(Nan::New(msigInfo.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::MakeMultisig) {
-    if (info.Length() != 2 || !info[0]->IsArray() || !info[1]->IsInt32()) {
-        Nan::ThrowTypeError("Function accepts array of strings and integer arguments");
-        return;
-    }
-
-    std::vector<std::string> infos;
-    if (!toVectorString(info[0], infos)) {
-        Nan::ThrowTypeError("Function accepts array of strings and integer arguments");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    auto threshold = Local<Uint32>::Cast(info[1]);
-    auto extraInfo = obj->wallet_->makeMultisig(infos, threshold->Value());
-
-    int status;
-    std::string errorString;
-    obj->wallet_->statusWithErrorString(status, errorString);
-    if (status != Monero::Wallet::Status_Ok) {
-        Nan::ThrowError(errorString.c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(Nan::New(extraInfo.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::FinalizeMultisig) {
-    if (info.Length() != 1 || !info[0]->IsArray()) {
-        Nan::ThrowTypeError("Function accepts array of strings argument");
-        return;
-    }
-    std::vector<std::string> extraInfos;
-    if (!toVectorString(info[0], extraInfos)) {
-        Nan::ThrowTypeError("Function accepts array of strings argument");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    if (!obj->wallet_->finalizeMultisig(extraInfos)) {
-        Nan::ThrowError(obj->wallet_->errorString().c_str());
-        return;
-    }
-}
-
-NAN_METHOD(Wallet::ExportMultisigImages) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    std::string images;
-    if (!obj->wallet_->exportMultisigImages(images)) {
-        auto errorString = obj->wallet_->errorString();
-        Nan::ThrowError(errorString.c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(Nan::New(images.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::ImportMultisigImages) {
-
-    if (info.Length() != 1 || !info[0]->IsArray()) {
-        Nan::ThrowTypeError("Function accepts array of strings argument");
-        return;
-    }
-
-    std::vector<std::string> images;
-    if (!toVectorString(info[0], images)) {
-        Nan::ThrowTypeError("Function accepts array of strings argument");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    uint32_t imported = obj->wallet_->importMultisigImages(images);
-
-    int status;
-    std::string errorString;
-    obj->wallet_->statusWithErrorString(status, errorString);
-    if (status != Monero::Wallet::Status_Ok) {
-        Nan::ThrowError(errorString.c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(imported);
-}
-
-NAN_METHOD(Wallet::RestoreMultisigTransaction) {
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        Nan::ThrowTypeError("Function accepts string argument");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    RestoreMultisigTransactionTask* task = new RestoreMultisigTransactionTask(toStdString(info[0]), obj->wallet_);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
-}
-
-NAN_METHOD(Wallet::MultisigState) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    auto state = obj->wallet_->multisig();
-    Local<Object> res = Nan::New<Object>();
-    res->Set(Nan::GetCurrentContext(),
-             Nan::New("isMultisig").ToLocalChecked(),
-             Nan::New(state.isMultisig));
-    res->Set(Nan::GetCurrentContext(),
-             Nan::New("isReady").ToLocalChecked(),
-             Nan::New(state.isReady));
-    res->Set(Nan::GetCurrentContext(),
-             Nan::New("threshold").ToLocalChecked(),
-             Nan::New((uint32_t)state.threshold));
-    res->Set(Nan::GetCurrentContext(),
-             Nan::New("total").ToLocalChecked(),
-             Nan::New((uint32_t)state.total));
-
-    info.GetReturnValue().Set(res);
-}
 
 NAN_METHOD(Wallet::SignMessage) {
 
@@ -787,7 +633,7 @@ NAN_METHOD(Wallet::SignMessage) {
 
     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
     auto signature = obj->wallet_->signMessage(toStdString(info[0]));
-    if (obj->wallet_->status() != Monero::Wallet::Status_Ok) {
+    if (obj->wallet_->status() != Safex::Wallet::Status_Ok) {
         Nan::ThrowTypeError(obj->wallet_->errorString().c_str());
         return;
     }
@@ -809,45 +655,7 @@ NAN_METHOD(Wallet::VerifySignedMessage) {
     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
     bool valid = obj->wallet_->verifySignedMessage(message, address, signature);
 
-    if (obj->wallet_->status() != Monero::Wallet::Status_Ok) {
-        Nan::ThrowTypeError(obj->wallet_->errorString().c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(valid);
-}
-
-NAN_METHOD(Wallet::SignMultisigParticipant) {
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        Nan::ThrowTypeError("Function accepts string argument");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    auto signature = obj->wallet_->signMultisigParticipant(toStdString(info[0]));
-    if (obj->wallet_->status() != Monero::Wallet::Status_Ok) {
-        Nan::ThrowTypeError(obj->wallet_->errorString().c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(Nan::New(signature.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::VerifyMessageWithPublicKey) {
-
-    if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
-        Nan::ThrowTypeError("Function accepts message, monero public key and signature as string arguments");
-        return;
-    }
-
-    auto message = toStdString(info[0]);
-    auto publicKey = toStdString(info[1]);
-    auto signature = toStdString(info[2]);
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    bool valid = obj->wallet_->verifyMessageWithPublicKey(message, publicKey, signature);
-
-    if (obj->wallet_->status() != Monero::Wallet::Status_Ok) {
+    if (obj->wallet_->status() != Safex::Wallet::Status_Ok) {
         Nan::ThrowTypeError(obj->wallet_->errorString().c_str());
         return;
     }

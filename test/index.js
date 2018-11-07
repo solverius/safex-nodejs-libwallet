@@ -8,7 +8,7 @@ const WALLET_PATH = path.join(__dirname, 'test');
 
 const walletOptions = {
   password: 'secret',
-  daemonAddress: 'monero1.exan.tech:18081',
+  daemonAddress: '127.0.0.1:29393',
   path: WALLET_PATH,
 };
 

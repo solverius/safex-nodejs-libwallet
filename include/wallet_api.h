@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018, The Monero Project
+// Copyright (c) 2018, The Safex Project
 // 
 // All rights reserved.
 // 
@@ -27,6 +27,7 @@
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // 
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
+// Parts of this file are originally copyright (c) 2014-2018 The Monero Project
 
 #pragma once
 
@@ -39,7 +40,7 @@
 #include <iostream>
 
 //  Public interface for libwallet library
-namespace Monero {
+namespace Safex {
 
 enum NetworkType : uint8_t {
     MAINNET = 0,
@@ -100,30 +101,6 @@ struct PendingTransaction
     virtual uint64_t txCount() const = 0;
     virtual std::vector<uint32_t> subaddrAccount() const = 0;
     virtual std::vector<std::set<uint32_t>> subaddrIndices() const = 0;
-
-    /**
-     * @brief multisigSignData
-     * @return encoded multisig transaction with signers' keys.
-     *         Transfer this data to another wallet participant to sign it.
-     *         Assumed use case is:
-     *         1. Initiator:
-     *              auto data = pendingTransaction->multisigSignData();
-     *         2. Signer1:
-     *              pendingTransaction = wallet->restoreMultisigTransaction(data);
-     *              pendingTransaction->signMultisigTx();
-     *              auto signed = pendingTransaction->multisigSignData();
-     *         3. Signer2:
-     *              pendingTransaction = wallet->restoreMultisigTransaction(signed);
-     *              pendingTransaction->signMultisigTx();
-     *              pendingTransaction->commit();
-     */
-    virtual std::string multisigSignData() = 0;
-    virtual void signMultisigTx() = 0;
-    /**
-     * @brief signersKeys
-     * @return vector of base58-encoded signers' public keys
-     */
-    virtual std::vector<std::string> signersKeys() const = 0;
 };
 
 /**
@@ -315,15 +292,6 @@ struct SubaddressAccount
     virtual void refresh() = 0;
 };
 
-struct MultisigState {
-    MultisigState() : isMultisig(false), isReady(false), threshold(0), total(0) {}
-
-    bool isMultisig;
-    bool isReady;
-    uint32_t threshold;
-    uint32_t total;
-};
-
 struct WalletListener
 {
     virtual ~WalletListener() = 0;
@@ -347,6 +315,20 @@ struct WalletListener
     * @param amount        - amount
     */
     virtual void unconfirmedMoneyReceived(const std::string &txId, uint64_t amount) = 0;
+
+    /**
+     * @brief tokensReceived - called when tokens are received
+     * @param txId          - transaction id
+     * @param token_amount  - amount of tokens
+     */
+    virtual void tokensReceived(const std::string &txId, uint64_t token_amount) = 0;
+
+   /**
+    * @brief unconfirmedTokensReceived - called when token payment arrived in tx pool
+    * @param txId          - transaction id
+    * @param token_amount  - amount of tokens
+    */
+    virtual void unconfirmedTokensReceived(const std::string &txId, uint64_t token_amount) = 0;
 
     /**
      * @brief newBlock      - called when new block received
@@ -391,11 +373,9 @@ struct Wallet
     virtual std::string getSeedLanguage() const = 0;
     virtual void setSeedLanguage(const std::string &arg) = 0;
     //! returns wallet status (Status_Ok | Status_Error)
-    virtual int status() const = 0; //deprecated: use safe alternative statusWithErrorString
+    virtual int status() const = 0;
     //! in case error status, returns error string
-    virtual std::string errorString() const = 0; //deprecated: use safe alternative statusWithErrorString
-    //! returns both error and error string atomically. suggested to use in instead of status() and errorString()
-    virtual void statusWithErrorString(int& status, std::string& errorString) const = 0;
+    virtual std::string errorString() const = 0;
     virtual bool setPassword(const std::string &password) = 0;
     virtual std::string address(uint32_t accountIndex = 0, uint32_t addressIndex = 0) const = 0;
     std::string mainAddress() const { return address(0, 0); }
@@ -442,12 +422,6 @@ struct Wallet
     * \return                  - public spend key
     */
     virtual std::string publicSpendKey() const = 0;
-
-    /*!
-     * \brief publicMultisigSignerKey - returns public signer key
-     * \return                        - public multisignature signer key or empty string if wallet is not multisig
-     */
-    virtual std::string publicMultisigSignerKey() const = 0;
 
     /*!
      * \brief store - stores wallet to file.
@@ -597,8 +571,7 @@ struct Wallet
     }
     static uint64_t maximumAllowedAmount();
     // Easylogger wrapper
-    static void init(const char *argv0, const char *default_log_base_name) { init(argv0, default_log_base_name, "", true); }
-    static void init(const char *argv0, const char *default_log_base_name, const std::string &log_path, bool console);
+    static void init(const char *argv0, const char *default_log_base_name);
     static void debug(const std::string &category, const std::string &str);
     static void info(const std::string &category, const std::string &str);
     static void warning(const std::string &category, const std::string &str);
@@ -670,48 +643,6 @@ struct Wallet
      */
     virtual void setSubaddressLabel(uint32_t accountIndex, uint32_t addressIndex, const std::string &label) = 0;
 
-    /**
-     * @brief multisig - returns current state of multisig wallet creation process
-     * @return MultisigState struct
-     */
-    virtual MultisigState multisig() const = 0;
-    /**
-     * @brief getMultisigInfo
-     * @return serialized and signed multisig info string
-     */
-    virtual std::string getMultisigInfo() const = 0;
-    /**
-     * @brief makeMultisig - switches wallet in multisig state. The one and only creation phase for N / N wallets
-     * @param info - vector of multisig infos from other participants obtained with getMulitisInfo call
-     * @param threshold - number of required signers to make valid transaction. Must be equal to number of participants (N) or N - 1
-     * @return in case of N / N wallets returns empty string since no more key exchanges needed. For N - 1 / N wallets returns base58 encoded extra multisig info
-     */
-    virtual std::string makeMultisig(const std::vector<std::string>& info, uint32_t threshold) = 0;
-    /**
-     * @brief finalizeMultisig - finalizes N - 1 / N multisig wallets creation
-     * @param extraMultisigInfo - wallet participants' extra multisig info obtained with makeMultisig call
-     * @return true if success
-     */
-    virtual bool finalizeMultisig(const std::vector<std::string>& extraMultisigInfo) = 0;
-    /**
-     * @brief exportMultisigImages - exports transfers' key images
-     * @param images - output paramter for hex encoded array of images
-     * @return true if success
-     */
-    virtual bool exportMultisigImages(std::string& images) = 0;
-    /**
-     * @brief importMultisigImages - imports other participants' multisig images
-     * @param images - array of hex encoded arrays of images obtained with exportMultisigImages
-     * @return number of imported images
-     */
-    virtual size_t importMultisigImages(const std::vector<std::string>& images) = 0;
-
-    /**
-     * @brief restoreMultisigTransaction creates PendingTransaction from signData
-     * @param signData encrypted unsigned transaction. Obtained with PendingTransaction::multisigSignData
-     * @return PendingTransaction
-     */
-    virtual PendingTransaction*  restoreMultisigTransaction(const std::string& signData) = 0;
     /*!
      * \brief createTransaction creates transaction. if dst_addr is an integrated address, payment_id is ignored
      * \param dst_addr          destination address as string
@@ -830,21 +761,6 @@ struct Wallet
      * \return true if the signature verified, false otherwise
      */
     virtual bool verifySignedMessage(const std::string &message, const std::string &addres, const std::string &signature) const = 0;
-
-    /*!
-     * \brief signMultisigParticipant   signs given message with the multisig public signer key
-     * \param message                   message to sign
-     * \return                          signature in case of success. Sets status to Error and return empty string in case of error
-     */
-    virtual std::string signMultisigParticipant(const std::string &message) const = 0;
-    /*!
-     * \brief verifyMessageWithPublicKey verifies that message was signed with the given public key
-     * \param message                    message
-     * \param publicKey                  hex encoded public key
-     * \param signature                  signature of the message
-     * \return                           true if the signature is correct. false and sets error state in case of error
-     */
-    virtual bool verifyMessageWithPublicKey(const std::string &message, const std::string &publicKey, const std::string &signature) const = 0;
 
     virtual bool parse_uri(const std::string &uri, std::string &address, std::string &payment_id, uint64_t &amount, std::string &tx_description, std::string &recipient_name, std::vector<std::string> &unknown_parameters, std::string &error) = 0;
 
@@ -1111,5 +1027,5 @@ struct WalletManagerFactory
 
 }
 
-namespace Bitmonero = Monero;
+namespace Bitsafex = Safex;
 

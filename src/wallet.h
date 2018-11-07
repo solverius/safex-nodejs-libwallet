@@ -5,17 +5,17 @@
 #include <map>
 #include <mutex>
 
-#include <wallet2_api.h>
+#include <wallet_api.h>
 
 namespace exawallet {
 
 using CopyablePersistentFunction = Nan::CopyablePersistentTraits<v8::Function>::CopyablePersistent;
 
-class Wallet : public node::ObjectWrap, public Monero::WalletListener {
+class Wallet : public node::ObjectWrap, public Safex::WalletListener {
 public:
     static NAN_MODULE_INIT(Init);
 
-    static v8::Local<v8::Object> NewInstance(Monero::Wallet* wallet);
+    static v8::Local<v8::Object> NewInstance(Safex::Wallet* wallet);
 
     static NAN_METHOD(WalletExists);
     static NAN_METHOD(CreateWallet);
@@ -31,12 +31,15 @@ public:
     v8::MaybeLocal<v8::Function> FindCallback(const std::string& name);
 
  private:
-    explicit Wallet(Monero::Wallet* wallet): wallet_(wallet) {}
+    explicit Wallet(Safex::Wallet* wallet): wallet_(wallet) {}
     ~Wallet();
 
     virtual void moneySpent(const std::string &txId, uint64_t amount) override;
     virtual void moneyReceived(const std::string &txId, uint64_t amount) override;
     virtual void unconfirmedMoneyReceived(const std::string &txId, uint64_t amount) override;
+    virtual void tokensReceived(const std::string &txId, uint64_t token_amount) override;
+    virtual void unconfirmedTokensReceived(const std::string &txId, uint64_t token_amount) override;
+
     virtual void newBlock(uint64_t height) override;
     virtual void updated() override;
     virtual void refreshed() override;
@@ -83,25 +86,13 @@ public:
 
     static NAN_METHOD(CreateTransaction);
 
-    static NAN_METHOD(PublicMultisigSignerKey);
-    static NAN_METHOD(GetMultisigInfo);
-    static NAN_METHOD(MakeMultisig);
-    static NAN_METHOD(FinalizeMultisig);
-    static NAN_METHOD(ExportMultisigImages);
-    static NAN_METHOD(ImportMultisigImages);
-    static NAN_METHOD(RestoreMultisigTransaction);
-    static NAN_METHOD(MultisigState);
-
     static NAN_METHOD(SignMessage);
     static NAN_METHOD(VerifySignedMessage);
 
-    // multisig signatures
-    static NAN_METHOD(SignMultisigParticipant);
-    static NAN_METHOD(VerifyMessageWithPublicKey);
 
     static Nan::Persistent<v8::Function> constructor;
 
-    Monero::Wallet* wallet_ = nullptr;
+    Safex::Wallet* wallet_ = nullptr;
     std::map<std::string, CopyablePersistentFunction> callbacks_;
 };
 

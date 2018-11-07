@@ -1,4 +1,4 @@
-const monero = require('monero-nodejs-libwallet');
+const monero = require('safex-nodejs-libwallet');
 
 monero.setupLog(1);
 

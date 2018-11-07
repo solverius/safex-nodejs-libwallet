@@ -90,11 +90,11 @@ std::string CreateWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args)
     language = getOptionalProperty<std::string>(obj, "language", "English");
     auto net = getOptionalProperty<std::string>(obj, "network", "mainnet");
     if (net == "mainnet") {
-        nettype = Monero::MAINNET;
+        nettype = Safex::MAINNET;
     } else if (net == "testnet") {
-        nettype = Monero::TESTNET;
+        nettype = Safex::TESTNET;
     } else if (net == "stagenet") {
-        nettype = Monero::STAGENET;
+        nettype = Safex::STAGENET;
     } else {
         return "Invalid value for network: " + net;
     }
@@ -120,11 +120,11 @@ std::string OpenWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
 
     auto net = getOptionalProperty<std::string>(obj, "network", "mainnet");
     if (net == "mainnet") {
-        nettype = Monero::MAINNET;
+        nettype = Safex::MAINNET;
     } else if (net == "testnet") {
-        nettype = Monero::TESTNET;
+        nettype = Safex::TESTNET;
     } else if (net == "stagenet") {
-        nettype = Monero::STAGENET;
+        nettype = Safex::STAGENET;
     } else {
         return "Invalid value for network: " + net;
     }
@@ -151,11 +151,11 @@ std::string RecoveryWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& arg
 
     auto net = getOptionalProperty<std::string>(obj, "network", "mainnet");
     if (net == "mainnet") {
-        nettype = Monero::MAINNET;
+        nettype = Safex::MAINNET;
     } else if (net == "testnet") {
-        nettype = Monero::TESTNET;
+        nettype = Safex::TESTNET;
     } else if (net == "stagenet") {
-        nettype = Monero::STAGENET;
+        nettype = Safex::STAGENET;
     } else {
         return "Invalid value for network: " + net;
     }

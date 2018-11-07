@@ -14,7 +14,7 @@ public:
 
 private:
     CreateWalletArgs args_;
-    Monero::Wallet* wallet_ = nullptr;
+    Safex::Wallet* wallet_ = nullptr;
 };
 
 class OpenWalletTask: public DeferredTask {
@@ -26,18 +26,18 @@ public:
 
 private:
     OpenWalletArgs args_;
-    Monero::Wallet* wallet_ = nullptr;
+    Safex::Wallet* wallet_ = nullptr;
 };
 
 class CloseWalletTask: public DeferredTask {
 public:
-    CloseWalletTask(Monero::Wallet* wallet, bool store): wallet_(wallet), store_(store) {}
+    CloseWalletTask(Safex::Wallet* wallet, bool store): wallet_(wallet), store_(store) {}
 
     virtual std::string doWork() override;
     virtual v8::Local<v8::Value> afterWork(std::string& error) override;
 
 private:
-    Monero::Wallet* wallet_ = nullptr;
+    Safex::Wallet* wallet_ = nullptr;
     bool store_;
 };
 
@@ -50,47 +50,47 @@ public:
 
 private:
     RecoveryWalletArgs args_;
-    Monero::Wallet* wallet_ = nullptr;
+    Safex::Wallet* wallet_ = nullptr;
 };
 
 
 class StoreWalletTask: public DeferredTask {
 public:
-    StoreWalletTask(Monero::Wallet* wallet): wallet_(wallet) {}
+    StoreWalletTask(Safex::Wallet* wallet): wallet_(wallet) {}
 
     virtual std::string doWork() override;
     virtual v8::Local<v8::Value> afterWork(std::string& error) override;
 private:
-    Monero::Wallet* wallet_;
+    Safex::Wallet* wallet_;
 };
 
 class CreateTransactionTask: public DeferredTask {
 public:
-    CreateTransactionTask(const CreateTransactionArgs& args, Monero::Wallet* wallet): args_(args), wallet_(wallet) {}
+    CreateTransactionTask(const CreateTransactionArgs& args, Safex::Wallet* wallet): args_(args), wallet_(wallet) {}
 
     virtual std::string doWork() override;
     virtual v8::Local<v8::Value> afterWork(std::string& error) override;
 
 private:
     CreateTransactionArgs args_;
-    Monero::PendingTransaction* transaction_ = nullptr;
-    Monero::Wallet* wallet_;
+    Safex::PendingTransaction* transaction_ = nullptr;
+    Safex::Wallet* wallet_;
 };
 
 class CommitTransactionTask: public DeferredTask {
 public:
-    CommitTransactionTask(Monero::PendingTransaction* transaction): transaction_(transaction) {}
+    CommitTransactionTask(Safex::PendingTransaction* transaction): transaction_(transaction) {}
 
     virtual std::string doWork() override;
     virtual v8::Local<v8::Value> afterWork(std::string& error) override;
 
 private:
-    Monero::PendingTransaction* transaction_;
+    Safex::PendingTransaction* transaction_;
 };
 
 class RestoreMultisigTransactionTask: public DeferredTask {
 public:
-    RestoreMultisigTransactionTask(const std::string& transactionData, Monero::Wallet* wallet)
+    RestoreMultisigTransactionTask(const std::string& transactionData, Safex::Wallet* wallet)
         : transactionData_(transactionData), wallet_(wallet) {}
 
     virtual std::string doWork() override;
@@ -98,8 +98,8 @@ public:
 
 private:
     std::string transactionData_;
-    Monero::PendingTransaction* transaction_ = nullptr;
-    Monero::Wallet* wallet_;
+    Safex::PendingTransaction* transaction_ = nullptr;
+    Safex::Wallet* wallet_;
 };
 
 } //namespace exawallet

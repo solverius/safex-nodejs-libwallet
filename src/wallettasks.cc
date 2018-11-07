@@ -8,7 +8,7 @@ namespace exawallet {
 using namespace v8;
 
 std::string CreateWalletTask::doWork() {
-    auto manager = Monero::WalletManagerFactory::getWalletManager();
+    auto manager = Safex::WalletManagerFactory::getWalletManager();
     if (manager->walletExists(args_.path)) {
         return "Wallet already exists: " + args_.path;
     }
@@ -37,7 +37,7 @@ Local<Value> CreateWalletTask::afterWork(std::string& error) {
 }
 
 std::string OpenWalletTask::doWork() {
-    auto manager = Monero::WalletManagerFactory::getWalletManager();
+    auto manager = Safex::WalletManagerFactory::getWalletManager();
     if (!manager->walletExists(args_.path)) {
         return "wallet does not exist: " + args_.path;
     }
@@ -66,7 +66,7 @@ Local<Value> OpenWalletTask::afterWork(std::string& error) {
 }
 
 std::string CloseWalletTask::doWork() {
-    auto manager = Monero::WalletManagerFactory::getWalletManager();
+    auto manager = Safex::WalletManagerFactory::getWalletManager();
     manager->closeWallet(wallet_, store_);
     return {};
 }
@@ -76,7 +76,7 @@ Local<Value> CloseWalletTask::afterWork(std::string& error) {
 }
 
 std::string RecoveryWalletTask::doWork() {
-    auto manager = Monero::WalletManagerFactory::getWalletManager();
+    auto manager = Safex::WalletManagerFactory::getWalletManager();
 
     wallet_ = manager->recoveryWallet(args_.path,
                                        args_.password,
@@ -139,19 +139,6 @@ std::string CommitTransactionTask::doWork() {
 
 Local<Value> CommitTransactionTask::afterWork(std::string& error) {
     return Nan::Undefined();
-}
-
-std::string RestoreMultisigTransactionTask::doWork() {
-    transaction_ = wallet_->restoreMultisigTransaction(transactionData_);
-    if (!wallet_->errorString().empty()) {
-        return wallet_->errorString();
-    }
-    
-    return {};
-}
-
-Local<Value> RestoreMultisigTransactionTask::afterWork(std::string& error) {
-    return PendingTransaction::NewInstance(transaction_);
 }
 
 }

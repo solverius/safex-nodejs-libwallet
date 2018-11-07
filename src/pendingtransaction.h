@@ -2,7 +2,7 @@
 
 #include <nan.h>
 
-namespace Monero {
+namespace Safex {
 struct PendingTransaction;
 }
 
@@ -10,12 +10,12 @@ namespace exawallet {
 
 class PendingTransaction : public node::ObjectWrap {
 public:
-    explicit PendingTransaction(Monero::PendingTransaction* tx): transaction(tx) {}
+    explicit PendingTransaction(Safex::PendingTransaction* tx): transaction(tx) {}
     virtual ~PendingTransaction();
 
     static NAN_MODULE_INIT(Init);
     static NAN_METHOD(New);
-    static v8::Local<v8::Object> NewInstance(Monero::PendingTransaction* tx);
+    static v8::Local<v8::Object> NewInstance(Safex::PendingTransaction* tx);
 
     static NAN_METHOD(Commit);
     static NAN_METHOD(Amount);
@@ -31,7 +31,7 @@ public:
 private:
     static Nan::Persistent<v8::Function> constructor;
 
-    Monero::PendingTransaction* transaction;
+    Safex::PendingTransaction* transaction;
 };
 
 }
