@@ -31,6 +31,8 @@ const nextTick = () => {
 		console.log("address: " + wallet.address());
 		console.log("balance: " + wallet.balance());
 		console.log("unlocked balance: " + wallet.unlockedBalance());
+        console.log("token balance: " + wallet.tokenBalance());
+        console.log("unlocked token balance: " + wallet.unlockedTokenBalance());
 		console.log("seed: " + wallet.seed());
 		console.log("secret view key: " + wallet.secretViewKey());
 		console.log("secret spend key: " + wallet.secretSpendKey());
@@ -97,6 +99,18 @@ promise
 		wallet.on('moneySpent', function(tx, amount) {
 			console.log("money spent. tx: " + tx + ", amount: " + amount);
 		});
+
+        wallet.on('unconfirmedTokensReceived', function(tx, token_amount) {
+            console.log("unconfirmed tokens received. tx: " + tx + ", token amount: " + token_amount);
+        });
+
+        wallet.on('tokensReceived', function(tx, token_amount) {
+            console.log("tokens received. tx: " + tx + ", token amount: " + token_amount);
+        });
+
+        wallet.on('tokensSpent', function(tx, token_amount) {
+            console.log("tokens spent. tx: " + tx + ", token amount: " + token_amount);
+        });
 
 		nextTick();
 	})

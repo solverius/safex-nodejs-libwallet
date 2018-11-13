@@ -255,6 +255,8 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"trustedDaemon", TrustedDaemon},
         {"balance", Balance},
         {"unlockedBalance", UnlockedBalance},
+        {"tokenBalance", TokenBalance},
+        {"unlockedTokenBalance", UnlockedTokenBalance},
         {"blockchainHeight", BlockChainHeight},
         {"daemonBlockchainHeight", DaemonBlockChainHeight},
         {"synchronized", Synchronized},
@@ -517,6 +519,19 @@ NAN_METHOD(Wallet::UnlockedBalance) {
 
     info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->unlockedBalanceAll()).c_str()).ToLocalChecked());
 }
+
+  NAN_METHOD(Wallet::TokenBalance) {
+          Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+          // it seems v8 doesn't have uint64
+          info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->tokenBalanceAll()).c_str()).ToLocalChecked());
+  }
+
+  NAN_METHOD(Wallet::UnlockedTokenBalance) {
+          Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+          info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->unlockedTokenBalanceAll()).c_str()).ToLocalChecked());
+  }
 
 NAN_METHOD(Wallet::BlockChainHeight) {
     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());

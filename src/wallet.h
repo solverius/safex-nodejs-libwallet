@@ -37,6 +37,7 @@ public:
     virtual void moneySpent(const std::string &txId, uint64_t amount) override;
     virtual void moneyReceived(const std::string &txId, uint64_t amount) override;
     virtual void unconfirmedMoneyReceived(const std::string &txId, uint64_t amount) override;
+    virtual void tokensSpent(const std::string &txId, uint64_t token_amount) override;
     virtual void tokensReceived(const std::string &txId, uint64_t token_amount) override;
     virtual void unconfirmedTokensReceived(const std::string &txId, uint64_t token_amount) override;
 
@@ -70,6 +71,8 @@ public:
 
     static NAN_METHOD(Balance);
     static NAN_METHOD(UnlockedBalance);
+    static NAN_METHOD(TokenBalance);
+    static NAN_METHOD(UnlockedTokenBalance);
 
     static NAN_METHOD(BlockChainHeight);
     static NAN_METHOD(DaemonBlockChainHeight);

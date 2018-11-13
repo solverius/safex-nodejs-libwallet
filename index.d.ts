@@ -22,7 +22,10 @@ declare namespace monero {
     | 'updated'
     | 'unconfirmedMoneyReceived'
     | 'moneyReceived'
-    | 'moneySpent';
+    | 'moneySpent'
+    | 'unconfirmedTokensReceived'
+    | 'tokensReceived'
+    | 'tokensSpent';
 
   type Network =
     | 'mainnet'
@@ -77,6 +80,10 @@ declare namespace monero {
     on(
       event: 'unconfirmedMoneyReceived' | 'moneyReceived' | 'moneySpent',
       callback: (tx: string, amount: string) => void,
+    ): Wallet;
+    on(
+        event: 'unconfirmedTokensReceived' | 'tokensReceived' | 'tokensSpent',
+        callback: (tx: string, token_amount: string) => void,
     ): Wallet;
     on(event: 'refreshed' | 'updated', callback: () => void): Wallet;
     off(event?: WalletEvent): Wallet;

@@ -1,33 +1,34 @@
-const monero = require('safex-nodejs-libwallet');
+const safex = require('safex-nodejs-libwallet');
+const path = require('path');
 
 const fs = require('fs');
 if(fs.existsSync('index.log')) 
 	fs.unlinkSync('index.log')
 	
-monero.setupLog(3, "index.log");
+safex.setupLog(3, "index.log");
 
 var wallet;
 var sent = false;
+const wallet_path = path.join(__dirname, 'test-wallet');
 
-var path = 'stagenet'
 var args = {
-	'path': path,
+    'path': wallet_path,
 	'password': '123', 
-	'network': 'stagenet',
-	'daemonAddress': 'monero-stage.exan.tech:38081',
+	'network': 'testnet',
+	'daemonAddress': 'localhost:29393',
 	'restoreHeight': 0,
 	'mnemonic' : 'nifty inflamed against focus gasp ethics spying gulp tiger cogs evicted cohesive woken nylon erosion tell saved fatal alkaline acquire lemon maps hull imitate saved'
 }
 
-if (!monero.walletExists(path)) {
-	console.log("wallet doesn't exist. creating new one: " + path);
+if (!safex.walletExists(wallet_path)) {
+	console.log("wallet doesn't exist. creating new one: " + wallet_path);
 	if(args.mnemonic)
-		promise = monero.recoveryWallet(args)
+		promise = safex.recoveryWallet(args)
 	else
-		promise = monero.createWallet(args);
+		promise = safex.createWallet(args);
 } else {
-	console.log("wallet already exists. opening: " + path);
-	promise = monero.openWallet(args);
+	console.log("wallet already exists. opening: " + wallet_path);
+	promise = safex.openWallet(args);
 }
 
 const nextTick = () => {
@@ -35,6 +36,8 @@ const nextTick = () => {
 		console.log("address: " + wallet.address());
 		console.log("balance: " + wallet.balance());
 		console.log("unlocked balance: " + wallet.unlockedBalance());
+        console.log("token balance: " + wallet.tokenBalance());
+        console.log("unlocked token balance: " + wallet.unlockedTokenBalance());
 		console.log("seed: " + wallet.seed());
 		console.log("secret view key: " + wallet.secretViewKey());
 		console.log("secret spend key: " + wallet.secretSpendKey());
@@ -68,11 +71,11 @@ promise
 			if (!sent) {
 				sent = true;
 				wallet.createTransaction({
-					'address': '44zrUGhyRHYbHYrfiGAtLdJMHfe5DtoFTBeVPCE6MGKzZA2bJ4tCJFuhYk3Wjp3YxEWoQU8So5xUiiArgnkBHZgX8Fyhv6e',
-					'amount': '2000000000', //monero atomic units as string
+					'address': 'SFXtzT37s8jWtjUx8kfWD24PU2mMLqYkt7DQ3KzJKC7B3pp67XFpFJhiEvwTe1DX9gT7nWcYZQRt7UWnEoWDcjmLdegfWoLVZwY',
+					'amount': '21300000000', //safex atomic units as string
 				}).then((tx) => {
 					console.log("transaction created: " + tx.transactionsIds());
-					
+
 					tx.commit().then(() => {
 						console.log("transaction commited successfully");
 					}).catch((e) => {
@@ -100,6 +103,18 @@ promise
 		wallet.on('moneySpent', function(tx, amount) {
 			console.log("money spent. tx: " + tx + ", amount: " + amount);
 		});
+
+        wallet.on('unconfirmedTokensReceived', function(tx, token_amount) {
+            console.log("unconfirmed tokens received. tx: " + tx + ", token amount: " + token_amount);
+        });
+
+        wallet.on('tokensReceived', function(tx, token_amount) {
+            console.log("tokens received. tx: " + tx + ", token amount: " + token_amount);
+        });
+
+        wallet.on('tokensSpent', function(tx, token_amount) {
+            console.log("tokens spent. tx: " + tx + ", token amount: " + token_amount);
+        });
 
 		nextTick();
 	})
