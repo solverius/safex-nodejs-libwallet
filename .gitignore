@@ -12,3 +12,5 @@ mainnet*
 *.log
 *.keys
 .cquery
+/safexcore
+/.idea
