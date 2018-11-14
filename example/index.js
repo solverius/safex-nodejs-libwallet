@@ -70,11 +70,16 @@ promise
 
 			if (!sent) {
 				sent = true;
+                // wallet.createTransaction({
+                //     'address': 'SFXtzT37s8jWtjUx8kfWD24PU2mMLqYkt7DQ3KzJKC7B3pp67XFpFJhiEvwTe1DX9gT7nWcYZQRt7UWnEoWDcjmLdegfWoLVZwY',
+                //     'amount': '21300000000', //send 2.13 cash
+                // })
 				wallet.createTransaction({
 					'address': 'SFXtzT37s8jWtjUx8kfWD24PU2mMLqYkt7DQ3KzJKC7B3pp67XFpFJhiEvwTe1DX9gT7nWcYZQRt7UWnEoWDcjmLdegfWoLVZwY',
-					'amount': '21300000000', //safex atomic units as string
+					'amount': '30000000000', //send 3 tokens
+					'tx_type': 1 //token transaction
 				}).then((tx) => {
-					console.log("transaction created: " + tx.transactionsIds());
+					console.log("token transaction created: " + tx.transactionsIds());
 
 					tx.commit().then(() => {
 						console.log("transaction commited successfully");

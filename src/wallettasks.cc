@@ -117,7 +117,7 @@ Local<Value> StoreWalletTask::afterWork(std::string& error) {
 }
 
 std::string CreateTransactionTask::doWork() {
-    transaction_ = wallet_->createTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin);
+    transaction_ = wallet_->createTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, args_.tx_type);
     if (!wallet_->errorString().empty()) {
         return wallet_->errorString();
     }

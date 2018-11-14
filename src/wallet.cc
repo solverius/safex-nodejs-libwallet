@@ -638,7 +638,6 @@ NAN_METHOD(Wallet::CreateTransaction) {
 }
 
 
-
 NAN_METHOD(Wallet::SignMessage) {
 
     if (info.Length() != 1 || !info[0]->IsString()) {

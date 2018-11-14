@@ -42,6 +42,7 @@ declare namespace monero {
   type Transaction = {
     commit(): Promise<void>;
     amount(): string;
+    tokenAmount(): string;
     fee(): string;
     transactionsCount(): number;
     transactionsIds(): string[];
@@ -52,6 +53,7 @@ declare namespace monero {
 
   type Transfer = {
     amount: string;
+    token_amount: string;
     address: string;
   };
 
@@ -71,6 +73,7 @@ declare namespace monero {
     timestamp: number;
     paymentId: number;
     transfers: Transfer[];
+    transactionType: number;
   };
 
   interface Wallet {
@@ -93,6 +96,8 @@ declare namespace monero {
       amount: string,
       paymentId?: string,
       mixin?: number,
+      priority?:number,
+      tx_type?: number
     }): Promise<Transaction>;
     history(): TransactionInfo[];
     path(): string;

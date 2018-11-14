@@ -50,6 +50,8 @@ struct CreateTransactionArgs {
     uint64_t amount;
     std::string paymentId;
     uint32_t mixin;
+    Safex::PendingTransaction::Priority priority = Safex::PendingTransaction::Priority_Low;
+    Safex::TransactionType tx_type;
 };
 
 }
