@@ -1,4 +1,4 @@
-SAFEX_BRANCH?="develop"
+SAFEX_BRANCH?="node_wallet"
 SAFEX_BUILD_TYPE?=Debug
 
 BOOST_VERSION=1.66.0
