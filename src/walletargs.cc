@@ -188,6 +188,10 @@ std::string CreateTransactionArgs::Init(const Nan::FunctionCallbackInfo<Value>& 
     amount = std::stoul(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
     mixin = getOptionalProperty<uint32_t>(obj, "mixin", MINIMAL_MIXIN);
+    priority = static_cast<Safex::PendingTransaction::Priority>(getOptionalProperty<uint32_t>(obj, "priority",
+            static_cast<uint32_t>(Safex::PendingTransaction::Priority::Priority_Medium)));
+    tx_type = static_cast<Safex::TransactionType>(getOptionalProperty<uint32_t>(obj, "tx_type",
+            static_cast<uint32_t>(Safex::TransactionType::CashTransaction)));
 
     if (mixin < MINIMAL_MIXIN) {
         return "Minimal mixin: " + std::to_string(MINIMAL_MIXIN);
