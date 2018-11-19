@@ -36,6 +36,36 @@ Local<Value> CreateWalletTask::afterWork(std::string& error) {
     return Wallet::NewInstance(wallet_);
 }
 
+std::string CreateWalletFromKeysTask::doWork() {
+  auto manager = Safex::WalletManagerFactory::getWalletManager();
+  if (manager->walletExists(args_.path)) {
+    return "Wallet already exists: " + args_.path;
+  }
+
+  wallet_ = manager->createWalletFromKeys(args_.path, args_.password, args_.language, args_.nettype, args_.restoreHeight, args_.addressString, args_.viewKeyString, args_.spendKeyString);
+
+
+  if (!wallet_) {
+    return "WalletManager returned null wallet pointer";
+  }
+
+  if (!wallet_->errorString().empty()) {
+    return wallet_->errorString();
+  }
+
+  if (!wallet_->init(args_.daemonAddress)) {
+    return "Couldn't init wallet";
+  }
+
+  wallet_->setTrustedDaemon(true);
+  wallet_->startRefresh();
+  return {};
+}
+
+Local<Value> CreateWalletFromKeysTask::afterWork(std::string& error) {
+  return Wallet::NewInstance(wallet_);
+}
+
 std::string OpenWalletTask::doWork() {
     auto manager = Safex::WalletManagerFactory::getWalletManager();
     if (!manager->walletExists(args_.path)) {

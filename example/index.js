@@ -13,17 +13,31 @@ const wallet_path = path.join(__dirname, 'test-wallet');
 
 var args = {
     'path': wallet_path,
-	'password': '123', 
+	'password': '123',
 	'network': 'testnet',
 	'daemonAddress': 'localhost:29393',
 	'restoreHeight': 0,
 	'mnemonic' : 'nifty inflamed against focus gasp ethics spying gulp tiger cogs evicted cohesive woken nylon erosion tell saved fatal alkaline acquire lemon maps hull imitate saved'
 }
 
+
+// var args = {
+//      'path': wallet_path,
+//  	'password': '123',
+//  	'network': 'testnet',
+//  	'daemonAddress': 'localhost:29393',
+//  	'restoreHeight': 0,
+//     'addressString':  'SFXtzRzqWR2J3ytgxg1AxBfM8ZFgZmywoXHtqeqwsk3Gi63B2c3mvLNct35m268Pg2eGqHLmJubC7GPdvb1KxhTvHeVd4WKD9RQ',
+//     'viewKeyString':  '',
+//     'spendKeyString':  ''
+// }
+
 if (!safex.walletExists(wallet_path)) {
 	console.log("wallet doesn't exist. creating new one: " + wallet_path);
 	if(args.mnemonic)
-		promise = safex.recoveryWallet(args)
+		promise = safex.recoveryWallet(args);
+    else if(args.addressString)
+        promise = safex.createWalletFromKeys(args);
 	else
 		promise = safex.createWallet(args);
 } else {
