@@ -65,6 +65,7 @@ NAN_MODULE_INIT(Init) {
     mlog_configure("", false);
 
     Nan::SetMethod(target, "createWallet", Wallet::CreateWallet);
+    Nan::SetMethod(target, "createWalletFromKeys", Wallet::CreateWalletFromKeys);
     Nan::SetMethod(target, "walletExists", Wallet::WalletExists);
     Nan::SetMethod(target, "openWallet", Wallet::OpenWallet);
     Nan::SetMethod(target, "recoveryWallet", Wallet::RecoveryWallet);

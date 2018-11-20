@@ -194,6 +194,19 @@ NAN_METHOD(Wallet::CreateWallet) {
     info.GetReturnValue().Set(promise);
 }
 
+NAN_METHOD(Wallet::CreateWalletFromKeys) {
+        CreateWalletFromKeysArgs walletArgs;
+        std::string error = walletArgs.Init(info);
+        if (!error.empty()) {
+          Nan::ThrowError(error.c_str());
+          return;
+        }
+
+        CreateWalletFromKeysTask* task = new CreateWalletFromKeysTask(walletArgs);
+        auto promise = task->Enqueue();
+        info.GetReturnValue().Set(promise);
+}
+
 NAN_METHOD(Wallet::OpenWallet) {
     OpenWalletArgs walletArgs;
     std::string error = walletArgs.Init(info);

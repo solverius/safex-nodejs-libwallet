@@ -17,6 +17,18 @@ private:
     Safex::Wallet* wallet_ = nullptr;
 };
 
+class CreateWalletFromKeysTask: public DeferredTask {
+public:
+  CreateWalletFromKeysTask(const CreateWalletFromKeysArgs& args): args_(args) {}
+
+  virtual std::string doWork() override;
+  virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+
+private:
+  CreateWalletFromKeysArgs args_;
+  Safex::Wallet* wallet_ = nullptr;
+};
+
 class OpenWalletTask: public DeferredTask {
 public:
     OpenWalletTask(const OpenWalletArgs& args): args_(args) {}

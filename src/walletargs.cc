@@ -102,6 +102,52 @@ std::string CreateWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args)
     return {};
 }
 
+  std::string CreateWalletFromKeysArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
+      if (args.Length() != 1 || !args[0]->IsObject()) {
+          return "Argument must be an object";
+      }
+      auto obj = args[0]->ToObject();
+      if (!getRequiredProperty<std::string>(obj, "path", path)) {
+          return std::string("Required property not found: path");
+      }
+
+      if (!getRequiredProperty<std::string>(obj, "password", password)) {
+          return std::string("Required property not found: password");
+      }
+
+      if (!getRequiredProperty<std::string>(obj, "daemonAddress", daemonAddress)) {
+          return std::string("Required property not found: daemonAddress");
+      }
+
+      language = getOptionalProperty<std::string>(obj, "language", "English");
+      auto net = getOptionalProperty<std::string>(obj, "network", "mainnet");
+      if (net == "mainnet") {
+          nettype = Safex::MAINNET;
+      } else if (net == "testnet") {
+          nettype = Safex::TESTNET;
+      } else if (net == "stagenet") {
+          nettype = Safex::STAGENET;
+      } else {
+          return "Invalid value for network: " + net;
+      }
+
+      restoreHeight = getOptionalProperty<uint64_t>(obj, "restoreHeight", 0);
+
+      if (!getRequiredProperty<std::string>(obj, "addressString", addressString)) {
+          return std::string("Required property not found: addressString");
+      }
+
+      if (!getRequiredProperty<std::string>(obj, "viewKeyString", viewKeyString)) {
+          return std::string("Required property not found: viewKeyString");
+      }
+
+      if (!getRequiredProperty<std::string>(obj, "spendKeyString", spendKeyString)) {
+          return std::string("Required property not found: spendKeyString");
+      }
+
+      return {};
+  }
+
 std::string OpenWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
     if (args.Length() != 1 || !args[0]->IsObject()) {
         return "Argument must be an object";

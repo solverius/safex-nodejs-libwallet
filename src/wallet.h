@@ -19,6 +19,7 @@ public:
 
     static NAN_METHOD(WalletExists);
     static NAN_METHOD(CreateWallet);
+    static NAN_METHOD(CreateWalletFromKeys);
     static NAN_METHOD(OpenWallet);
     static NAN_METHOD(RecoveryWallet);
     static NAN_METHOD(GenPaymentId);
