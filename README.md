@@ -1,5 +1,5 @@
 # safex-nodejs-libwallet
-Wrapper for monero libwallet. All created wallet files are compatible with `monero-wallet-cli` and `monero-wallet-rpc`. 
+Wrapper for safex libwallet. All created wallet files are compatible with `safex-wallet-cli` and `safex-wallet-rpc`. 
 Check `example/index.js` for usage examples of the library. 
 
 # Installation
@@ -8,16 +8,16 @@ $ npm install safex-nodejs-libwallet
 ```
 `npm` will try to find and download precompiled binaries for your node version, OS and architecture. Then include require statement in your `js`-code and use it:
 ```js
-const monero = require('safex-nodejs-libwallet');
+const safex = require('safex-nodejs-libwallet');
 ```
 If `npm` couldn't find proper binaries for your platform please refer to [manual build](#manual-build) section.
 
 # Manual Build
-If you want to build the addon manually or there are no prebuilt binaries for your platform in `npm` repository please check the [official monero guide](https://github.com/monero-project/monero#compiling-monero-from-source) on how to satisfy all the dependencies. After that you may compile the addon following these steps:
+If you want to build the addon manually or there are no prebuilt binaries for your platform in `npm` repository please check the [official safexcore repository](https://github.com/safex/safexcore) on how to satisfy all the dependencies. After that you may compile the addon following these steps:
 
 Checkout the repository:
 ```sh
-$ git clone https://github.com/exantech/safex-nodejs-libwallet
+$ git clone https://github.com/safex/safex-nodejs-libwallet
 ```
 
 Install prerequisites (example for ubuntu below)
@@ -42,7 +42,7 @@ $ npm link safex-nodejs-libwallet
 
 And use it in you source code:
 ```js
-const monero = require('safex-nodejs-libwallet');
+const safex = require('safex-nodejs-libwallet');
 ```
 
 
@@ -51,19 +51,19 @@ const monero = require('safex-nodejs-libwallet');
 ### setupLog
 Configures log level and output (file or `stdout`). Accepts integer log level (from `0` to `4`) and optional output filename (skip it if you want log to write to `stdout`):
 ```js
-const monero = require('safex-nodejs-libwallet');
-monero.setupLog(4, 'wallet.log'); //maximum logs into `wallet.log` file
+const safex = require('safex-nodejs-libwallet');
+safex.setupLog(4, 'wallet.log'); //maximum logs into `wallet.log` file
 ```
 
 ### createWallet
 Create new wallet asynchronously:
 ```js
-const monero = require('safex-nodejs-libwallet');
-monero.createWallet({
+const safex = require('safex-nodejs-libwallet');
+safex.createWallet({
 	'path': path.join(__dirname, 'test-wallet'),
 	'password': '123', 
 	'network': 'mainnet',
-	'daemonAddress': 'localhost:18081',
+	'daemonAddress': 'localhost:17402',
 }).then((wallet) => console.log('New wallet succesfully created: ' + wallet.address()))
    .catch((e) => console.log('Failed to create new wallet: ' + e));
 ```
@@ -82,12 +82,12 @@ Returns promise object. Throws in case of arguments error.
 ### openWallet
 Opens existing wallet asynchronously:
 ```js
-const monero = require('safex-nodejs-libwallet');
-monero.openWallet({
+const safex = require('safex-nodejs-libwallet');
+safex.openWallet({
 	'path': path.join(__dirname, 'test-wallet'),
 	'password': '123', 
 	'network': 'mainnet',
-	'daemonAddress': 'localhost:18081',
+	'daemonAddress': 'localhost:17402',
 }).then((wallet) => console.log('New wallet succesfully created: ' + wallet.address()))
    .catch((e) => console.log('Failed to create new wallet: ' + e));
 ```
@@ -107,12 +107,12 @@ Returns promise object. Throws in case of arguments error.
 ### recoveryWallet
 Recovers wallet from seed mnemonic asynchronously
 ```js
-const monero = require('safex-nodejs-libwallet');
-monero.recoveryWallet({
+const safex = require('safex-nodejs-libwallet');
+safex.recoveryWallet({
 	'path': path.join(__dirname, 'test-wallet'),
 	'password': '123', 
 	'network': 'mainnet',
-	'daemonAddress': 'localhost:18081',
+	'daemonAddress': 'localhost:17402',
 	'restoreHeight': 1608000,
 	'mnemonic': 'nifty inflamed against focus gasp ethics spying gulp tiger cogs evicted cohesive woken nylon erosion tell saved fatal alkaline acquire lemon maps hull imitate saved'
 }).then((wallet) => console.log('New wallet succesfully created: ' + wallet.address()))
@@ -135,8 +135,8 @@ Returns promise object. Throws in case of arguments error.
 ### walletExists
 Checks if wallet exists:
 ```js
-const monero = require('safex-nodejs-libwallet');
-if (monero.walletExists(path.join(__dirname, 'test-wallet'))) {
+const safex = require('safex-nodejs-libwallet');
+if (safex.walletExists(path.join(__dirname, 'test-wallet'))) {
     console.log('Wallet already exists');
 } else {
     console.log('Wallet does not exist');
@@ -148,15 +148,15 @@ Returns boolean.
 ### genPaymentId
 Generates new payment id:
 ```js
-const monero = require('safex-nodejs-libwallet');
-console.log('New payment id: ' + monero.genPaymentId());
+const safex = require('safex-nodejs-libwallet');
+console.log('New payment id: ' + safex.genPaymentId());
 ```
 
 ### paymentIdValid
 Checks if given payment id is valid:
 ```js
-const monero = require('safex-nodejs-libwallet');
-if (monero.paymentIdValid('180b67533011df75b74333e62599c160f5484bf8bb98779598520dfb90633198')) {
+const safex = require('safex-nodejs-libwallet');
+if (safex.paymentIdValid('180b67533011df75b74333e62599c160f5484bf8bb98779598520dfb90633198')) {
     console.log('Payment id is valid');
 } else {
     console.log('Payment id is not valid');
@@ -164,10 +164,10 @@ if (monero.paymentIdValid('180b67533011df75b74333e62599c160f5484bf8bb98779598520
 ```
 
 ### addressValid
-Checks if given monero address valid in certain network type:
+Checks if given safex address valid in certain network type:
 ```js
-const monero = require('safex-nodejs-libwallet');
-if (monero.addressValid('44zrUGhyRHYbHYrfiGAtLdJMHfe5DtoFTBeVPCE6MGKzZA2bJ4tCJFuhYk3Wjp3YxEWoQU8So5xUiiArgnkBHZgX8Fyhv6e', 'mainnet')) {
+const safex = require('safex-nodejs-libwallet');
+if (safex.addressValid('Safex5zRnBzHRPRGwLJR89d8AyRsiCErZPdLKGoPyHJsZbbRhcrVkZ2irGRXqgDHg6Qp9ZSoCRe8BWGPuFNbTVi1AgeRgsANLGy27', 'mainnet')) {
     console.log('Address is valid');
 } else {
     console.log('Address is not valid');
@@ -232,8 +232,8 @@ wallet.store()
 Creates pending transaction:
 ```js
 wallet.createTransaction({
-	'address': '44zrUGhyRHYbHYrfiGAtLdJMHfe5DtoFTBeVPCE6MGKzZA2bJ4tCJFuhYk3Wjp3YxEWoQU8So5xUiiArgnkBHZgX8Fyhv6e',
-	'amount': '2000000000', //monero atomic units as string
+	'address': 'Safex5zRnBzHRPRGwLJR89d8AyRsiCErZPdLKGoPyHJsZbbRhcrVkZ2irGRXqgDHg6Qp9ZSoCRe8BWGPuFNbTVi1AgeRgsANLGy27',
+	'amount': '2000000000', //safex atomic units as string
 }).then((tx) => {
 	console.log("transaction created: " + tx.transactionsIds());
 }).catch((e) => {
@@ -245,8 +245,8 @@ Accepts arguments object:
 
 | property | description | required |
 |-----|-----|-----|
-| address | valid monero address | yes |
-| amount | monero atomic units as string | yes |
+| address | valid safex address | yes |
+| amount | safex atomic units as string | yes |
 | paymentId | valid payment id | no |
 | mixin | ring signature size (current minimum is `7`) | no |
 
@@ -262,8 +262,8 @@ wallet.history().forEach((txInfo) => {
 	console.log("direction : " + txInfo.direction);             // 'in' for incoming transactions, 'out' for outcoming ones
 	console.log("pending : " + txInfo.pending);                 // 'true' if transaction has been included in a block
 	console.log("failed : " + txInfo.failed);                   // 'true' if transaction hasn't been sent due to errors
-	console.log("amount : " + txInfo.amount);                   // transaction amount (in atomic monero units as string)
-	console.log("fee : " + txInfo.fee);                         // transaction fee (in atomic monero units as string)
+	console.log("amount : " + txInfo.amount);                   // transaction amount (in atomic safex units as string)
+	console.log("fee : " + txInfo.fee);                         // transaction fee (in atomic safex units as string)
 	console.log("block height : " + txInfo.blockHeight);        // block height containing this transaction. 0 if pending
 	console.log("subaddresses: " + txInfo.subAddresses);        // account subaddresses affected by this transaction
 	console.log("subAddrAccount : " + txInfo.subAddrAccount);   // accounts affected by this transaction
@@ -384,7 +384,7 @@ console.log('multisig total: ' + state.total); //number of participants
 ### signMessage, verifySignedMessage
 **These functions only allowed for non-multisig wallets.**
 `signMessage` returns signature for arbitrary message.
-`verifySignedMessage` Verifies message's signature with public monero address. Returns `true` if the signature is valid:
+`verifySignedMessage` Verifies message's signature with public safex address. Returns `true` if the signature is valid:
 ```js
 var signature = wallet1.signMessage('Hello, world!');
 console.log('signature valid: ' + wallet2.verifySignedMessage('Hello, world!', wallet1.address(), signature));
@@ -513,7 +513,7 @@ Returns serialized multisig transaction which has to be passed to another partic
 Signs multisig transaction:
 ```js
 wallet1.createTransaction({
-	'address': '44zrUGhyRHYbHYrfiGAtLdJMHfe5DtoFTBeVPCE6MGKzZA2bJ4tCJFuhYk3Wjp3YxEWoQU8So5xUiiArgnkBHZgX8Fyhv6e',
+	'address': 'Safex5zRnBzHRPRGwLJR89d8AyRsiCErZPdLKGoPyHJsZbbRhcrVkZ2irGRXqgDHg6Qp9ZSoCRe8BWGPuFNbTVi1AgeRgsANLGy27',
 	'amount': '2000000000',
 }).then((tx) => {
 	var signData = tx.multisigSignData();
