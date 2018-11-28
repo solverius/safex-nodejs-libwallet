@@ -4,6 +4,61 @@
       'OS=="win"',
       {
 
+        "targets":[
+        {
+          "target_name": "build_safex",
+          "type": "none",
+          "actions": [
+            {
+              "action_name": "retrieve_from_github",
+              "inputs": "",
+              "outputs": [
+                "../deps/libwin_wallet_wrapper.dll.a",
+              ],
+              "action": [
+                "make deps","--directory=.."],
+              "message": "Building windows safex libraries"
+            }
+          ]
+        },
+        # {
+        #   "target_name": "safex",
+        #   "dependencies": [
+        #     "build_safex"
+        #   ],
+        #   "sources": [
+        #     "src/addon.cc",
+        #     "src/wallet.cc",
+        #     "src/walletcallbacks.cc",
+        #     "src/walletargs.cc",
+        #     "src/deferredtask.cc",
+        #     "src/wallettasks.cc",
+        #     "src/pendingtransaction.cc"
+        #   ],
+        #   "libraries": [
+        #     "../deps/libwin_wallet_wrapper.lib"
+        #   ],
+        #   "include_dirs": [
+        #     "include",
+        #     "<!(node -e \"require('nan')\")"
+        #   ]
+        # },
+        # {
+        #   "target_name": "action_after_build",
+        #   "type": "none",
+        #   "dependencies": [
+        #     "<(module_name)"
+        #   ],
+        #   "copies": [
+        #     {
+        #       "files": [
+        #         "<(PRODUCT_DIR)/<(module_name).node"
+        #       ],
+        #       "destination": "<(module_path)"
+        #     }
+        #   ]
+        # }
+      ]
       },
       { #nonwin
       "conditions":[
