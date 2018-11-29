@@ -5,7 +5,7 @@
 #include <wallet_api.h>
 #include <windows_wrapper.h>
 
-#include "WinPendingTransaction.h"
+#include "winpendingtransaction.h"
 
 namespace Safex
 {
