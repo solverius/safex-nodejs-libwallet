@@ -44,7 +44,7 @@
 
 
 #include <wallet_api.h>
-#include <safexnativewallet.h>
+#include "safexnativewallet.h"
 
 
 //  Public interface for libwallet library

@@ -3,7 +3,8 @@
 #include "wallet.h"
 #include "pendingtransaction.h"
 
-#include <safexnativewallet.h>
+
+#include "safexnativewallet.h"
 
 
 namespace exawallet {

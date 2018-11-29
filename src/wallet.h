@@ -7,7 +7,7 @@
 
 #include <wallet_api.h>
 
-#include <safexnativewallet.h>
+#include "safexnativewallet.h"
 
 #if _MSC_VER //windows node-gyp build
 #include <windows_wrapper.h>

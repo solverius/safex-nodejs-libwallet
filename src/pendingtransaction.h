@@ -8,7 +8,7 @@ namespace Safex {
 struct PendingTransaction;
 }
 
-#include <safexnativewallet.h>
+#include "safexnativewallet.h"
 
 namespace exawallet {
 

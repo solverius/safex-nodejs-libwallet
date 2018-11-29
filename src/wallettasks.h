@@ -3,7 +3,7 @@
 #include "deferredtask.h"
 #include "walletargs.h"
 
-#include <safexnativewallet.h>
+#include "safexnativewallet.h"
 
 #if _MSC_VER //windows node-gyp build
 #include <windows_wrapper.h>
