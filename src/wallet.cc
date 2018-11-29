@@ -7,6 +7,7 @@
 #include "walletargs.h"
 #include "wallettasks.h"
 
+
 using namespace v8;
 
 namespace exawallet {
@@ -65,7 +66,7 @@ Local<String> convertAmount(uint64_t amount) {
     return Nan::New(std::to_string(amount).c_str()).ToLocalChecked();
 }
 
-Local<Object> makeTransactionInfoObject(const Safex::TransactionInfo* transaction) {
+Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transaction) {
     auto transfersNative = transaction->transfers();
     auto transfers = Nan::New<Array>(transfersNative.size());
 
@@ -176,7 +177,7 @@ NAN_METHOD(Wallet::WalletExists) {
     }
 
     std::string path = toStdString(info[0]);
-    auto manager = Safex::WalletManagerFactory::getWalletManager();
+    auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     bool exists = manager->walletExists(path);
     info.GetReturnValue().Set(Nan::New(exists));
 }
@@ -293,7 +294,7 @@ NAN_MODULE_INIT(Wallet::Init) {
     constructor.Reset(tpl->GetFunction());
 }
 
-v8::Local<v8::Object> Wallet::NewInstance(Safex::Wallet* wallet) {
+v8::Local<v8::Object> Wallet::NewInstance(SafexNativeWallet *wallet) {
     const unsigned argc = 0;
     Local<Value> argv[1] = { Nan::Null() };
     Local<Function> cons = Nan::New(constructor);
@@ -564,7 +565,7 @@ NAN_METHOD(Wallet::Synchronized) {
 }
 
 NAN_METHOD(Wallet::GenPaymentId) {
-    info.GetReturnValue().Set(Nan::New(Safex::Wallet::genPaymentId().c_str()).ToLocalChecked());
+    info.GetReturnValue().Set(Nan::New(SafexNativeWallet::genPaymentId().c_str()).ToLocalChecked());
 }
 
 NAN_METHOD(Wallet::PaymentIdValid) {
@@ -573,7 +574,7 @@ NAN_METHOD(Wallet::PaymentIdValid) {
         return;
     }
 
-    info.GetReturnValue().Set(Nan::New(Safex::Wallet::paymentIdValid(toStdString(info[0]))));
+    info.GetReturnValue().Set(Nan::New(SafexNativeWallet::paymentIdValid(toStdString(info[0]))));
 }
 
 NAN_METHOD(Wallet::AddressValid) {
@@ -587,7 +588,7 @@ NAN_METHOD(Wallet::AddressValid) {
         Nan::ThrowError("wrong network type argument");
         return;
     }
-    bool valid = Safex::Wallet::addressValid(toStdString(info[0]), nettype);
+    bool valid = SafexNativeWallet::addressValid(toStdString(info[0]), nettype);
     info.GetReturnValue().Set(Nan::New(valid));
 }
 

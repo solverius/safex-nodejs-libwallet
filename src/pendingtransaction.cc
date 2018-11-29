@@ -59,7 +59,7 @@ NAN_METHOD(PendingTransaction::New) {
   }
 }
 
-Local<Object> PendingTransaction::NewInstance(Safex::PendingTransaction* tx) {
+Local<Object> PendingTransaction::NewInstance(SafexNativePendingTransaction* tx) {
     const unsigned argc = 0;
     Local<Value> argv[1] = { Nan::Null() };
     Local<Function> cons = Nan::New(constructor);

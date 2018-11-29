@@ -33,13 +33,20 @@
             "src/walletargs.cc",
             "src/deferredtask.cc",
             "src/wallettasks.cc",
-            "src/pendingtransaction.cc"
+            "src/pendingtransaction.cc",
+            "src/win/winwallet.cpp",
+            "src/win/winwalletlistener.cpp",
+            "src/win/winwalletmanager.cpp",
+            "src/win/winpendingtransaction.cpp",
+            "src/win/misc.cpp"
           ],
           "libraries": [
             "../deps/libwin_wallet_wrapper.lib"
           ],
           "include_dirs": [
             "include",
+            "src",
+            "src/win",
             "<!(node -e \"require('nan')\")"
           ]
         },
