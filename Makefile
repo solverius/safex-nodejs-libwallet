@@ -48,10 +48,10 @@ ifeq ($(OS),Windows_NT)
 safexcore/build: boost safexcore
 	mkdir -p safexcore/build
 	mkdir -p deps
-	cd safexcore/build && cmake -G "MSYS Makefiles" -DBUILD_TAG="win-x64" -DCMAKE_TOOLCHAIN_FILE=../cmake/64-bit-toolchain.cmake \ 
-	-DMSYS2_FOLDER=c:/msys64 -DARCH="x86-64" -DBUILD_64=ON  -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON -DBUILD_TESTS=OFF -DSTATIC=ON \ 
-	-DBOOST_ROOT=${PWD}/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true -DBUILD_WIN_WALLET_WRAPPER=ON \ 
-	-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps ..
+	cp safexcore/src/wallet/api/win_wrapper/windows_wrapper.h include
+	cd safexcore/build && cmake -G "MSYS Makefiles" -DBUILD_TAG="win-x64" -DCMAKE_TOOLCHAIN_FILE=../cmake/64-bit-toolchain.cmake -DMSYS2_FOLDER=c:/msys64 -DARCH="x86-64" \
+	 -DBUILD_64=ON  -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON -DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true \
+	  -DBUILD_WIN_WALLET_WRAPPER=ON -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps ..
 	cd safexcore/build && make -j${THREADS}
 	cp safexcore/build/src/wallet/api/win_wrapper/libwin_wallet_wrapper.* ${PWD}/deps
 	cd deps && '/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Tools/MSVC/14.16.27023/bin/Hostx86/x86/lib.exe' /machine:x64 /def:libwin_wallet_wrapper.def

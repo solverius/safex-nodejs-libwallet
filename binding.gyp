@@ -13,7 +13,7 @@
               "action_name": "retrieve_from_github",
               "inputs": "",
               "outputs": [
-                "../deps/libwin_wallet_wrapper.dll.a",
+                "../deps/libwin_wallet_wrapper.dll",
               ],
               "action": [
                 "make deps","--directory=.."],
@@ -21,28 +21,28 @@
             }
           ]
         },
-        # {
-        #   "target_name": "safex",
-        #   "dependencies": [
-        #     "build_safex"
-        #   ],
-        #   "sources": [
-        #     "src/addon.cc",
-        #     "src/wallet.cc",
-        #     "src/walletcallbacks.cc",
-        #     "src/walletargs.cc",
-        #     "src/deferredtask.cc",
-        #     "src/wallettasks.cc",
-        #     "src/pendingtransaction.cc"
-        #   ],
-        #   "libraries": [
-        #     "../deps/libwin_wallet_wrapper.lib"
-        #   ],
-        #   "include_dirs": [
-        #     "include",
-        #     "<!(node -e \"require('nan')\")"
-        #   ]
-        # },
+        {
+          "target_name": "safex",
+          "dependencies": [
+            "build_safex"
+          ],
+          "sources": [
+            "src/addon.cc",
+            "src/wallet.cc",
+            "src/walletcallbacks.cc",
+            "src/walletargs.cc",
+            "src/deferredtask.cc",
+            "src/wallettasks.cc",
+            "src/pendingtransaction.cc"
+          ],
+          "libraries": [
+            "../deps/libwin_wallet_wrapper.lib"
+          ],
+          "include_dirs": [
+            "include",
+            "<!(node -e \"require('nan')\")"
+          ]
+        },
         # {
         #   "target_name": "action_after_build",
         #   "type": "none",
