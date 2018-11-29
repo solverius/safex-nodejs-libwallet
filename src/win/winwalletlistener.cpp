@@ -4,7 +4,9 @@
 
 
 #include <cstdint>
-#include "winwalletlistener.h"
+#include <winwalletlistener.h>
+
+#include <windows_wrapper.h>
 
 namespace Safex
 {

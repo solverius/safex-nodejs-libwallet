@@ -10,7 +10,6 @@
 #include <tuple>
 
 #include <wallet_api.h>
-#include <windows_wrapper.h>
 #include <winwallet.h>
 
 namespace Safex

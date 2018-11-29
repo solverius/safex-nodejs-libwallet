@@ -4,10 +4,11 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
 #include <tuple>
-#include <winwallet.h>
+
 #include <winwalletmanager.h>
+
+#include <windows_wrapper.h>
 
 
 

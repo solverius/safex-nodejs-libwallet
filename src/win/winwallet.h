@@ -36,20 +36,15 @@
 
 #pragma once
 
-
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <list>
 #include <set>
 #include <ctime>
-#include <iostream>
-#include <cstdint>
+
 
 #include <wallet_api.h>
 #include <safexnativewallet.h>
-#include "winpendingtransaction.h"
-#include "winwalletlistener.h"
-
 
 
 //  Public interface for libwallet library

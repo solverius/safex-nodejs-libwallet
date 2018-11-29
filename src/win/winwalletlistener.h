@@ -9,7 +9,6 @@
 #include <string>
 
 #include <wallet_api.h>
-#include <windows_wrapper.h>
 
 namespace Safex
 {

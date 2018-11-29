@@ -2,8 +2,13 @@
 // Created by amarko on 28.11.18..
 //
 
-#include <cstdint>
-#include "winwallet.h"
+
+#include <winwallet.h>
+
+#include <windows_wrapper.h>
+
+
+
 
 
 namespace Safex {
@@ -321,7 +326,7 @@ namespace Safex {
   {
     return nullptr;
   }
-  
+
   void WinWallet::startRefresh()
   {
 

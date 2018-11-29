@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <string>
+
 #include <wallet_api.h>
 
 namespace Safex
