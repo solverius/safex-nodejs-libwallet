@@ -4,7 +4,7 @@
       'OS=="win"',
       {
 
-        "targets":[
+         "targets":[
         {
           "target_name": "build_safex",
           "type": "none",
@@ -41,7 +41,7 @@
             "src/win/misc.cpp"
           ],
           "libraries": [
-            "../deps/libwin_wallet_wrapper.lib"
+            '-l../deps/libwin_wallet_wrapper.lib' 
           ],
           "include_dirs": [
             "include",
@@ -50,21 +50,22 @@
             "<!(node -e \"require('nan')\")"
           ]
         },
-        # {
-        #   "target_name": "action_after_build",
-        #   "type": "none",
-        #   "dependencies": [
-        #     "<(module_name)"
-        #   ],
-        #   "copies": [
-        #     {
-        #       "files": [
-        #         "<(PRODUCT_DIR)/<(module_name).node"
-        #       ],
-        #       "destination": "<(module_path)"
-        #     }
-        #   ]
-        # }
+        {
+          "target_name": "action_after_build",
+          "type": "none",
+          "dependencies": [
+            "<(module_name)"
+          ],
+          "copies": [
+            {
+              "files": [
+                "<(PRODUCT_DIR)/<(module_name).node",
+                "./deps/libwin_wallet_wrapper.dll"
+              ],
+              "destination": "<(module_path)"
+            }
+          ]
+        }
       ]
       },
       { #nonwin

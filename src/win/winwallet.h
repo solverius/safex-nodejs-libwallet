@@ -89,6 +89,8 @@ namespace Safex
   struct WinWallet
   {
 
+    WinWallet(void *self_):self{self_} {}
+
     virtual ~WinWallet();
     virtual std::string seed() const;
     virtual Wallet * createWallet(const std::string &path, const std::string &password, const std::string &language, NetworkType nettype);
@@ -145,6 +147,8 @@ namespace Safex
     virtual bool verifySignedMessage(const std::string &message, const std::string &addres, const std::string &signature) const;
 
 
+  private:
+    void *self;
   };
 
 }
