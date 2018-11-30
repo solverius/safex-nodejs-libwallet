@@ -171,6 +171,11 @@ Wallet::~Wallet() {
 
 NAN_METHOD(Wallet::WalletExists) {
 
+    std::cout << "Wallet::WalletExists" << "checkpoint 1" << std::endl; 
+    win_checkDLL("Od dole wallet exitst!");
+    std::cout << "Wallet::WalletExists" << "checkpoint 2" << std::endl; 
+
+
     if (info.Length() != 1 || !info[0]->IsString()) {
         Nan::ThrowTypeError("Function accepts path to wallet");
         return;
@@ -178,12 +183,18 @@ NAN_METHOD(Wallet::WalletExists) {
 
     std::string path = toStdString(info[0]);
     auto manager = SafexNativeWalletManagerFactory::getWalletManager();
+    if (!manager) {
+        Nan::ThrowTypeError("Wallet manager could not be instantiated!");
+        return;
+    }
     bool exists = manager->walletExists(path);
     info.GetReturnValue().Set(Nan::New(exists));
 }
 
 NAN_METHOD(Wallet::CreateWallet) {
     CreateWalletArgs walletArgs;
+    std::cout << "Wallet::CreateWallet" << std::endl;
+    win_checkDLL("Kreiram ovde jedan wallet!");
     std::string error = walletArgs.Init(info);
     if (!error.empty()) {
         Nan::ThrowError(error.c_str());
@@ -284,6 +295,8 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"history", TransactionHistory}
     };
 
+    std::cout << "Wallet::Init" << std::endl;
+
     auto tpl = Nan::New<FunctionTemplate>(Wallet::New);
     tpl->SetClassName(Nan::New("Wallet").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(walletFunctions.size());
@@ -300,6 +313,9 @@ v8::Local<v8::Object> Wallet::NewInstance(SafexNativeWallet *wallet) {
     Local<Function> cons = Nan::New(constructor);
     Local<Context> context = Nan::GetCurrentContext();
     Local<Object> instance = cons->NewInstance(context, argc, argv).ToLocalChecked();
+
+    std::cout << "Wallet::NewInstance" << std::endl;
+    win_checkDLL(" Wallet::NewInstance here!");
 
     Wallet* w = new Wallet(wallet);
     wallet->setListener(w);

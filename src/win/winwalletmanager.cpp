@@ -56,7 +56,8 @@ namespace Safex
 
   bool WinWalletManager::walletExists(const std::string &path)
   {
-    return false;
+    throw "walletExists not implemented!";
+    
   }
 
   bool WinWalletManager::verifyWalletPassword(const std::string &keys_file_name, const std::string &password, bool no_spend_key) const
