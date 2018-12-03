@@ -12,7 +12,7 @@ namespace Safex
 {
   WinWalletListener::WinWalletListener() {
    m_innerPtr = ::win_lstn_Create(static_cast<void*>(this));
-    ::win_lstn_setMoneySpent(m_innerPtr, &WinWalletListenerProxy::moneySpend);
+    ::win_lstn_setMoneySpent(m_innerPtr, &WinWalletListenerProxy::moneySpent);
     ::win_lstn_setMoneyReceived(m_innerPtr, &WinWalletListenerProxy::moneyReceived);
     ::win_lstn_setUnconfirmedMoneyReceived(m_innerPtr, &WinWalletListenerProxy::unconfirmedMoneyReceived);
     ::win_lstn_setTokensSpent(m_innerPtr, &WinWalletListenerProxy::tokensSpent);

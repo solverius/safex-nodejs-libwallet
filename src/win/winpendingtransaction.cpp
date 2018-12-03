@@ -34,7 +34,7 @@ namespace Safex
 
   bool WinPendingTransaction::commit(const std::string &filename, bool overwrite)
   {
-    return static_cast<bool>(::win_pt_commit(m_innerPtr, overwrite));
+    return static_cast<bool>(::win_pt_commit(m_innerPtr));
   }
 
   uint64_t WinPendingTransaction::amount() const
@@ -60,7 +60,7 @@ namespace Safex
   std::vector<std::string> WinPendingTransaction::txid() const
   {
     char** results = ::win_pt_txid(m_innerPtr);
-    char* temp = results;
+    char* temp = results[0];
     std::vector<std::string> ret;
     while(temp != nullptr) {
       ret.push_back(temp);

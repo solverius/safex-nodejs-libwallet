@@ -14,7 +14,7 @@ namespace Safex
 {
 
 
-struct WinPendingTransaction : public PendingTransaction
+struct WinPendingTransaction
   {
     WinPendingTransaction(void* ptr);
 
