@@ -89,7 +89,7 @@ namespace Safex
   struct WinWallet
   {
 
-    WinWallet(void *self_):self{self_} {}
+    WinWallet(void *self_):m_innerPtr{self_} {}
 
     virtual ~WinWallet();
     virtual std::string seed() const;
@@ -148,7 +148,8 @@ namespace Safex
 
 
   private:
-    void *self;
+    void *m_innerPtr;
+    void *m_nativeListenerPtr;
   };
 
 }

@@ -43,6 +43,7 @@ public:
     v8::MaybeLocal<v8::Function> FindCallback(const std::string& name);
 
  private:
+
     explicit Wallet(SafexNativeWallet* wallet): wallet_(wallet) {}
     ~Wallet();
 

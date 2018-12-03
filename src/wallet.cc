@@ -171,11 +171,6 @@ Wallet::~Wallet() {
 
 NAN_METHOD(Wallet::WalletExists) {
 
-    std::cout << "Wallet::WalletExists" << "checkpoint 1" << std::endl; 
-    win_checkDLL("Od dole wallet exitst!");
-    std::cout << "Wallet::WalletExists" << "checkpoint 2" << std::endl; 
-
-
     if (info.Length() != 1 || !info[0]->IsString()) {
         Nan::ThrowTypeError("Function accepts path to wallet");
         return;

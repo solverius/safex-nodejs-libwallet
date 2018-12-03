@@ -30,7 +30,9 @@ namespace Safex
 
   SafexNativeWallet *WinWalletManager::recoveryWallet(const std::string &path, const std::string &password, const std::string &mnemonic, NetworkType nettype, uint64_t restoreHeight)
   {
-    return nullptr;
+
+    WinWallet *nativeWallet = new WinWallet(win_mng_recoveryWallet(m_innerPtr, path.c_str(), password.c_str(), mnemonic.c_str(), static_cast<uint32_t>(nettype), restoreHeight));
+    return nativeWallet;
   }
 
   SafexNativeWallet *WinWalletManager::recoveryWallet(const std::string &path, const std::string &mnemonic, NetworkType nettype, uint64_t restoreHeight)
@@ -56,8 +58,7 @@ namespace Safex
 
   bool WinWalletManager::walletExists(const std::string &path)
   {
-    throw "walletExists not implemented!";
-    
+    return win_mng_walletExists(m_innerPtr, path.c_str());
   }
 
   bool WinWalletManager::verifyWalletPassword(const std::string &keys_file_name, const std::string &password, bool no_spend_key) const
@@ -137,6 +138,7 @@ namespace Safex
 
   WinWalletManager *WinWalletManagerFactory::getWalletManager()
   {
-    return nullptr;
+    WinWalletManager *winWalletManager = new WinWalletManager(::win_mngf_getWalletManager());
+    return winWalletManager;
   }
 }

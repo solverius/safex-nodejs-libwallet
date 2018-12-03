@@ -6,6 +6,8 @@
 #include <winwallet.h>
 
 #include <windows_wrapper.h>
+#include "winwalletlistener.h"
+#include "winpendingtransaction.h"
 
 
 
@@ -149,37 +151,55 @@ namespace Safex {
 
   std::string WinWallet::address(uint32_t accountIndex, uint32_t addressIndex) const
   {
-    return std::string();
+   char* result = win_address(m_innerPtr);
+   std::string retValue{result};
+   free(result);
+   return retValue;
   }
 
   std::string WinWallet::path() const
   {
-    return std::string();
+    char* result = win_path(m_innerPtr);
+    std::string retValue{result};
+    free(result);
+    return retValue;
   }
 
   NetworkType WinWallet::nettype() const
   {
-    return STAGENET;
+    return static_cast<NetworkType>(win_nettype(m_innerPtr));
   }
 
   std::string WinWallet::secretViewKey() const
   {
-    return std::string();
+    char* result = win_secretViewKey(m_innerPtr);
+    std::string retValue{result};
+    free(result);
+    return retValue;
   }
 
   std::string WinWallet::publicViewKey() const
   {
-    return std::string();
+    char* result = win_publicViewKey(m_innerPtr);
+    std::string retValue{result};
+    free(result);
+    return retValue;
   }
 
   std::string WinWallet::secretSpendKey() const
   {
-    return std::string();
+    char* result = win_secretSpendKey(m_innerPtr);
+    std::string retValue{result};
+    free(result);
+    return retValue;
   }
 
   std::string WinWallet::publicSpendKey() const
   {
-    return std::string();
+    char* result = win_publicSpendKey(m_innerPtr);
+    std::string retValue{result};
+    free(result);
+    return retValue;
   }
 
   bool WinWallet::setPassword(const std::string &password)
@@ -189,12 +209,15 @@ namespace Safex {
 
   std::string WinWallet::errorString() const
   {
-    return std::string();
+    char* result = win_errorString(m_innerPtr);
+    std::string retValue{result};
+    free(result);
+    return retValue;
   }
 
   bool WinWallet::init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, const std::string &daemon_username, const std::string &daemon_password, bool use_ssl, bool lightWallet)
   {
-    return false;
+    return static_cast<bool>(win_initB(m_innerPtr, daemon_username.c_str()));
   }
 
   bool WinWallet::store(const std::string &path)
@@ -267,7 +290,7 @@ namespace Safex {
 
   void WinWallet::setTrustedDaemon(bool arg)
   {
-
+    win_setTrustedDaemon(m_innerPtr, static_cast<uint8_t>(arg));
   }
 
   uint64_t WinWallet::balanceAll() const
@@ -316,9 +339,19 @@ namespace Safex {
     return 0;
   }
 
-  void WinWallet::setListener(WinWalletListener *)
+  void WinWallet::setListener(WinWalletListener * wltListener)
   {
-
+    m_nativeListenerPtr = win_lstn_Create(static_cast<void *>(this));
+    ::win_lstn_setMoneySpent(m_nativeListenerPtr, &WinWalletListenerProxy::moneySpent);
+    ::win_lstn_setMoneyReceived(m_nativeListenerPtr, &WinWalletListenerProxy::moneyReceived);
+    ::win_lstn_setUnconfirmedMoneyReceived(m_nativeListenerPtr, &WinWalletListenerProxy::unconfirmedMoneyReceived);
+    ::win_lstn_setTokensSpent(m_nativeListenerPtr, &WinWalletListenerProxy::tokensSpent);
+    ::win_lstn_setTokenReceived(m_nativeListenerPtr, &WinWalletListenerProxy::tokensReceived);
+    ::win_lstn_setUnconfirmedTokenReceived(m_nativeListenerPtr, &WinWalletListenerProxy::unconfirmedTokensReceived);
+    ::win_lstn_setNewBlock(m_nativeListenerPtr, &WinWalletListenerProxy::newBlock);
+    ::win_lstn_setUpdated(m_nativeListenerPtr, &WinWalletListenerProxy::updated);
+    ::win_lstn_setRefreshed(m_nativeListenerPtr, &WinWalletListenerProxy::refreshed);
+    ::win_SetListener(m_innerPtr, m_nativeListenerPtr);
   }
 
   WinPendingTransaction *WinWallet::createTransaction(const std::string &dst_addr, const std::string &payment_id, optional<uint64_t> value_amount, uint32_t mixin_count,
@@ -329,7 +362,7 @@ namespace Safex {
 
   void WinWallet::startRefresh()
   {
-
+    win_startRefresh(m_innerPtr);
   }
 
   void WinWallet::pauseRefresh()

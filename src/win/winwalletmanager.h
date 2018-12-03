@@ -22,6 +22,8 @@ namespace Safex
   struct WinWalletManager
   {
 
+    WinWalletManager(void *nativeWalletPtr): m_innerPtr(nativeWalletPtr) {}
+
     /*!
      * \brief  Creates new wallet
      * \param  path           Name of wallet file
@@ -221,6 +223,10 @@ namespace Safex
 
     //! checks for an update and returns version, hash and url
     static std::tuple<bool, std::string, std::string, std::string, std::string> checkUpdates(const std::string &software, std::string subdir);
+
+  private:
+    void* m_innerPtr;
+
   };
 
 
