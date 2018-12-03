@@ -15,6 +15,8 @@ namespace Safex
 
   struct WinWalletListener
   {
+
+    WinWalletListener();
     virtual ~WinWalletListener();
 
     /**
@@ -76,7 +78,23 @@ namespace Safex
      * @brief refreshed - called when wallet refreshed by background thread or explicitly refreshed by calling "refresh" synchronously
      */
     virtual void refreshed();
+
+  private:
+      void* m_innerPtr;
   };
+
+  struct WinWalletListenerProxy {
+    static void moneySpent(void* target, const char* txId, uint64_t amount);
+    static void moneyReceived(void* target, const char* txId, uint64_t amount);
+    static void unconfirmedMoneyReceived(void* target, const char* txId, uint64_t amount);
+    static void tokensSpent(void* target, const char* txId, uint64_t token_amount);
+    static void tokensReceived(void* target, const char* txId, uint64_t token_amount);
+    static void unconfirmedTokensReceived(void* target, const char* txId, uint64_t token_amount);
+    static void newBlock(void* target, uint64_t height);
+    static void updated(void* target);
+    static void refreshed(void* target);
+
+};
 
 }
 

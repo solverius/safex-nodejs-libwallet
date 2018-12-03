@@ -14,8 +14,9 @@ namespace Safex
 {
 
 
-  struct WinPendingTransaction
+struct WinPendingTransaction : public PendingTransaction
   {
+    WinPendingTransaction(void* ptr);
 
     virtual ~WinPendingTransaction();
 
@@ -45,6 +46,9 @@ namespace Safex
     virtual std::vector<uint32_t> subaddrAccount() const;
 
     virtual std::vector<std::set<uint32_t>> subaddrIndices() const;
+
+  private:
+      void* m_innerPtr;
   };
 
 }

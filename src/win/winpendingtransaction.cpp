@@ -10,64 +10,82 @@
 namespace Safex
 {
 
+    WinPendingTransaction::WinPendingTransaction(void* ptr) : m_innerPtr(ptr) {
+
+  }
 
   WinPendingTransaction::~WinPendingTransaction()
   {
-
+    ::win_pt_delete(m_innerPtr);
   }
 
   int WinPendingTransaction::status() const
   {
-    return 0;
+    return ::win_pt_status(m_innerPtr);
   }
 
   std::string WinPendingTransaction::errorString() const
   {
-    return nullptr;
+    char* result = ::win_pt_errorString(m_innerPtr);
+    std::string ret(result);
+    delete result;
+    return ret;
   }
 
   bool WinPendingTransaction::commit(const std::string &filename, bool overwrite)
   {
-    return false;
+    return static_cast<bool>(::win_pt_commit(m_innerPtr, overwrite));
   }
 
   uint64_t WinPendingTransaction::amount() const
   {
-    return 0;
+    return ::win_pt_amount(m_innerPtr);
   }
 
   uint64_t WinPendingTransaction::tokenAmount() const
   {
-    return 0;
+    return ::win_pt_tokenAmount(m_innerPtr);
   }
 
   uint64_t WinPendingTransaction::dust() const
   {
-    return 0;
+    return ::win_pt_dust(m_innerPtr);
   }
 
   uint64_t WinPendingTransaction::fee() const
   {
-    return 0;
+    return ::win_pt_fee(m_innerPtr);
   }
 
   std::vector<std::string> WinPendingTransaction::txid() const
   {
-    return {};
+    char** results = ::win_pt_txid(m_innerPtr);
+    char* temp = results;
+    std::vector<std::string> ret;
+    while(temp != nullptr) {
+      ret.push_back(temp);
+      delete temp;
+      temp++;
+    }
+    delete results;
+
+    return ret;
   }
 
   uint64_t WinPendingTransaction::txCount() const
   {
-    return 0;
+    return ::win_pt_txCount(m_innerPtr);
   }
 
   std::vector<uint32_t> WinPendingTransaction::subaddrAccount() const
   {
+    throw std::string("Not implemented yet!!");
     return {};
   }
 
   std::vector<std::set<uint32_t>> WinPendingTransaction::subaddrIndices() const
   {
+    throw std::string("Not implemented yet!!");
     return {};
   }
 
