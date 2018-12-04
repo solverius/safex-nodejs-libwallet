@@ -4,6 +4,7 @@
 
 #include <wallet_api.h>
 #include <windows_wrapper.h>
+#include <cstring>
 
 #include "winpendingtransaction.h"
 
@@ -56,15 +57,15 @@ namespace Safex
 
   std::vector<std::string> WinPendingTransaction::txid() const
   {
-    char** results = ::win_pt_txid(m_innerPtr);
-    char* temp = results[0];
+    char* results = ::win_pt_txid(m_innerPtr);
+    char* temp = results;
     std::vector<std::string> ret;
-    while(temp != nullptr) {
-      ret.push_back(temp);
-      delete temp;
-      temp++;
+    while(temp[0] != 0) {
+      unsigned char txid[64];
+      memmove((void *)txid, (void *)temp, 64);
+      ret.push_back(std::string((char*)txid));
+      temp+=64;
     }
-    delete results;
 
     return ret;
   }

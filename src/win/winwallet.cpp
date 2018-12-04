@@ -336,9 +336,14 @@ namespace Safex {
   }
 
   WinPendingTransaction *WinWallet::createTransaction(const std::string &dst_addr, const std::string &payment_id, optional<uint64_t> value_amount, uint32_t mixin_count,
-          PendingTransaction::Priority, uint32_t subaddr_account, std::set<uint32_t> subaddr_indices, const TransactionType tx_type)
+          PendingTransaction::Priority priority, uint32_t subaddr_account, std::set<uint32_t> subaddr_indices, const TransactionType tx_type)
   {
-    return nullptr;
+
+    std::cout << "WinWallet::createTransaction checkpoint 1" << std::endl;
+    void* temp = win_createTransaction(m_innerPtr,dst_addr.c_str(), payment_id.c_str(), *value_amount, mixin_count, priority,
+            0 /*subaddr_account*/, 0 /*subaddr_indices*/, static_cast<uint32_t>(tx_type));
+    WinPendingTransaction *retValue = new WinPendingTransaction(temp);
+    return retValue;
   }
 
   void WinWallet::startRefresh()
