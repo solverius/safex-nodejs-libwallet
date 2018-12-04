@@ -20,32 +20,32 @@ namespace Safex {
 
   int WinTransactionInfo::direction() const
   {
-    return 0;
+    return static_cast<int>(win_txinfo_direction(m_innerPtr));
   }
 
   bool WinTransactionInfo::isPending() const
   {
-    return false;
+    return static_cast<bool>(win_txinfo_isPendingB(m_innerPtr));
   }
 
   bool WinTransactionInfo::isFailed() const
   {
-    return false;
+    return static_cast<bool>(win_txinfo_isFailedB(m_innerPtr));
   }
 
   uint64_t WinTransactionInfo::amount() const
   {
-    return 0;
+    return win_txinfo_amount(m_innerPtr);
   }
 
   uint64_t WinTransactionInfo::fee() const
   {
-    return 0;
+    return win_txinfo_fee(m_innerPtr);
   }
 
   uint64_t WinTransactionInfo::blockHeight() const
   {
-    return 0;
+    return win_txinfo_blockHeight(m_innerPtr);
   }
 
   std::set<uint32_t> WinTransactionInfo::subaddrIndex() const
@@ -60,32 +60,32 @@ namespace Safex {
 
   std::string WinTransactionInfo::label() const
   {
-    return std::string();
+    return std::string(win_txinfo_label(m_innerPtr));
   }
 
   uint64_t WinTransactionInfo::confirmations() const
   {
-    return 0;
+    return win_txinfo_confirmations(m_innerPtr);
   }
 
   uint64_t WinTransactionInfo::unlockTime() const
   {
-    return 0;
+    return win_txinfo_unlockTime(m_innerPtr);
   }
 
   std::string WinTransactionInfo::hash() const
   {
-    return std::string();
+    return std::string(win_txinfo_hash(m_innerPtr));
   }
 
   std::time_t WinTransactionInfo::timestamp() const
   {
-    return 0;
+    return static_cast<std::time_t>(win_txinfo_timestamp(m_innerPtr));
   }
 
   std::string WinTransactionInfo::paymentId() const
   {
-    return std::string();
+    return std::string(win_txinfo_paymentId(m_innerPtr));
   }
 
   const std::vector<Safex::TransactionInfo::Transfer> &WinTransactionInfo::transfers() const
@@ -95,7 +95,7 @@ namespace Safex {
 
   TransactionType WinTransactionInfo::transactionType() const
   {
-    return Safex::TransactionType::CashTransaction;
+    return static_cast<TransactionType>(win_txinfo_transactionType(m_innerPtr));
   }
 
 

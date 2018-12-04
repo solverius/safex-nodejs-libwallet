@@ -53,25 +53,47 @@ namespace Safex
 
   struct WinTransactionInfo
   {
-    virtual ~WinTransactionInfo() ;
-    virtual int  direction() const;
+    virtual ~WinTransactionInfo();
+
+    WinTransactionInfo(void *innerPtr) : m_innerPtr(innerPtr)
+    {}
+
+    virtual int direction() const;
+
     virtual bool isPending() const;
+
     virtual bool isFailed() const;
+
     virtual uint64_t amount() const;
+
     virtual uint64_t fee() const;
+
     virtual uint64_t blockHeight() const;
+
     virtual std::set<uint32_t> subaddrIndex() const;
+
     virtual uint32_t subaddrAccount() const;
+
     virtual std::string label() const;
+
     virtual uint64_t confirmations() const;
+
     virtual uint64_t unlockTime() const;
+
     //! transaction_id
     virtual std::string hash() const;
+
     virtual std::time_t timestamp() const;
+
     virtual std::string paymentId() const;
+
     //! only applicable for output transactions
-    virtual const std::vector<Safex::TransactionInfo::Transfer> & transfers() const;
+    virtual const std::vector<Safex::TransactionInfo::Transfer> &transfers() const;
+
     virtual TransactionType transactionType() const;
+
+  private:
+    void *m_innerPtr;
   };
 
 
