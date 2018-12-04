@@ -141,6 +141,7 @@ Local<Value> RecoveryWalletTask::afterWork(std::string& error) {
 
 std::string StoreWalletTask::doWork() {
     if (!wallet_->store(wallet_->path())) {
+        std::cout << "Error storing wallet path:" << wallet_->path() << std::endl;
         return "Couldn't store wallet";
     }
 

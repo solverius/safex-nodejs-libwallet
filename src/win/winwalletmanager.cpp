@@ -25,7 +25,8 @@ namespace Safex
 
   SafexNativeWallet *WinWalletManager::openWallet(const std::string &path, const std::string &password, NetworkType nettype)
   {
-    return nullptr;
+    WinWallet *nativeWallet = new WinWallet(win_mng_openWallet(m_innerPtr, path.c_str(), password.c_str(), static_cast<uint32_t>(nettype)));
+    return nativeWallet;
   }
 
   SafexNativeWallet *WinWalletManager::recoveryWallet(const std::string &path, const std::string &password, const std::string &mnemonic, NetworkType nettype, uint64_t restoreHeight)
@@ -40,10 +41,13 @@ namespace Safex
     return nullptr;
   }
 
-  SafexNativeWallet *WinWalletManager::createWalletFromKeys(const std::string &path, const std::string &password, const std::string &language, NetworkType nettype, uint64_t restoreHeight, const std::string &addressString, const std::string &viewKeyString,
-                                                 const std::string &spendKeyString)
+  SafexNativeWallet *WinWalletManager::createWalletFromKeys(const std::string &path, const std::string &password, const std::string &language, NetworkType nettype, uint64_t restoreHeight,
+          const std::string &addressString, const std::string &viewKeyString, const std::string &spendKeyString)
   {
-    return nullptr;
+    WinWallet *nativeWallet = new WinWallet(win_mng_createWalletFromKeys(m_innerPtr, path.c_str(), password.c_str(), language.c_str(), static_cast<uint32_t>(nettype), restoreHeight,
+                                                                         addressString.c_str(), viewKeyString.c_str(), spendKeyString.c_str()));
+
+    return nativeWallet;
   }
 
   SafexNativeWallet *WinWalletManager::createWalletFromKeys(const std::string &path, const std::string &language, NetworkType nettype, uint64_t restoreHeight, const std::string &addressString, const std::string &viewKeyString, const std::string &spendKeyString)
@@ -139,6 +143,7 @@ namespace Safex
   WinWalletManager *WinWalletManagerFactory::getWalletManager()
   {
     WinWalletManager *winWalletManager = new WinWalletManager(::win_mngf_getWalletManager());
+    WinWalletManagerFactory::setLogLevel(LogLevel::LogLevel_0); //by default mlog it prints on stdout on Windows
     return winWalletManager;
   }
 
