@@ -26,10 +26,7 @@ namespace Safex
 
   std::string WinPendingTransaction::errorString() const
   {
-    char* result = ::win_pt_errorString(m_innerPtr);
-    std::string ret(result);
-    delete result;
-    return ret;
+    return std::string(win_pt_errorString(m_innerPtr));
   }
 
   bool WinPendingTransaction::commit(const std::string &filename, bool overwrite)
