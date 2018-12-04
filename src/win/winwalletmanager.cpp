@@ -141,4 +141,14 @@ namespace Safex
     WinWalletManager *winWalletManager = new WinWalletManager(::win_mngf_getWalletManager());
     return winWalletManager;
   }
+
+  void WinWalletManagerFactory::setLogLevel(int level)
+  {
+    win_mlog_set_log_levelI(level);
+  }
+
+  void WinWalletManagerFactory::setLogCategories(const std::string &categories)
+  {
+    win_mlog_set_log_levelCPtr(categories.c_str());
+  }
 }

@@ -11,8 +11,6 @@
 
 
 
-
-
 namespace Safex {
 
   WinTransactionInfo::~WinTransactionInfo()
@@ -141,7 +139,7 @@ namespace Safex {
 
   std::string WinWallet::seed() const
   {
-    return std::string();
+    return std::string(win_seed(m_innerPtr));
   }
 
   Wallet *WinWallet::createWallet(const std::string &path, const std::string &password, const std::string &language, NetworkType nettype)
@@ -151,18 +149,15 @@ namespace Safex {
 
   std::string WinWallet::address(uint32_t accountIndex, uint32_t addressIndex) const
   {
-   char* result = win_address(m_innerPtr);
-   std::string retValue{result};
-   free(result);
-   return retValue;
+//    const char *value = ;
+//    std::string retValue{value};
+//    return retValue;
+    return std::string(win_address(m_innerPtr));
   }
 
   std::string WinWallet::path() const
   {
-    char* result = win_path(m_innerPtr);
-    std::string retValue{result};
-    free(result);
-    return retValue;
+    return std::string(win_path(m_innerPtr));
   }
 
   NetworkType WinWallet::nettype() const
@@ -172,34 +167,22 @@ namespace Safex {
 
   std::string WinWallet::secretViewKey() const
   {
-    char* result = win_secretViewKey(m_innerPtr);
-    std::string retValue{result};
-    free(result);
-    return retValue;
+    return std::string(win_secretViewKey(m_innerPtr));
   }
 
   std::string WinWallet::publicViewKey() const
   {
-    char* result = win_publicViewKey(m_innerPtr);
-    std::string retValue{result};
-    free(result);
-    return retValue;
+    return std::string(win_publicViewKey(m_innerPtr));
   }
 
   std::string WinWallet::secretSpendKey() const
   {
-    char* result = win_secretSpendKey(m_innerPtr);
-    std::string retValue{result};
-    free(result);
-    return retValue;
+    return std::string(win_secretSpendKey(m_innerPtr));
   }
 
   std::string WinWallet::publicSpendKey() const
   {
-    char* result = win_publicSpendKey(m_innerPtr);
-    std::string retValue{result};
-    free(result);
-    return retValue;
+    return std::string(win_publicSpendKey(m_innerPtr));
   }
 
   bool WinWallet::setPassword(const std::string &password)
@@ -209,20 +192,17 @@ namespace Safex {
 
   std::string WinWallet::errorString() const
   {
-    char* result = win_errorString(m_innerPtr);
-    std::string retValue{result};
-    free(result);
-    return retValue;
+    return std::string(win_errorString(m_innerPtr));
   }
 
   bool WinWallet::init(const std::string &daemon_address, uint64_t upper_transaction_size_limit, const std::string &daemon_username, const std::string &daemon_password, bool use_ssl, bool lightWallet)
   {
-    return static_cast<bool>(win_initB(m_innerPtr, daemon_username.c_str()));
+    return static_cast<bool>(win_initB(m_innerPtr, daemon_address.c_str()));
   }
 
   bool WinWallet::store(const std::string &path)
   {
-    return false;
+    return static_cast<bool>(win_storeB(m_innerPtr, path.c_str()));
   }
 
   void WinWallet::segregatePreForkOutputs(bool segregate)
@@ -295,22 +275,23 @@ namespace Safex {
 
   uint64_t WinWallet::balanceAll() const
   {
-    return 0;
+    return win_balanceAll(m_innerPtr);
   }
 
   uint64_t WinWallet::unlockedBalanceAll() const
   {
-    return 0;
+    return win_unlockedBalanceAll(m_innerPtr);
   }
 
   uint64_t WinWallet::tokenBalanceAll() const
   {
-    return 0;
+    return win_tokenBalanceAll(m_innerPtr);
   }
 
   uint64_t WinWallet::unlockedTokenBalanceAll() const
   {
-    return 0;
+    return win_unlockedTokenBalanceAll(m_innerPtr);
+
   }
 
 
@@ -341,7 +322,7 @@ namespace Safex {
 
   void WinWallet::setListener(WinWalletListener * wltListener)
   {
-    m_nativeListenerPtr = win_lstn_Create(static_cast<void *>(this));
+    m_nativeListenerPtr = win_lstn_Create(static_cast<void *>(wltListener));
     ::win_lstn_setMoneySpent(m_nativeListenerPtr, &WinWalletListenerProxy::moneySpent);
     ::win_lstn_setMoneyReceived(m_nativeListenerPtr, &WinWalletListenerProxy::moneyReceived);
     ::win_lstn_setUnconfirmedMoneyReceived(m_nativeListenerPtr, &WinWalletListenerProxy::unconfirmedMoneyReceived);
@@ -382,7 +363,7 @@ namespace Safex {
 
   void WinWallet::setRefreshFromBlockHeight(uint64_t refresh_from_block_height)
   {
-
+    win_setRefreshFromBlockHeight(m_innerPtr, refresh_from_block_height);
   }
 
 
