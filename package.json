@@ -1,6 +1,6 @@
 {
   "name": "safex-nodejs-libwallet",
-  "version": "v0.1.13",
+  "version": "0.2.0",
   "description": "Safex libwallet native addon based on Monero native addon from Exantech",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -27,7 +27,7 @@
   "gypfile": true,
   "homepage": "https://github.com/atanmarko/safex-nodejs-libwallet#readme",
   "engines": {
-    "node": "8 - 9"
+    "node": "10"
   },
   "dependencies": {
     "nan": "^2.10.0",
@@ -40,16 +40,19 @@
     "tap": "^12.0.1"
   },
   "bundledDependencies": [
-    "node-pre-gyp"
+    "node-pre-gyp",
+    "node-pre-gyp-github"
   ],
   "binary": {
     "module_name": "safex",
     "module_path": "./lib/binding/",
-    "remote_path": "atanmarko/safex-nodejs-libwallet/releases/download/{version}",
-    "host": "https://github.com"
+    "remote_path": "{version}",
+    "host": "https://github.com/atanmarko/safex-nodejs-libwallet/releases/download/"
   },
   "scripts": {
     "build": "node-pre-gyp configure build",
+    "publish": "node-pre-gyp configure build package",
+    "publishGithub": "node-pre-gyp-github publish",
     "prepublishOnly": "npm ls",
     "install": "node-pre-gyp install --fallback-to-build",
     "test": "node test/index.js"
