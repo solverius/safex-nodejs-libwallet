@@ -7,15 +7,26 @@
 
 #include <wallet_api.h>
 
+#include "safexnativewallet.h"
+
+#if _MSC_VER //windows node-gyp build
+#include <windows_wrapper.h>
+#include <winwallet.h>
+#include <winwalletlistener.h>
+#include <winwalletmanager.h>
+#include <winpendingtransaction.h>
+#endif
+
 namespace exawallet {
+
 
 using CopyablePersistentFunction = Nan::CopyablePersistentTraits<v8::Function>::CopyablePersistent;
 
-class Wallet : public node::ObjectWrap, public Safex::WalletListener {
+class Wallet : public node::ObjectWrap, public SafexNativeWalletListener {
 public:
     static NAN_MODULE_INIT(Init);
 
-    static v8::Local<v8::Object> NewInstance(Safex::Wallet* wallet);
+    static v8::Local<v8::Object> NewInstance(SafexNativeWallet* wallet);
 
     static NAN_METHOD(WalletExists);
     static NAN_METHOD(CreateWallet);
@@ -32,7 +43,8 @@ public:
     v8::MaybeLocal<v8::Function> FindCallback(const std::string& name);
 
  private:
-    explicit Wallet(Safex::Wallet* wallet): wallet_(wallet) {}
+
+    explicit Wallet(SafexNativeWallet* wallet): wallet_(wallet) {}
     ~Wallet();
 
     virtual void moneySpent(const std::string &txId, uint64_t amount) override;
@@ -96,7 +108,7 @@ public:
 
     static Nan::Persistent<v8::Function> constructor;
 
-    Safex::Wallet* wallet_ = nullptr;
+    SafexNativeWallet* wallet_ = nullptr;
     std::map<std::string, CopyablePersistentFunction> callbacks_;
 };
 

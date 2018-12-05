@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include <nan.h>
+#include <string>
 
 using namespace v8;
 
@@ -231,7 +232,7 @@ std::string CreateTransactionArgs::Init(const Nan::FunctionCallbackInfo<Value>& 
     if (!getRequiredProperty<std::string>(obj, "amount", amountStr)) {
         return std::string("Required property not found: amount");
     }
-    amount = std::stoul(amountStr);
+    amount = std::stoull(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
     mixin = getOptionalProperty<uint32_t>(obj, "mixin", MINIMAL_MIXIN);
     priority = static_cast<Safex::PendingTransaction::Priority>(getOptionalProperty<uint32_t>(obj, "priority",

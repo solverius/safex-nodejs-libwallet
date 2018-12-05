@@ -3,12 +3,16 @@
 #include "wallet.h"
 #include "pendingtransaction.h"
 
+
+#include "safexnativewallet.h"
+
+
 namespace exawallet {
 
 using namespace v8;
 
 std::string CreateWalletTask::doWork() {
-    auto manager = Safex::WalletManagerFactory::getWalletManager();
+    auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     if (manager->walletExists(args_.path)) {
         return "Wallet already exists: " + args_.path;
     }
@@ -37,7 +41,7 @@ Local<Value> CreateWalletTask::afterWork(std::string& error) {
 }
 
 std::string CreateWalletFromKeysTask::doWork() {
-  auto manager = Safex::WalletManagerFactory::getWalletManager();
+  auto manager = SafexNativeWalletManagerFactory::getWalletManager();
   if (manager->walletExists(args_.path)) {
     return "Wallet already exists: " + args_.path;
   }
@@ -67,7 +71,7 @@ Local<Value> CreateWalletFromKeysTask::afterWork(std::string& error) {
 }
 
 std::string OpenWalletTask::doWork() {
-    auto manager = Safex::WalletManagerFactory::getWalletManager();
+    auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     if (!manager->walletExists(args_.path)) {
         return "wallet does not exist: " + args_.path;
     }
@@ -96,7 +100,7 @@ Local<Value> OpenWalletTask::afterWork(std::string& error) {
 }
 
 std::string CloseWalletTask::doWork() {
-    auto manager = Safex::WalletManagerFactory::getWalletManager();
+    auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     manager->closeWallet(wallet_, store_);
     return {};
 }
@@ -106,7 +110,7 @@ Local<Value> CloseWalletTask::afterWork(std::string& error) {
 }
 
 std::string RecoveryWalletTask::doWork() {
-    auto manager = Safex::WalletManagerFactory::getWalletManager();
+    auto manager = SafexNativeWalletManagerFactory::getWalletManager();
 
     wallet_ = manager->recoveryWallet(args_.path,
                                        args_.password,
@@ -137,6 +141,7 @@ Local<Value> RecoveryWalletTask::afterWork(std::string& error) {
 
 std::string StoreWalletTask::doWork() {
     if (!wallet_->store(wallet_->path())) {
+        std::cout << "Error storing wallet path:" << wallet_->path() << std::endl;
         return "Couldn't store wallet";
     }
 

@@ -3,6 +3,16 @@
 #include "deferredtask.h"
 #include "walletargs.h"
 
+#include "safexnativewallet.h"
+
+#if _MSC_VER //windows node-gyp build
+#include <windows_wrapper.h>
+#include <winwallet.h>
+#include <winwalletlistener.h>
+#include <winwalletmanager.h>
+#include <winpendingtransaction.h>
+#endif
+
 namespace exawallet {
 
 class CreateWalletTask: public DeferredTask {
@@ -14,7 +24,7 @@ public:
 
 private:
     CreateWalletArgs args_;
-    Safex::Wallet* wallet_ = nullptr;
+  SafexNativeWallet* wallet_ = nullptr;
 };
 
 class CreateWalletFromKeysTask: public DeferredTask {
@@ -26,7 +36,7 @@ public:
 
 private:
   CreateWalletFromKeysArgs args_;
-  Safex::Wallet* wallet_ = nullptr;
+  SafexNativeWallet* wallet_ = nullptr;
 };
 
 class OpenWalletTask: public DeferredTask {
@@ -38,18 +48,18 @@ public:
 
 private:
     OpenWalletArgs args_;
-    Safex::Wallet* wallet_ = nullptr;
+    SafexNativeWallet* wallet_ = nullptr;
 };
 
 class CloseWalletTask: public DeferredTask {
 public:
-    CloseWalletTask(Safex::Wallet* wallet, bool store): wallet_(wallet), store_(store) {}
+    CloseWalletTask(SafexNativeWallet* wallet, bool store): wallet_(wallet), store_(store) {}
 
     virtual std::string doWork() override;
     virtual v8::Local<v8::Value> afterWork(std::string& error) override;
 
 private:
-    Safex::Wallet* wallet_ = nullptr;
+  SafexNativeWallet* wallet_ = nullptr;
     bool store_;
 };
 
@@ -62,47 +72,47 @@ public:
 
 private:
     RecoveryWalletArgs args_;
-    Safex::Wallet* wallet_ = nullptr;
+    SafexNativeWallet* wallet_ = nullptr;
 };
 
 
 class StoreWalletTask: public DeferredTask {
 public:
-    StoreWalletTask(Safex::Wallet* wallet): wallet_(wallet) {}
+    StoreWalletTask(SafexNativeWallet* wallet): wallet_(wallet) {}
 
     virtual std::string doWork() override;
     virtual v8::Local<v8::Value> afterWork(std::string& error) override;
 private:
-    Safex::Wallet* wallet_;
+  SafexNativeWallet* wallet_;
 };
 
 class CreateTransactionTask: public DeferredTask {
 public:
-    CreateTransactionTask(const CreateTransactionArgs& args, Safex::Wallet* wallet): args_(args), wallet_(wallet) {}
+    CreateTransactionTask(const CreateTransactionArgs& args, SafexNativeWallet* wallet): args_(args), wallet_(wallet) {}
 
     virtual std::string doWork() override;
     virtual v8::Local<v8::Value> afterWork(std::string& error) override;
 
 private:
     CreateTransactionArgs args_;
-    Safex::PendingTransaction* transaction_ = nullptr;
-    Safex::Wallet* wallet_;
+    SafexNativePendingTransaction* transaction_ = nullptr;
+    SafexNativeWallet* wallet_;
 };
 
 class CommitTransactionTask: public DeferredTask {
 public:
-    CommitTransactionTask(Safex::PendingTransaction* transaction): transaction_(transaction) {}
+    CommitTransactionTask(SafexNativePendingTransaction* transaction): transaction_(transaction) {}
 
     virtual std::string doWork() override;
     virtual v8::Local<v8::Value> afterWork(std::string& error) override;
 
 private:
-    Safex::PendingTransaction* transaction_;
+    SafexNativePendingTransaction* transaction_;
 };
 
 class RestoreMultisigTransactionTask: public DeferredTask {
 public:
-    RestoreMultisigTransactionTask(const std::string& transactionData, Safex::Wallet* wallet)
+    RestoreMultisigTransactionTask(const std::string& transactionData, SafexNativeWallet* wallet)
         : transactionData_(transactionData), wallet_(wallet) {}
 
     virtual std::string doWork() override;
@@ -110,8 +120,8 @@ public:
 
 private:
     std::string transactionData_;
-    Safex::PendingTransaction* transaction_ = nullptr;
-    Safex::Wallet* wallet_;
+    SafexNativePendingTransaction* transaction_ = nullptr;
+    SafexNativeWallet * wallet_;
 };
 
 } //namespace exawallet
