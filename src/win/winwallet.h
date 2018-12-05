@@ -53,6 +53,13 @@ namespace Safex
 
   struct WinTransactionInfo
   {
+    struct Transfer {
+      Transfer(uint64_t _amount, uint64_t _token_amount, const std::string &address);
+      const uint64_t amount;
+      const uint64_t token_amount;
+      const std::string address;
+    };
+
     virtual ~WinTransactionInfo();
 
     WinTransactionInfo(void *innerPtr) : m_innerPtr(innerPtr)
@@ -88,7 +95,7 @@ namespace Safex
     virtual std::string paymentId() const;
 
     //! only applicable for output transactions
-    virtual const std::vector<Safex::TransactionInfo::Transfer> &transfers() const;
+    virtual const std::vector<WinTransactionInfo::Transfer> &transfers() const;
 
     virtual TransactionType transactionType() const;
 
@@ -99,12 +106,16 @@ namespace Safex
 
   struct WinTransactionHistory
   {
+    WinTransactionHistory(void* innerPtr) : m_innerPtr(innerPtr) {}
     virtual ~WinTransactionHistory();
     virtual int count() const;
     virtual WinTransactionInfo * transaction(int index)  const;
     virtual WinTransactionInfo * transaction(const std::string &id) const;
     virtual std::vector<WinTransactionInfo*> getAll() const;
     virtual void refresh();
+    
+    private:
+      void* m_innerPtr;
   };
 
 

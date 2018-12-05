@@ -10,12 +10,15 @@
 #include "winpendingtransaction.h"
 
 
-
 namespace Safex {
+
+WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount, const std::string &_address)
+    : amount(_amount), token_amount(_token_amount), address(_address) {}
+
 
   WinTransactionInfo::~WinTransactionInfo()
   {
-
+    win_txinfo_deleteTransactionInfo(m_innerPtr);
   }
 
   int WinTransactionInfo::direction() const
@@ -88,9 +91,30 @@ namespace Safex {
     return std::string(win_txinfo_paymentId(m_innerPtr));
   }
 
-  const std::vector<Safex::TransactionInfo::Transfer> &WinTransactionInfo::transfers() const
+  const std::vector<WinTransactionInfo::Transfer> &WinTransactionInfo::transfers() const
   {
-    return {};
+    std::vector<WinTransactionInfo::Transfer> ret;
+    char* buffer = ::win_txinfo_transfers(m_innerPtr);
+    uint32_t offset = 0;
+
+    uint32_t transfer_len;
+    memcpy(&transfer_len, buffer, sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+    for(uint32_t i = 0; i < transfer_len; ++i) {
+      uint32_t addr_len = 0;
+      uint64_t amount;
+      uint64_t token_amount;
+      std::string addr;
+      memcpy(&(amount), buffer+offset, sizeof(uint64_t));
+      offset += sizeof(uint64_t);
+      memcpy(&(token_amount), buffer+offset, sizeof(uint64_t));
+      offset += sizeof(uint64_t);
+      addr = std::string(buffer+offset);
+      offset += addr.size() + 1;
+
+      ret.emplace_back(amount, token_amount, addr);
+    }
+    return ret;
   }
 
   TransactionType WinTransactionInfo::transactionType() const
@@ -101,32 +125,43 @@ namespace Safex {
 
   WinTransactionHistory::~WinTransactionHistory()
   {
-
+    win_txhist_Delete(m_innerPtr);
   }
 
   int WinTransactionHistory::count() const
   {
-    return 0;
+    return static_cast<int>(win_txhist_count(m_innerPtr));
   }
 
   WinTransactionInfo *WinTransactionHistory::transaction(int index) const
   {
-    return nullptr;
+    void* txInfo = win_txhist_transactionInt(m_innerPtr, index);
+    return new WinTransactionInfo(txInfo);
   }
 
   WinTransactionInfo *WinTransactionHistory::transaction(const std::string &id) const
   {
-    return nullptr;
+    void* txInfo = win_txhist_transactionStr(m_innerPtr, id.c_str());
+    return new WinTransactionInfo(txInfo);
   }
 
   std::vector<WinTransactionInfo *> WinTransactionHistory::getAll() const
   {
-    return std::vector<WinTransactionInfo *>();
+    std::vector<WinTransactionInfo *> ret;
+
+    uint32_t size = 0;
+    void** results = win_txhist_getAll(m_innerPtr, &size);
+
+    for(uint32_t i = 0; i < size; ++i) {
+      ret.push_back(new WinTransactionInfo(results[i]));
+    }
+
+    return ret;
   }
 
   void WinTransactionHistory::refresh()
   {
-
+    win_txhist_refresh(m_innerPtr);
   }
 
 
