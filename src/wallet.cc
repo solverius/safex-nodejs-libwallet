@@ -188,8 +188,6 @@ NAN_METHOD(Wallet::WalletExists) {
 
 NAN_METHOD(Wallet::CreateWallet) {
     CreateWalletArgs walletArgs;
-    std::cout << "Wallet::CreateWallet" << std::endl;
-    win_checkDLL("Kreiram ovde jedan wallet!");
     std::string error = walletArgs.Init(info);
     if (!error.empty()) {
         Nan::ThrowError(error.c_str());
@@ -308,9 +306,6 @@ v8::Local<v8::Object> Wallet::NewInstance(SafexNativeWallet *wallet) {
     Local<Function> cons = Nan::New(constructor);
     Local<Context> context = Nan::GetCurrentContext();
     Local<Object> instance = cons->NewInstance(context, argc, argv).ToLocalChecked();
-
-    std::cout << "Wallet::NewInstance" << std::endl;
-    win_checkDLL(" Wallet::NewInstance here!");
 
     Wallet* w = new Wallet(wallet);
     wallet->setListener(w);
