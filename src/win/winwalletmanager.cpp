@@ -17,10 +17,8 @@ namespace Safex
 
   SafexNativeWallet *WinWalletManager::createWallet(const std::string &path, const std::string &password, const std::string &language, NetworkType nettype)
   {
-    void *self = nullptr;
-    win_mng_createWallet(self, path.c_str(), password.c_str(), language.c_str(), nettype);
-    SafexNativeWallet *wlt = new WinWallet(self);
-    return wlt;
+    SafexNativeWallet *nativeWallet = new WinWallet(win_mng_createWallet(m_innerPtr, path.c_str(), password.c_str(), language.c_str(), nettype));
+    return nativeWallet;
   }
 
   SafexNativeWallet *WinWalletManager::openWallet(const std::string &path, const std::string &password, NetworkType nettype)
