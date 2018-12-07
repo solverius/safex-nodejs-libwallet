@@ -12,7 +12,7 @@
 
 #include <windows.h>
 
-#ifdef DLLIMPORT_SAFEX 
+#ifdef DLLIMPORT_SAFEX
 #define DLL_MAGIC __declspec(dllimport)
 #else
 #define DLL_MAGIC __declspec(dllexport)
@@ -41,7 +41,7 @@ extern "C" DLL_MAGIC void* win_createTransaction(
         uint32_t subaddr_account,
         uint32_t subaddr_indices,
         uint32_t tx_type
-        );
+);
 
 extern "C" DLL_MAGIC const char* win_address(void* self);
 extern "C" DLL_MAGIC const char* win_seed(void* self);
@@ -62,13 +62,15 @@ extern "C" DLL_MAGIC uint64_t win_unlockedBalanceAll(void* self);
 extern "C" DLL_MAGIC uint64_t win_tokenBalanceAll(void* self);
 extern "C" DLL_MAGIC uint64_t win_unlockedTokenBalanceAll(void* self);
 
+extern "C" DLL_MAGIC uint8_t win_synchronizedB(void* self);
+extern "C" DLL_MAGIC void win_setAutoRefreshInterval(void* self, uint32_t millis);
 extern "C" DLL_MAGIC const char* win_GenPaymentId();
 extern "C" DLL_MAGIC uint8_t win_PaymentIdValid(const char* paymentId);
 extern "C" DLL_MAGIC void win_SetListener(void* self, void* listener);
 extern "C" DLL_MAGIC void win_segregatePreForkOutputs(void* self, uint8_t segregate);
 extern "C" DLL_MAGIC void win_keyReuseMitigation2(void* self, uint8_t mitigation);
 extern "C" DLL_MAGIC const char* win_IntegratedAddress(void* self, const char* paymentId);
-    
+
 extern "C" DLL_MAGIC uint8_t win_static_addressValid(const char* address, uint32_t nettype);
 /****************************** END WALLET API ************************************************************************/
 
@@ -106,7 +108,7 @@ extern "C" DLL_MAGIC void* win_mng_recoveryWallet(
 //@return Safex::WalletManager
 extern "C" DLL_MAGIC uint8_t win_mng_walletExists(void* self, const char* path);
 extern "C" DLL_MAGIC void* win_mng_createWalletFromKeys(void* self, const char* path, const char* password, const char* language, uint32_t nettype,
-                                                uint64_t restoreHeight,const char *addressString, const char* viewKeyString, const char* spendKeyString);
+                                                        uint64_t restoreHeight,const char *addressString, const char* viewKeyString, const char* spendKeyString);
 /****************************** END WALLET MANAGER API ****************************************************************/
 
 /****************************** TRANSACTIONINFO API *******************************************************************/
