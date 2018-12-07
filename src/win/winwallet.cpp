@@ -272,7 +272,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   bool WinWallet::synchronized() const
   {
-    return false;
+    return static_cast<bool>(win_synchronizedB(m_innerPtr));
   }
 
   bool WinWallet::paymentIdValid(const std::string &paiment_id)
@@ -406,5 +406,8 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     win_setRefreshFromBlockHeight(m_innerPtr, refresh_from_block_height);
   }
 
+  void WinWallet::setAutoRefreshInterval(int millis) {
+    win_setAutoRefreshInterval(m_innerPtr, millis);
+  }
 
 }

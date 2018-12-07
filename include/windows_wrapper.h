@@ -12,7 +12,7 @@
 
 #include <windows.h>
 
-#ifdef DLLIMPORT_SAFEX 
+#ifdef DLLIMPORT_SAFEX
 #define DLL_MAGIC __declspec(dllimport)
 #else
 #define DLL_MAGIC __declspec(dllexport)
@@ -41,7 +41,7 @@ extern "C" DLL_MAGIC void* win_createTransaction(
         uint32_t subaddr_account,
         uint32_t subaddr_indices,
         uint32_t tx_type
-        );
+);
 
 extern "C" DLL_MAGIC const char* win_address(void* self);
 extern "C" DLL_MAGIC const char* win_seed(void* self);
@@ -62,13 +62,15 @@ extern "C" DLL_MAGIC uint64_t win_unlockedBalanceAll(void* self);
 extern "C" DLL_MAGIC uint64_t win_tokenBalanceAll(void* self);
 extern "C" DLL_MAGIC uint64_t win_unlockedTokenBalanceAll(void* self);
 
+extern "C" DLL_MAGIC uint8_t win_synchronizedB(void* self);
+extern "C" DLL_MAGIC void win_setAutoRefreshInterval(void* self, uint32_t millis);
 extern "C" DLL_MAGIC const char* win_GenPaymentId();
 extern "C" DLL_MAGIC uint8_t win_PaymentIdValid(const char* paymentId);
 extern "C" DLL_MAGIC void win_SetListener(void* self, void* listener);
 extern "C" DLL_MAGIC void win_segregatePreForkOutputs(void* self, uint8_t segregate);
 extern "C" DLL_MAGIC void win_keyReuseMitigation2(void* self, uint8_t mitigation);
 extern "C" DLL_MAGIC const char* win_IntegratedAddress(void* self, const char* paymentId);
-    
+
 extern "C" DLL_MAGIC uint8_t win_static_addressValid(const char* address, uint32_t nettype);
 /****************************** END WALLET API ************************************************************************/
 
@@ -106,7 +108,7 @@ extern "C" DLL_MAGIC void* win_mng_recoveryWallet(
 //@return Safex::WalletManager
 extern "C" DLL_MAGIC uint8_t win_mng_walletExists(void* self, const char* path);
 extern "C" DLL_MAGIC void* win_mng_createWalletFromKeys(void* self, const char* path, const char* password, const char* language, uint32_t nettype,
-                                                uint64_t restoreHeight,const char *addressString, const char* viewKeyString, const char* spendKeyString);
+                                                        uint64_t restoreHeight,const char *addressString, const char* viewKeyString, const char* spendKeyString);
 /****************************** END WALLET MANAGER API ****************************************************************/
 
 /****************************** TRANSACTIONINFO API *******************************************************************/
@@ -123,7 +125,7 @@ extern "C" DLL_MAGIC const char* win_txinfo_hash(void* self);
 extern "C" DLL_MAGIC uint64_t win_txinfo_timestamp(void* self);
 extern "C" DLL_MAGIC const char* win_txinfo_paymentId(void* self);
 // returns array of Safex::Transfers
-extern "C" DLL_MAGIC char* win_txinfo_transfers(void* self);
+extern "C" DLL_MAGIC void* win_txinfo_transfers(void* self, uint32_t* size);
 extern "C" DLL_MAGIC uint64_t win_txinfo_confirmations(void* self);
 extern "C" DLL_MAGIC uint64_t win_txinfo_unlockTime(void* self);
 extern "C" DLL_MAGIC uint32_t win_txinfo_transactionType(void* self);
@@ -146,16 +148,6 @@ extern "C" DLL_MAGIC void win_lstn_setRefreshed(void* self, void(*refreshed_)(vo
 extern "C" DLL_MAGIC void win_mlog_set_log_levelI(int level);
 extern "C" DLL_MAGIC void win_mlog_set_log_levelCPtr(const char* log);
 /****************************** END OTHER FUNCTIONS *******************************************************************/
-
-/****************************** TRANSACTION HISTORY API ***************************************************************/
-extern "C" DLL_MAGIC void* win_txhist_Create(void* wallet);
-extern "C" DLL_MAGIC void win_txhist_Delete(void* self);
-extern "C" DLL_MAGIC uint32_t win_txhist_count(void* self);
-extern "C" DLL_MAGIC void* win_txhist_transactionInt(void* self, uint32_t index);
-extern "C" DLL_MAGIC void* win_txhist_transactionStr(void* self, const char* id);
-extern "C" DLL_MAGIC void** win_txhist_getAll(void* self, uint32_t* size);
-extern "C" DLL_MAGIC void win_txhist_refresh(void* self);
-/****************************** END TRANSACTION HISTORY API ***********************************************************/
 
 #endif //SAFEX_WINDOWS_WRAPPER_H
 
