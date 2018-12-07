@@ -222,7 +222,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   bool WinWallet::setPassword(const std::string &password)
   {
-    return false;
+    return static_cast<bool>(win_setPasswordB(m_innerPtr, password.c_str()));
   }
 
   std::string WinWallet::errorString() const
@@ -242,12 +242,12 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   void WinWallet::segregatePreForkOutputs(bool segregate)
   {
-
+      win_segregatePreForkOutputs(m_innerPtr, static_cast<uint8_t>(segregate));
   }
 
   void WinWallet::keyReuseMitigation2(bool mitigation)
   {
-
+      win_keyReuseMitigation2(m_innerPtr, mitigation);
   }
 
   uint64_t WinWallet::getRefreshFromBlockHeight() const
@@ -257,7 +257,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   bool WinWallet::trustedDaemon() const
   {
-    return false;
+    return static_cast<bool>(win_trustedDaemonB(m_innerPtr));
   }
 
   std::string WinWallet::genPaymentId()
@@ -300,7 +300,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   Safex::Wallet::ConnectionStatus WinWallet::connected() const
   {
-    return Safex::Wallet::ConnectionStatus::ConnectionStatus_WrongVersion;
+    return static_cast<Safex::Wallet::ConnectionStatus>(win_connected(m_innerPtr));
   }
 
   void WinWallet::setTrustedDaemon(bool arg)

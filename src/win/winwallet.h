@@ -178,7 +178,7 @@ namespace Safex
     virtual std::string signMessage(const std::string &message);
     virtual int status() const;
     virtual bool verifySignedMessage(const std::string &message, const std::string &addres, const std::string &signature) const;
-    virtual void setAutoRefreshInterval(int millis) = 0;
+    virtual void setAutoRefreshInterval(int millis);
 
   private:
     void *m_innerPtr;
