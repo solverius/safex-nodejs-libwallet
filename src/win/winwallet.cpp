@@ -252,7 +252,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   uint64_t WinWallet::getRefreshFromBlockHeight() const
   {
-    return 0;
+    return win_getRefreshFromBlockHeight(m_innerPtr);
   }
 
   bool WinWallet::trustedDaemon() const
@@ -262,12 +262,12 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   std::string WinWallet::genPaymentId()
   {
-    return std::string();
+    return std::string(win_GenPaymentId(m_innerPtr));
   }
 
   uint64_t WinWallet::daemonBlockChainHeight() const
   {
-    return 0;
+    return win_daemonBlockChainHeight(m_innerPtr);
   }
 
   bool WinWallet::synchronized() const
@@ -277,12 +277,12 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   bool WinWallet::paymentIdValid(const std::string &paiment_id)
   {
-    return false;
+    return static_cast<bool>(win_PaymentIdValid(m_innerPtr, paiment_id.c_str()));
   }
 
   bool WinWallet::addressValid(const std::string &str, NetworkType nettype)
   {
-    return false;
+    return static_cast<bool>(win_static_addressValid(m_innerPtr, str.c_str(), static_cast<uint32_t>(nettype)));
   }
 
   uint32_t WinWallet::defaultMixin() const
@@ -352,7 +352,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   uint64_t WinWallet::blockChainHeight() const
   {
-    return 0;
+    return win_blockChainHeight(m_innerPtr);
   }
 
   void WinWallet::setListener(WinWalletListener * wltListener)
@@ -393,7 +393,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   bool WinWallet::refresh()
   {
-    return false;
+    return static_cast<bool>(win_refresh(m_innerPtr));
   }
 
   void WinWallet::refreshAsync()
