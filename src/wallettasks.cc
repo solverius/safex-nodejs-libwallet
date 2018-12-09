@@ -90,6 +90,10 @@ std::string OpenWalletTask::doWork() {
         return "Couldn't init wallet";
     }
 
+    //set refresh height as latest block wallet has seen - 1 day
+    uint64_t currentHeight = wallet_->blockChainHeight();
+    wallet_->setRefreshFromBlockHeight(currentHeight - 720 > 0 ? currentHeight - 720 : 0);
+
     wallet_->setTrustedDaemon(true);
     wallet_->startRefresh();
     return {};
