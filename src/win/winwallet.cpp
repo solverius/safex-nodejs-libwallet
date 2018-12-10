@@ -295,9 +295,6 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     return nullptr;
   }
 
-
-
-
   Safex::Wallet::ConnectionStatus WinWallet::connected() const
   {
     return static_cast<Safex::Wallet::ConnectionStatus>(win_connected(m_innerPtr));
@@ -409,5 +406,16 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
   void WinWallet::setAutoRefreshInterval(int millis) {
     win_setAutoRefreshInterval(m_innerPtr, millis);
   }
+
+  bool WinWallet::rescanBlockchain()
+  {
+    return static_cast<bool>(win_rescanBlockchain(m_innerPtr));
+  }
+
+  void WinWallet::rescanBlockchainAsync()
+  {
+    win_rescanBlockchainAsync(m_innerPtr);
+  }
+
 
 }

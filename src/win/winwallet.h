@@ -180,6 +180,9 @@ namespace Safex
     virtual bool verifySignedMessage(const std::string &message, const std::string &addres, const std::string &signature) const;
     virtual void setAutoRefreshInterval(int millis);
 
+    virtual bool rescanBlockchain();
+    virtual void rescanBlockchainAsync();
+
   private:
     void *m_innerPtr;
     void *m_nativeListenerPtr;

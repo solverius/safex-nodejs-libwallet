@@ -41,7 +41,7 @@ extern "C" DLL_MAGIC void* win_createTransaction(
         uint32_t subaddr_account,
         uint32_t subaddr_indices,
         uint32_t tx_type
-);
+        );
 
 extern "C" DLL_MAGIC const char* win_address(void* self);
 extern "C" DLL_MAGIC const char* win_seed(void* self);
@@ -54,6 +54,7 @@ extern "C" DLL_MAGIC const char* win_publicSpendKey(void* self);
 extern "C" DLL_MAGIC uint8_t win_setPasswordB(void* self, const char*); // @todo See if bool is valid in CAPI
 extern "C" DLL_MAGIC const char* win_errorString(void* self);
 extern "C" DLL_MAGIC void win_setRefreshFromBlockHeight(void* self, uint32_t height);
+extern "C" DLL_MAGIC uint64_t win_getRefreshFromBlockHeight(void* self);
 extern "C" DLL_MAGIC uint32_t win_connected(void* self); // @todo Enum ConnectionStatus without default type should be uint32_t
 extern "C" DLL_MAGIC void win_setTrustedDaemon(void* self, uint8_t argB);
 extern "C" DLL_MAGIC uint8_t win_trustedDaemonB(void* self);
@@ -70,6 +71,16 @@ extern "C" DLL_MAGIC void win_SetListener(void* self, void* listener);
 extern "C" DLL_MAGIC void win_segregatePreForkOutputs(void* self, uint8_t segregate);
 extern "C" DLL_MAGIC void win_keyReuseMitigation2(void* self, uint8_t mitigation);
 extern "C" DLL_MAGIC const char* win_IntegratedAddress(void* self, const char* paymentId);
+extern "C" DLL_MAGIC uint8_t win_refresh(void* self);
+
+
+extern "C" DLL_MAGIC uint64_t win_blockChainHeight(void* self);
+extern "C" DLL_MAGIC uint64_t win_approximateBlockChainHeight(void* self);
+extern "C" DLL_MAGIC uint64_t win_daemonBlockChainHeight(void* self);
+extern "C" DLL_MAGIC uint64_t win_daemonBlockChainTargetHeight(void* self);
+
+extern "C" DLL_MAGIC bool win_rescanBlockchain(void* self);
+extern "C" DLL_MAGIC void win_rescanBlockchainAsync(void* self);
 
 extern "C" DLL_MAGIC uint8_t win_static_addressValid(const char* address, uint32_t nettype);
 /****************************** END WALLET API ************************************************************************/
@@ -108,7 +119,7 @@ extern "C" DLL_MAGIC void* win_mng_recoveryWallet(
 //@return Safex::WalletManager
 extern "C" DLL_MAGIC uint8_t win_mng_walletExists(void* self, const char* path);
 extern "C" DLL_MAGIC void* win_mng_createWalletFromKeys(void* self, const char* path, const char* password, const char* language, uint32_t nettype,
-                                                        uint64_t restoreHeight,const char *addressString, const char* viewKeyString, const char* spendKeyString);
+                                                uint64_t restoreHeight,const char *addressString, const char* viewKeyString, const char* spendKeyString);
 /****************************** END WALLET MANAGER API ****************************************************************/
 
 /****************************** TRANSACTIONINFO API *******************************************************************/
@@ -125,7 +136,7 @@ extern "C" DLL_MAGIC const char* win_txinfo_hash(void* self);
 extern "C" DLL_MAGIC uint64_t win_txinfo_timestamp(void* self);
 extern "C" DLL_MAGIC const char* win_txinfo_paymentId(void* self);
 // returns array of Safex::Transfers
-extern "C" DLL_MAGIC void* win_txinfo_transfers(void* self, uint32_t* size);
+extern "C" DLL_MAGIC char* win_txinfo_transfers(void* self);
 extern "C" DLL_MAGIC uint64_t win_txinfo_confirmations(void* self);
 extern "C" DLL_MAGIC uint64_t win_txinfo_unlockTime(void* self);
 extern "C" DLL_MAGIC uint32_t win_txinfo_transactionType(void* self);
@@ -143,6 +154,16 @@ extern "C" DLL_MAGIC void win_lstn_setNewBlock(void* self, void(*newBlock_)(void
 extern "C" DLL_MAGIC void win_lstn_setUpdated(void* self, void(*updated_)(void*));
 extern "C" DLL_MAGIC void win_lstn_setRefreshed(void* self, void(*refreshed_)(void*));
 /****************************** END WALLET LISTNER API ****************************************************************/
+
+/****************************** TRANSACTION HISTORY API ***************************************************************/
+extern "C" DLL_MAGIC void* win_txhist_Create(void* wallet);
+extern "C" DLL_MAGIC void win_txhist_Delete(void* self);
+extern "C" DLL_MAGIC uint32_t win_txhist_count(void* self);
+extern "C" DLL_MAGIC void* win_txhist_transactionInt(void* self, uint32_t index);
+extern "C" DLL_MAGIC void* win_txhist_transactionStr(void* self, const char* id);
+extern "C" DLL_MAGIC void** win_txhist_getAll(void* self, uint32_t* size);
+extern "C" DLL_MAGIC void win_txhist_refresh(void* self);
+/****************************** END TRANSACTION HISTORY API ***********************************************************/
 
 /****************************** OTHER FUNCTIONS ***********************************************************************/
 extern "C" DLL_MAGIC void win_mlog_set_log_levelI(int level);
