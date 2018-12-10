@@ -78,6 +78,9 @@ public:
     static NAN_METHOD(SetRefreshFromBlockHeight);
     static NAN_METHOD(GetRefreshFromBlockHeight);
 
+    static NAN_METHOD(RescanBlockchain);
+    static NAN_METHOD(RescanBlockchainAsync);
+
     static NAN_METHOD(Connected);
     static NAN_METHOD(SetTrustedDaemon);
     static NAN_METHOD(TrustedDaemon);

@@ -268,6 +268,8 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"setPassword", SetPassword},
         {"setRefreshFromBlockHeight", SetRefreshFromBlockHeight},
         {"getRefreshFromBlockHeight", GetRefreshFromBlockHeight},
+        {"rescanBlockchain", RescanBlockchain},
+        {"rescanBlockchainAsync", RescanBlockchainAsync},
         {"connected", Connected},
         {"setTrustedDaemon", SetTrustedDaemon},
         {"trustedDaemon", TrustedDaemon},
@@ -597,6 +599,19 @@ NAN_METHOD(Wallet::AddressValid) {
     bool valid = SafexNativeWallet::addressValid(toStdString(info[0]), nettype);
     info.GetReturnValue().Set(Nan::New(valid));
 }
+
+NAN_METHOD(Wallet::RescanBlockchain) {
+        Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+        obj->wallet_->setRefreshFromBlockHeight(0);
+        obj->wallet_->rescanBlockchain();
+}
+
+NAN_METHOD(Wallet::RescanBlockchainAsync) {
+        Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+        obj->wallet_->setRefreshFromBlockHeight(0);
+        obj->wallet_->rescanBlockchainAsync();
+}
+
 
 NAN_METHOD(Wallet::DefaultMixin) {
     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
