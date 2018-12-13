@@ -48,11 +48,6 @@ namespace Safex
     return nativeWallet;
   }
 
-  SafexNativeWallet *WinWalletManager::createWalletFromKeys(const std::string &path, const std::string &language, NetworkType nettype, uint64_t restoreHeight, const std::string &addressString, const std::string &viewKeyString, const std::string &spendKeyString)
-  {
-    return nullptr;
-  }
-
   bool WinWalletManager::closeWallet(SafexNativeWallet *wallet, bool store)
   {
     return false;

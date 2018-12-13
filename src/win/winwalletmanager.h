@@ -120,36 +120,6 @@ namespace Safex
       return createWalletFromKeys(path, password, language, testnet ? TESTNET : MAINNET, restoreHeight, addressString, viewKeyString, spendKeyString);
     }
 
-    /*!
-     * \deprecated this method creates a wallet WITHOUT a passphrase, use createWalletFromKeys(..., password, ...) instead
-     * \brief  recovers existing wallet using keys. Creates a view only wallet if spend key is omitted
-     * \param  path           Name of wallet file to be created
-     * \param  language       language
-     * \param  nettype        Network type
-     * \param  restoreHeight  restore from start height
-     * \param  addressString  public address
-     * \param  viewKeyString  view key
-     * \param  spendKeyString spend key (optional)
-     * \return                SafexNativeWallet instance (SafexNativeWallet::status() needs to be called to check if recovered successfully)
-     */
-    virtual SafexNativeWallet *createWalletFromKeys(const std::string &path,
-                                         const std::string &language,
-                                         NetworkType nettype,
-                                         uint64_t restoreHeight,
-                                         const std::string &addressString,
-                                         const std::string &viewKeyString,
-                                         const std::string &spendKeyString = "");
-
-    SafexNativeWallet *createWalletFromKeys(const std::string &path,
-                                 const std::string &language,
-                                 bool testnet,
-                                 uint64_t restoreHeight,
-                                 const std::string &addressString,
-                                 const std::string &viewKeyString,
-                                 const std::string &spendKeyString = "")           // deprecated
-    {
-      return createWalletFromKeys(path, language, testnet ? TESTNET : MAINNET, restoreHeight, addressString, viewKeyString, spendKeyString);
-    }
 
     /*!
      * \brief Closes wallet. In case operation succeeded, wallet object deleted. in case operation failed, wallet object not deleted
