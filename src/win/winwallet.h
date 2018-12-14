@@ -121,6 +121,7 @@ namespace Safex
 
   struct WinWallet
   {
+    friend class WinWalletManager;
 
     WinWallet(void *self_):m_innerPtr{self_} {}
 

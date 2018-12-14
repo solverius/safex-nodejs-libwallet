@@ -50,7 +50,7 @@ namespace Safex
 
   bool WinWalletManager::closeWallet(SafexNativeWallet *wallet, bool store)
   {
-    //win_mng_closeWallet(m_innerPtr, wallet, true);
+    win_mng_closeWallet(m_innerPtr, wallet->m_innerPtr, store);
     return false;
   }
 
