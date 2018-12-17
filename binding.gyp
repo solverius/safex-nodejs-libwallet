@@ -60,7 +60,10 @@
             {
               "files": [
                 "<(PRODUCT_DIR)/<(module_name).node",
-                "./deps/libwin_wallet_wrapper.dll"
+                "./deps/libwin_wallet_wrapper.dll",
+                "/msys64/mingw64/bin/libwinpthread-1.dll",
+                "/msys64/mingw64/bin/libgcc_s_seh-1.dll",
+                "/msys64/mingw64/bin/libstdc++-6.dll"
               ],
               "destination": "<(module_path)"
             }
