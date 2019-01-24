@@ -64,6 +64,7 @@ public:
 
     static NAN_METHOD(Address);
     static NAN_METHOD(Seed);
+    static NAN_METHOD(SetSeedLanguage);
     static NAN_METHOD(Store);
     static NAN_METHOD(Path);
     static NAN_METHOD(NetType);
