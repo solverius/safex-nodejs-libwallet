@@ -417,5 +417,10 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     win_rescanBlockchainAsync(m_innerPtr);
   }
 
+  void WinWallet::setSeedLanguage(const std::string &seedLanguage)
+  {
+    win_setSeedLanguage(seedLanguage.c_str());
+  }
+
 
 }

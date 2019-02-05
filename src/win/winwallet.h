@@ -184,6 +184,8 @@ namespace Safex
     virtual bool rescanBlockchain();
     virtual void rescanBlockchainAsync();
 
+    virtual void setSeedLanguage(const std::string &seedLanguage);
+
   private:
     void *m_innerPtr;
     void *m_nativeListenerPtr;

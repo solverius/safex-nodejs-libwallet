@@ -59,6 +59,8 @@ const nextTick = () => {
 		console.log("secret spend key: " + wallet.secretSpendKey());
 		console.log("public view key: " + wallet.publicViewKey());
 		console.log("public spend key: " + wallet.publicSpendKey());
+                console.log("block chain height: " + wallet.blockchainHeight());
+                console.log("daemon block chain height: " + wallet.daemonBlockchainHeight());
     }
 
     setTimeout(nextTick, 10000);
