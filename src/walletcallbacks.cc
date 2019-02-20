@@ -3,9 +3,12 @@
 namespace exawallet {
 
 void Wallet::newBlock(uint64_t height) {
-    AsyncCallback<uint64_t>* async = constructAsyncCallback<uint64_t>(this, "newBlock");
-    async->param = height;
-    async->Enqueue();
+    // Disable for stability, to many newBlock callbacks
+    return;
+
+//    AsyncCallback<uint64_t>* async = constructAsyncCallback<uint64_t>(this, "newBlock");
+//    async->param = height;
+//    async->Enqueue();
 }
 
 void Wallet::refreshed() {
