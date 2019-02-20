@@ -50,8 +50,12 @@ namespace Safex
 
   void WinWalletListenerProxy::newBlock(void *target, uint64_t height)
   {
-    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
-    sink->newBlock(height);
+    //During syncing, this callback is called 100000 times and it messes with JS engine
+    //We will disable it
+    return;
+
+//    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
+//    sink->newBlock(height);
   }
 
   void WinWalletListenerProxy::updated(void *target)
