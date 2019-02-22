@@ -9,7 +9,7 @@ using namespace v8;
 
 namespace exawallet {
 
-const uint32_t CreateTransactionArgs::MINIMAL_MIXIN = 7;
+const uint32_t CreateTransactionArgs::DEFAULT_MIXIN = 6;
 
 template<typename T>
 T convertValue(Local<Value> value);
@@ -234,15 +234,11 @@ std::string CreateTransactionArgs::Init(const Nan::FunctionCallbackInfo<Value>& 
     }
     amount = std::stoull(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
-    mixin = getOptionalProperty<uint32_t>(obj, "mixin", MINIMAL_MIXIN);
+    mixin = getOptionalProperty<uint32_t>(obj, "mixin", DEFAULT_MIXIN);
     priority = static_cast<Safex::PendingTransaction::Priority>(getOptionalProperty<uint32_t>(obj, "priority",
             static_cast<uint32_t>(Safex::PendingTransaction::Priority::Priority_Medium)));
     tx_type = static_cast<Safex::TransactionType>(getOptionalProperty<uint32_t>(obj, "tx_type",
             static_cast<uint32_t>(Safex::TransactionType::CashTransaction)));
-
-    if (mixin < MINIMAL_MIXIN) {
-        return "Minimal mixin: " + std::to_string(MINIMAL_MIXIN);
-    }
 
     return {};
 }

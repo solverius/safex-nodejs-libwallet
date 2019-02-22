@@ -59,7 +59,7 @@ struct RecoveryWalletArgs {
 struct CreateTransactionArgs {
     //returns error string
     std::string Init(const Nan::FunctionCallbackInfo<v8::Value>& args);
-    static const uint32_t MINIMAL_MIXIN;
+    static const uint32_t DEFAULT_MIXIN;
 
     std::string address;
     uint64_t amount;
