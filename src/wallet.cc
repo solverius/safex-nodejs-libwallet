@@ -77,6 +77,10 @@ Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transa
         trObj->Set(Nan::GetCurrentContext(),
                    Nan::New("amount").ToLocalChecked(),
                    convertAmount(transfer.amount));
+        
+        trObj->Set(Nan::GetCurrentContext(),
+                   Nan::New("tokenAmount").ToLocalChecked(),
+                   convertAmount(transfer.token_amount));
 
         trObj->Set(Nan::GetCurrentContext(),
                    Nan::New("address").ToLocalChecked(),
@@ -119,6 +123,10 @@ Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transa
     result->Set(Nan::GetCurrentContext(),
                 Nan::New("amount").ToLocalChecked(),
                 convertAmount(transaction->amount()));
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("tokenAmount").ToLocalChecked(),
+                convertAmount(transaction->token_amount()));
 
     result->Set(Nan::GetCurrentContext(),
                 Nan::New("fee").ToLocalChecked(),
