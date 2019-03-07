@@ -72,6 +72,8 @@ namespace Safex
     virtual bool isFailed() const;
 
     virtual uint64_t amount() const;
+    
+    virtual uint64_t token_amount() const;
 
     virtual uint64_t fee() const;
 

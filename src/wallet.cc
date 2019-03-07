@@ -664,7 +664,6 @@ NAN_METHOD(Wallet::TransactionHistory) {
     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
     auto history = obj->wallet_->history();
     history->refresh();
-
     auto transactions = history->getAll();
     auto result = Nan::New<Array>(transactions.size());
     for (size_t i = 0; i < transactions.size(); ++i) {

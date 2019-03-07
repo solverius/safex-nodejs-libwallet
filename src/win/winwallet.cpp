@@ -41,6 +41,11 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     return win_txinfo_amount(m_innerPtr);
   }
 
+  uint64_t WinTransactionInfo::token_amount() const
+  {
+    return win_txinfo_token_amount(m_innerPtr);
+  }
+
   uint64_t WinTransactionInfo::fee() const
   {
     return win_txinfo_fee(m_innerPtr);
@@ -163,9 +168,6 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
   {
     win_txhist_refresh(m_innerPtr);
   }
-
-
-
 
   WinWallet::~WinWallet()
   {
@@ -292,7 +294,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   WinTransactionHistory *WinWallet::history()
   {
-    return nullptr;
+    return new WinTransactionHistory(win_history(m_innerPtr));
   }
 
   Safex::Wallet::ConnectionStatus WinWallet::connected() const
@@ -370,8 +372,6 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
   WinPendingTransaction *WinWallet::createTransaction(const std::string &dst_addr, const std::string &payment_id, optional<uint64_t> value_amount, uint32_t mixin_count,
           PendingTransaction::Priority priority, uint32_t subaddr_account, std::set<uint32_t> subaddr_indices, const TransactionType tx_type)
   {
-
-    std::cout << "WinWallet::createTransaction checkpoint 1" << std::endl;
     void* temp = win_createTransaction(m_innerPtr,dst_addr.c_str(), payment_id.c_str(), *value_amount, mixin_count, priority,
             0 /*subaddr_account*/, 0 /*subaddr_indices*/, static_cast<uint32_t>(tx_type));
     WinPendingTransaction *retValue = new WinPendingTransaction(temp);
