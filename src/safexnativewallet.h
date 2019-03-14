@@ -25,22 +25,26 @@ namespace Safex {
 //SafexNativeWallet is a type that represents OS agnostic interface
 #if _MSC_VER //windows node-gyp build
 
-using SafexNativeWallet=Safex::WinWallet;
-using SafexNativeWalletListener=Safex::WinWalletListener;
-using SafexNativeWalletManager=Safex::WinWalletManager;
-using SafexNativeWalletManagerFactory=Safex::WinWalletManagerFactory;
-using SafexNativePendingTransaction=Safex::WinPendingTransaction;
-using SafexNativeTransactionInfo=Safex::WinTransactionInfo;
-using SafexNativeTransactionHistory=Safex::WinTransactionHistory;
+using SafexNativeWallet                 = Safex::WinWallet;
+using SafexNativeWalletListener         = Safex::WinWalletListener;
+using SafexNativeWalletManager          = Safex::WinWalletManager;
+using SafexNativeWalletManagerFactory   = Safex::WinWalletManagerFactory;
+using SafexNativePendingTransaction     = Safex::WinPendingTransaction;
+using SafexNativeTransactionInfo        = Safex::WinTransactionInfo;
+using SafexNativeTransactionHistory     = Safex::WinTransactionHistory;
+using SafexNativeAddressBookRow         = Safex::WinAddressBookRow;
 #else
 
-using SafexNativeWallet=Safex::Wallet;
-using SafexNativeWalletListener=Safex::WalletListener;
-using SafexNativeWalletManager=Safex::WalletManager;
-using SafexNativeWalletManagerFactory=Safex::WalletManagerFactory;
-using SafexNativePendingTransaction=Safex::PendingTransaction;
-using SafexNativeTransactionInfo=Safex::TransactionInfo;
-using SafexNativeTransactionHistory=Safex::TransactionHistory;
+using SafexNativeWallet                 = Safex::Wallet;
+using SafexNativeWalletListener         = Safex::WalletListener;
+using SafexNativeWalletManager          = Safex::WalletManager;
+using SafexNativeWalletManagerFactory   = Safex::WalletManagerFactory;
+using SafexNativePendingTransaction     = Safex::PendingTransaction;
+using SafexNativeTransactionInfo        = Safex::TransactionInfo;
+using SafexNativeTransactionHistory     = Safex::TransactionHistory;
+using SafexNativeAddressBook            = Safex::AddressBook;
+using SafexNativeAddressBookRow         = Safex::AddressBookRow;
+
 #endif
 
 #endif //WIN_SAFEX_NODEJS_LIBWALLET_NATIVESAFEXWALLET_H

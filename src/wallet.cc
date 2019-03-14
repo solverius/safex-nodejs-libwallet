@@ -66,6 +66,28 @@ Local<String> convertAmount(uint64_t amount) {
     return Nan::New(std::to_string(amount).c_str()).ToLocalChecked();
 }
 
+Local<Object> makeAddressBookRowInfoObject(const SafexNativeAddressBookRow* row) {
+    auto result = Nan::New<Object>();
+    result->Set(Nan::GetCurrentContext(),
+                    Nan::New("rowID").ToLocalChecked(),
+                    Nan::New((uint32_t)row->getRowId())
+                    );
+
+    result->Set(Nan::GetCurrentContext(),
+                        Nan::New("address").ToLocalChecked(),
+                        Nan::New(row->getAddress().c_str()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                        Nan::New("description").ToLocalChecked(),
+                        Nan::New(row->getDescription().c_str()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                        Nan::New("paymentId").ToLocalChecked(),
+                        Nan::New(row->getPaymentId().c_str()).ToLocalChecked());
+
+    return result;
+}
+
 Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transaction) {
     auto transfersNative = transaction->transfers();
     auto transfers = Nan::New<Array>(transfersNative.size());
@@ -77,7 +99,7 @@ Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transa
         trObj->Set(Nan::GetCurrentContext(),
                    Nan::New("amount").ToLocalChecked(),
                    convertAmount(transfer.amount));
-        
+
         trObj->Set(Nan::GetCurrentContext(),
                    Nan::New("tokenAmount").ToLocalChecked(),
                    convertAmount(transfer.token_amount));
@@ -242,7 +264,7 @@ NAN_METHOD(Wallet::RecoveryWallet) {
     }
 
     RecoveryWalletTask* task = new RecoveryWalletTask(walletArgs);
-    auto promise = task->Enqueue();    
+    auto promise = task->Enqueue();
     info.GetReturnValue().Set(promise);
 }
 
@@ -296,7 +318,12 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"createTransaction", CreateTransaction},
         {"signMessage", SignMessage},
         {"verifySignedMessage", VerifySignedMessage},
-        {"history", TransactionHistory}
+        {"history", TransactionHistory},
+        {"addressBook_GetAll", AddressBook_GetAll},
+        {"addressBook_AddRow", AddressBook_AddRow},
+        {"addressBook_DeleteRow", AddressBook_DeleteRow},
+        {"addressBook_ErrorString", AddressBook_ErrorString},
+        {"addressBook_LookupPID", AddressBook_LookupPID}
     };
 
     std::cout << "Wallet::Init" << std::endl;
@@ -373,7 +400,7 @@ NAN_METHOD(Wallet::Seed) {
     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
     auto buf = obj->wallet_->seed();
-    auto seed = Nan::New(buf.c_str()).ToLocalChecked(); 
+    auto seed = Nan::New(buf.c_str()).ToLocalChecked();
 
     info.GetReturnValue().Set(seed);
 }
@@ -731,5 +758,76 @@ NAN_METHOD(Wallet::VerifySignedMessage) {
 
     info.GetReturnValue().Set(valid);
 }
+
+NAN_METHOD(Wallet::AddressBook_GetAll) {
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+    auto addressBook = obj->wallet_->addressBook();
+    addressBook->refresh();
+    auto rows = addressBook->getAll();
+    auto result = Nan::New<Array>(rows.size());
+    for (size_t i = 0; i < rows.size(); ++i) {
+        const auto& row = rows[i];
+        auto rowObj = makeAddressBookRowInfoObject(row);
+
+        if (result->Set(Nan::GetCurrentContext(), i, rowObj).IsNothing()) {
+            Nan::ThrowError("Couldn't make row info list: unknown error");
+            return;
+        }
+    }
+
+    info.GetReturnValue().Set(result);
+}
+
+NAN_METHOD(Wallet::AddressBook_AddRow) {
+     if (info.Length() != 3  || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
+        Nan::ThrowTypeError("Function accepts address, payment ID and description");
+        return;
+     }
+
+     auto address = toStdString(info[0]);
+     auto paymentID = toStdString(info[1]);
+     auto description = toStdString(info[2]);
+
+     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+     bool valid = obj->wallet_->addressBook()->addRow(address, paymentID, description);
+
+     info.GetReturnValue().Set(valid);
+}
+
+NAN_METHOD(Wallet::AddressBook_DeleteRow) {
+     if (info.Length() != 1 || !info[0]->IsInt32() ) {
+        Nan::ThrowTypeError("Function accepts rowId");
+        return;
+     }
+
+     auto rowID = Nan::To<v8::Int32>(info[0]).ToLocalChecked()->Value();
+     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+     bool valid = obj->wallet_->addressBook()->deleteRow(rowID);
+     info.GetReturnValue().Set(valid);
+}
+
+NAN_METHOD(Wallet::AddressBook_ErrorString) {
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+    auto buf = obj->wallet_->addressBook()->errorString();
+    auto err = Nan::New(buf.c_str()).ToLocalChecked();
+
+    info.GetReturnValue().Set(err);
+}
+
+NAN_METHOD(Wallet::AddressBook_LookupPID) {
+    if (info.Length() != 1 || !info[0]->IsString() ) {
+        Nan::ThrowTypeError("Function accepts paymentID");
+        return;
+    }
+
+     auto paymentID = toStdString(info[0]);
+     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+     auto rowId = obj->wallet_->addressBook()->lookupPaymentID(paymentID);
+
+    info.GetReturnValue().Set(rowId);
+}
+
 
 } //namespace exawallet

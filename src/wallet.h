@@ -109,6 +109,12 @@ public:
     static NAN_METHOD(SignMessage);
     static NAN_METHOD(VerifySignedMessage);
 
+    // AddressBook methods
+    static NAN_METHOD(AddressBook_GetAll);
+    static NAN_METHOD(AddressBook_AddRow);
+    static NAN_METHOD(AddressBook_DeleteRow);
+    static NAN_METHOD(AddressBook_ErrorString);
+    static NAN_METHOD(AddressBook_LookupPID);
 
     static Nan::Persistent<v8::Function> constructor;
 
