@@ -16,6 +16,7 @@ namespace Safex {
   struct WinPendingTransaction;
   struct WinTransactionInfo;
   struct WinTransactionHistory;
+  struct WinAddressBookRow;
 }
 
 #endif

@@ -66,7 +66,7 @@ Local<String> convertAmount(uint64_t amount) {
     return Nan::New(std::to_string(amount).c_str()).ToLocalChecked();
 }
 
-Local<Object> makeAddressBookRowInfoObject(const SafexNativeAddressBookRow* row) {
+Local<Object> makeAddressBookRowInfoObject( SafexNativeAddressBookRow* row) {
     auto result = Nan::New<Object>();
     result->Set(Nan::GetCurrentContext(),
                     Nan::New("rowID").ToLocalChecked(),
@@ -103,10 +103,6 @@ Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transa
         trObj->Set(Nan::GetCurrentContext(),
                    Nan::New("tokenAmount").ToLocalChecked(),
                    convertAmount(transfer.token_amount));
-
-        trObj->Set(Nan::GetCurrentContext(),
-                   Nan::New("address").ToLocalChecked(),
-                   Nan::New(transfer.address.c_str()).ToLocalChecked());
 
         transfers->Set(Nan::GetCurrentContext(), i, trObj);
     }

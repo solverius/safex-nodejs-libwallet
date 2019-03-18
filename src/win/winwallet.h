@@ -39,6 +39,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <memory>
 #include <set>
 #include <ctime>
 
@@ -121,11 +122,49 @@ namespace Safex
   };
 
 
+  struct WinAddressBookRow {
+  public:
+    WinAddressBookRow(){}
+    WinAddressBookRow(uint32_t row_id, const std::string& addr, const std::string& pid, const std::string& desc)
+    : m_row_id(row_id), m_addr(addr), m_pid(pid), m_desc(desc){}
+    ~WinAddressBookRow(){}
+
+    inline uint32_t getRowId() { return m_row_id; }
+    inline std::string getAddress() { return m_addr; }
+    inline std::string getPaymentId() { return m_pid; }
+    inline std::string getDescription() { return m_desc; }
+
+  private:
+    uint32_t m_row_id;
+    std::string m_addr;
+    std::string m_pid;
+    std::string m_desc;
+  };
+
   struct WinWallet
   {
+    // This class is intended as a wrapper around addressbook calls.
+    // Main reason is to satisfy same API and usage as original safex wallet_api classes on *nix platforms.
+    class WinAddressBook {
+      public:
+        WinAddressBook(void* wlt) : m_wlt(wlt) {}
+        inline void refresh() {} // This is done on safexcore side for windows wrapper during getAll call.
+        std::vector<WinAddressBookRow*> getAll();
+        bool addRow(const std::string& addr, const std::string& pid, const std::string& desc);
+        bool deleteRow(uint32_t row_id);
+        std::string errorString();
+        int32_t lookupPaymentID(const std::string& pid);
+      private:
+        // Prevent memory leak
+        void cleanRows();
+
+        std::vector<WinAddressBookRow*> m_rows;
+        void* m_wlt;
+    };
+
     friend class WinWalletManager;
 
-    WinWallet(void *self_):m_innerPtr{self_} {}
+    WinWallet(void *self_):m_innerPtr{self_}, m_addressBook{std::make_unique<WinAddressBook>(self_)} {}
 
     virtual ~WinWallet();
     virtual std::string seed() const;
@@ -187,10 +226,13 @@ namespace Safex
     virtual void rescanBlockchainAsync();
 
     virtual void setSeedLanguage(const std::string &seedLanguage);
+    virtual WinAddressBook* addressBook();
 
   private:
     void *m_innerPtr;
     void *m_nativeListenerPtr;
+    WinTransactionHistory * m_history;
+    std::unique_ptr<WinAddressBook> m_addressBook;
   };
 
 }

@@ -106,16 +106,13 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     memcpy(&transfer_len, buffer, sizeof(uint32_t));
     offset += sizeof(uint32_t);
     for(uint32_t i = 0; i < transfer_len; ++i) {
-      uint32_t addr_len = 0;
       uint64_t amount;
       uint64_t token_amount;
       std::string addr;
       memcpy(&(amount), buffer+offset, sizeof(uint64_t));
       offset += sizeof(uint64_t);
       memcpy(&(token_amount), buffer+offset, sizeof(uint64_t));
-      offset += sizeof(uint64_t);
-      addr = std::string(buffer+offset);
-      offset += addr.size() + 1;
+      offset += sizeof(uint64_t) +1;
 
       ret.emplace_back(amount, token_amount, addr);
     }
@@ -294,7 +291,11 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   WinTransactionHistory *WinWallet::history()
   {
-    return new WinTransactionHistory(win_history(m_innerPtr));
+    if(m_history == nullptr){
+      m_history = new WinTransactionHistory(win_history(m_innerPtr));
+    }
+
+    return m_history;
   }
 
   Safex::Wallet::ConnectionStatus WinWallet::connected() const
@@ -422,5 +423,62 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     win_setSeedLanguage(m_innerPtr, seedLanguage.c_str());
   }
 
+  WinWallet::WinAddressBook* WinWallet::addressBook() { return this->m_addressBook.get(); }
 
+  std::vector<WinAddressBookRow*> WinWallet::WinAddressBook::getAll() {
+    std::string data {win_addrbook_get_all(m_wlt)};
+    m_rows.clear();
+
+    std::string delimeter{"$@"};
+    size_t last = 0;
+    size_t curr = 0;
+    while((curr = data.find(delimeter, last)) != std::string::npos) {
+      uint32_t rowid = std::stoi(std::string{data.begin()+last, data.begin()+curr});
+      last = curr + delimeter.size();
+      curr = data.find(delimeter, last);
+      
+      std::string addr {data.begin()+last, data.begin()+curr};
+      last = curr + delimeter.size();
+      curr = data.find(delimeter, last);
+      
+      std::string pid {data.begin()+last, data.begin()+curr};
+      last = curr + delimeter.size();
+      curr = data.find(delimeter, last);
+      
+      std::string desc {data.begin()+last, data.begin()+curr};
+      last = curr + delimeter.size();
+
+      m_rows.push_back(new WinAddressBookRow(rowid, addr, pid,  desc));
+    }
+
+    return m_rows;
+
+  }
+
+  bool WinWallet::WinAddressBook::addRow(const std::string& addr, const std::string& pid, const std::string& desc) {
+    return static_cast<bool>(win_addrbook_add_row(m_wlt, addr.c_str(), pid.c_str(), desc.c_str()));
+  }
+  
+  bool WinWallet::WinAddressBook::deleteRow(uint32_t row_id) {
+    return static_cast<bool>(win_addrbook_del_row(m_wlt, row_id));
+  }
+  
+  std::string WinWallet::WinAddressBook::errorString() {
+    return std::string{win_addrbook_err_str(m_wlt)};
+  }
+  
+  int32_t WinWallet::WinAddressBook::lookupPaymentID(const std::string& pid){
+    return win_addrbook_look_for_pid(m_wlt, pid.c_str());
+  }
+
+  void WinWallet::WinAddressBook::cleanRows() {
+    if (m_rows.empty()) {
+      return;
+    }
+    else {
+      for (auto ptr : m_rows) {
+        delete ptr;
+      }
+    }
+  }
 }
