@@ -17,39 +17,39 @@ void Wallet::refreshed() {
 }
 
 void Wallet::moneySpent(const std::string& tx, uint64_t amount) {
-    AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "moneySpent");
-    async->param = TransactionAmount{tx, std::to_string(amount)};
-    async->Enqueue();
+    // AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "moneySpent");
+    // async->param = TransactionAmount{tx, std::to_string(amount)};
+    // async->Enqueue();
 }
 
 void Wallet::moneyReceived(const std::string& tx, uint64_t amount) {
-    AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "moneyReceived");
-    async->param = TransactionAmount{tx, std::to_string(amount)};
-    async->Enqueue();
+    // AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "moneyReceived");
+    // async->param = TransactionAmount{tx, std::to_string(amount)};
+    // async->Enqueue();
 }
 
 void Wallet::unconfirmedMoneyReceived(const std::string& tx, uint64_t amount) {
-    AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "unconfirmedMoneyReceived");
-    async->param = TransactionAmount{tx, std::to_string(amount)};
-    async->Enqueue();
+    // AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "unconfirmedMoneyReceived");
+    // async->param = TransactionAmount{tx, std::to_string(amount)};
+    // async->Enqueue();
 }
 
 void Wallet::tokensSpent(const std::string& tx, uint64_t token_amount) {
-  AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "tokensSpent");
-  async->param = TransactionAmount{tx, std::to_string(token_amount)};
-  async->Enqueue();
+  // AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "tokensSpent");
+  // async->param = TransactionAmount{tx, std::to_string(token_amount)};
+  // async->Enqueue();
 }
 
 void Wallet::tokensReceived(const std::string &tx, uint64_t token_amount) {
-  AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "tokensReceived");
-  async->param = TransactionAmount{tx, std::to_string(token_amount)};
-  async->Enqueue();
+  // AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "tokensReceived");
+  // async->param = TransactionAmount{tx, std::to_string(token_amount)};
+  // async->Enqueue();
 }
 
 void Wallet::unconfirmedTokensReceived(const std::string &tx, uint64_t token_amount) {
-  AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "unconfirmedTokensReceived");
-  async->param = TransactionAmount{tx, std::to_string(token_amount)};
-  async->Enqueue();
+  // AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "unconfirmedTokensReceived");
+  // async->param = TransactionAmount{tx, std::to_string(token_amount)};
+  // async->Enqueue();
 }
 
 void Wallet::updated() {

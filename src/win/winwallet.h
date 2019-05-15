@@ -32,8 +32,6 @@
 #ifndef SAFEX_NODEJS_LIBWALLET_WINWALLET_H
 #define SAFEX_NODEJS_LIBWALLET_WINWALLET_H
 
-
-
 #pragma once
 
 #include <cstdint>
@@ -164,7 +162,7 @@ namespace Safex
 
     friend class WinWalletManager;
 
-    WinWallet(void *self_):m_innerPtr{self_}, m_addressBook{std::make_unique<WinAddressBook>(self_)} {}
+    WinWallet(void *self_):m_innerPtr{self_}, m_addressBook{std::make_unique<WinAddressBook>(self_)}, m_history(nullptr) {}
 
     virtual ~WinWallet();
     virtual std::string seed() const;
