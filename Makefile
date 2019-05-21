@@ -28,7 +28,7 @@ ${BOOST_DIRNAME}.tar.bz2:
             http://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/${BOOST_DIRNAME}.tar.bz2/download
 
 ${BOOST_DIRNAME}: ${BOOST_DIRNAME}.tar.bz2
-	tar xf ${BOOST_DIRNAME}.tar.bz2
+	tar -xf ${BOOST_DIRNAME}.tar.bz2
 	cd ${BOOST_DIRNAME} && ./bootstrap.sh --with-libraries=${BOOST_LIBS}
 
 boost: ${BOOST_DIRNAME}
@@ -55,7 +55,7 @@ safexcore/build: boost safexcore
 	  -DBUILD_WIN_WALLET_WRAPPER=ON -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps ..
 	cd safexcore/build && make -j${THREADS}
 	cp safexcore/build/src/wallet/api/win_wrapper/libwin_wallet_wrapper.* ${PWD}/deps
-	cd deps &&  '/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.14.26428/bin/Hostx64/x64/lib.exe' /machine:x64 /def:libwin_wallet_wrapper.def
+	cd deps &&  '${PWD}/lib.exe' /machine:x64 /def:libwin_wallet_wrapper.def
 		
 else
 #linux, mac
