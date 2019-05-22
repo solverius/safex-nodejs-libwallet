@@ -60,9 +60,6 @@ safexcore/build: boost safexcore
 else
 #linux, mac
 safexcore/build: boost safexcore
-	ifndef LIB_EXE_PATH
-		$(ERROR Ther is no LIB_EXE_PATH set)
-	endif
 	mkdir -p safexcore/build
 	mkdir -p deps
 	cd safexcore/build && cmake -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON \
