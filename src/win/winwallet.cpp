@@ -9,11 +9,11 @@
 #include "winwalletlistener.h"
 #include "winpendingtransaction.h"
 
-
 namespace Safex {
 
 WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount, const std::string &_address)
-    : amount(_amount), token_amount(_token_amount), address(_address) {}
+    : amount(_amount), token_amount(_token_amount), address(_address) {
+    }
 
 
   WinTransactionInfo::~WinTransactionInfo()
@@ -101,7 +101,6 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     std::vector<WinTransactionInfo::Transfer> ret;
     char* buffer = ::win_txinfo_transfers(m_innerPtr);
     uint32_t offset = 0;
-
     uint32_t transfer_len;
     memcpy(&transfer_len, buffer, sizeof(uint32_t));
     offset += sizeof(uint32_t);
@@ -154,6 +153,8 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     uint32_t size = 0;
     void** results = win_txhist_getAll(m_innerPtr, &size);
 
+    if(size >= 4095) size = 4095;
+
     for(uint32_t i = 0; i < size; ++i) {
       ret.push_back(new WinTransactionInfo(results[i]));
     }
@@ -168,7 +169,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   WinWallet::~WinWallet()
   {
-
+    
   }
 
   std::string WinWallet::seed() const
@@ -183,9 +184,6 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   std::string WinWallet::address(uint32_t accountIndex, uint32_t addressIndex) const
   {
-//    const char *value = ;
-//    std::string retValue{value};
-//    return retValue;
     return std::string(win_address(m_innerPtr));
   }
 
@@ -241,12 +239,12 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   void WinWallet::segregatePreForkOutputs(bool segregate)
   {
-      win_segregatePreForkOutputs(m_innerPtr, static_cast<uint8_t>(segregate));
+    win_segregatePreForkOutputs(m_innerPtr, static_cast<uint8_t>(segregate));
   }
 
   void WinWallet::keyReuseMitigation2(bool mitigation)
   {
-      win_keyReuseMitigation2(m_innerPtr, mitigation);
+    win_keyReuseMitigation2(m_innerPtr, mitigation);
   }
 
   uint64_t WinWallet::getRefreshFromBlockHeight() const
@@ -295,7 +293,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
       m_history = new WinTransactionHistory(win_history(m_innerPtr));
     }
 
-    return m_history;
+     return m_history;
   }
 
   Safex::Wallet::ConnectionStatus WinWallet::connected() const
@@ -396,7 +394,7 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
 
   void WinWallet::refreshAsync()
   {
-
+    
   }
 
   void WinWallet::setRefreshFromBlockHeight(uint64_t refresh_from_block_height)
@@ -423,7 +421,9 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     win_setSeedLanguage(m_innerPtr, seedLanguage.c_str());
   }
 
-  WinWallet::WinAddressBook* WinWallet::addressBook() { return this->m_addressBook.get(); }
+  WinWallet::WinAddressBook* WinWallet::addressBook() { 
+    return this->m_addressBook.get(); 
+  }
 
   std::vector<WinAddressBookRow*> WinWallet::WinAddressBook::getAll() {
     std::string data {win_addrbook_get_all(m_wlt)};
@@ -452,7 +452,6 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     }
 
     return m_rows;
-
   }
 
   bool WinWallet::WinAddressBook::addRow(const std::string& addr, const std::string& pid, const std::string& desc) {

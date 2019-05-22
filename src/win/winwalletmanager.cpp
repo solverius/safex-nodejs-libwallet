@@ -11,7 +11,6 @@
 #include <windows_wrapper.h>
 
 
-
 namespace Safex
 {
 
@@ -29,7 +28,6 @@ namespace Safex
 
   SafexNativeWallet *WinWalletManager::recoveryWallet(const std::string &path, const std::string &password, const std::string &mnemonic, NetworkType nettype, uint64_t restoreHeight)
   {
-
     WinWallet *nativeWallet = new WinWallet(win_mng_recoveryWallet(m_innerPtr, path.c_str(), password.c_str(), mnemonic.c_str(), static_cast<uint32_t>(nettype), restoreHeight));
     return nativeWallet;
   }
@@ -76,7 +74,6 @@ namespace Safex
 
   void WinWalletManager::setDaemonAddress(const std::string &address)
   {
-
   }
 
   bool WinWalletManager::connected(uint32_t *version)

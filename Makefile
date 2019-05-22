@@ -4,6 +4,7 @@ SAFEX_BUILD_TYPE?=Debug
 BOOST_VERSION=1.66.0
 BOOST_DIRNAME=boost_1_66_0
 
+
 PWD=${shell pwd}
 BOOST_LIBS=chrono,date_time,filesystem,program_options,regex,serialization,system,thread,locale
 THREADS?=6
@@ -27,7 +28,7 @@ ${BOOST_DIRNAME}.tar.bz2:
             http://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/${BOOST_DIRNAME}.tar.bz2/download
 
 ${BOOST_DIRNAME}: ${BOOST_DIRNAME}.tar.bz2
-	tar xf ${BOOST_DIRNAME}.tar.bz2
+	tar -xf ${BOOST_DIRNAME}.tar.bz2
 	cd ${BOOST_DIRNAME} && ./bootstrap.sh --with-libraries=${BOOST_LIBS}
 
 boost: ${BOOST_DIRNAME}
@@ -40,7 +41,7 @@ deps: boost safexcore/build
 	cp boost/lib/*.a deps
 
 safexcore:
-	git clone --depth 1 --recurse-submodules -b ${SAFEX_BRANCH} https://github.com/safex/safexcore
+	git clone --depth 1 --recurse-submodules -b ${SAFEX_BRANCH} https://github.com/StefanIsidorovic/safexcore
 	cp safexcore/src/wallet/api/wallet_api.h include
 	
 ifeq ($(OS),Windows_NT)
@@ -54,10 +55,14 @@ safexcore/build: boost safexcore
 	  -DBUILD_WIN_WALLET_WRAPPER=ON -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps ..
 	cd safexcore/build && make -j${THREADS}
 	cp safexcore/build/src/wallet/api/win_wrapper/libwin_wallet_wrapper.* ${PWD}/deps
-	cd deps && '/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Tools/MSVC/14.16.27023/bin/Hostx86/x86/lib.exe' /machine:x64 /def:libwin_wallet_wrapper.def
+	cd deps &&  '${PWD}/lib.exe' /machine:x64 /def:libwin_wallet_wrapper.def
+		
 else
 #linux, mac
 safexcore/build: boost safexcore
+	ifndef LIB_EXE_PATH
+		$(ERROR Ther is no LIB_EXE_PATH set)
+	endif
 	mkdir -p safexcore/build
 	mkdir -p deps
 	cd safexcore/build && cmake -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON \

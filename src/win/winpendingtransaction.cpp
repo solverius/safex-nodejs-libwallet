@@ -7,11 +7,12 @@
 #include <cstring>
 
 #include "winpendingtransaction.h"
+#include "winpendingtransaction.h"
 
 namespace Safex
 {
 
-    WinPendingTransaction::WinPendingTransaction(void* ptr) : m_innerPtr(ptr) {
+  WinPendingTransaction::WinPendingTransaction(void* ptr) : m_innerPtr(ptr) {
 
   }
 
@@ -56,15 +57,19 @@ namespace Safex
   }
 
   std::vector<std::string> WinPendingTransaction::txid() const
-  {
+  { 
     char* results = ::win_pt_txid(m_innerPtr);
     char* temp = results;
     std::vector<std::string> ret;
+    uint64_t txid_size = 0;
     while(temp[0] != 0) {
+      if(txid_size >= 6 * 1024 * 1024 -64) break;
+      
       unsigned char txid[64];
       memmove((void *)txid, (void *)temp, 64);
       ret.push_back(std::string((char*)txid));
       temp+=64;
+      txid_size+=64;
     }
 
     return ret;

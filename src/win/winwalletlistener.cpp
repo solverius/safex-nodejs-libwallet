@@ -7,7 +7,6 @@
 #include <winwalletlistener.h>
 
 #include <windows_wrapper.h>
-
 namespace Safex
 {
 
@@ -67,6 +66,12 @@ namespace Safex
   void WinWalletListenerProxy::refreshed(void *target)
   {
     WinWalletListener *sink = static_cast<WinWalletListener *>(target);
+    if(sink != nullptr) {
+      std::cout << "sink is not nullptr" << std::endl;
+    }
+    else {
+      std::cout << "sink is  nullptr" << std::endl;
+    }
     sink->refreshed();
   }
 

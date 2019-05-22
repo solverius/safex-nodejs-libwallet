@@ -89,41 +89,30 @@ Local<Object> makeAddressBookRowInfoObject( SafexNativeAddressBookRow* row) {
 }
 
 Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transaction) {
-    auto transfersNative = transaction->transfers();
-    auto transfers = Nan::New<Array>(transfersNative.size());
 
-    for (size_t i = 0; i < transfersNative.size(); ++i) {
-        const auto& transfer = transfersNative[i];
+    // auto transfersNative = transaction->transfers();
+    // auto transfers = Nan::New<Array>(transfersNative.size());
 
-        auto trObj = Nan::New<Object>();
-        trObj->Set(Nan::GetCurrentContext(),
-                   Nan::New("amount").ToLocalChecked(),
-                   convertAmount(transfer.amount));
+    // for (size_t i = 0; i < transfersNative.size(); ++i) {
+    //     const auto& transfer = transfersNative[i];
 
-        trObj->Set(Nan::GetCurrentContext(),
-                   Nan::New("tokenAmount").ToLocalChecked(),
-                   convertAmount(transfer.token_amount));
+    //     auto trObj = Nan::New<Object>();
+    //     trObj->Set(Nan::GetCurrentContext(),
+    //                Nan::New("amount").ToLocalChecked(),
+    //                convertAmount(transfer.amount));
 
-        transfers->Set(Nan::GetCurrentContext(), i, trObj);
-    }
+    //     trObj->Set(Nan::GetCurrentContext(),
+    //                Nan::New("tokenAmount").ToLocalChecked(),
+    //                convertAmount(transfer.token_amount));
+
+    //     transfers->Set(Nan::GetCurrentContext(), i, trObj);
+    // }
 
     auto result = Nan::New<Object>();
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("transfers").ToLocalChecked(),
-                transfers);
+    // result->Set(Nan::GetCurrentContext(),
+    //             Nan::New("transfers").ToLocalChecked(),
+    //             transfers);
 
-    auto subaddrsNative = transaction->subaddrIndex();
-    auto subaddrs = Nan::New<Array>(subaddrsNative.size());
-    size_t subaddrIndex = 0;
-    for (const auto& subaddr: subaddrsNative) {
-        subaddrs->Set(Nan::GetCurrentContext(),
-                      subaddrIndex++,
-                      Nan::New((uint32_t)subaddr));
-    }
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("subAddresses").ToLocalChecked(),
-                subaddrs);
 
     const char* direction = transaction->direction() == Safex::TransactionInfo::Direction_In ? "in" : "out";
     result->Set(Nan::GetCurrentContext(),
@@ -691,6 +680,9 @@ NAN_METHOD(Wallet::TransactionHistory) {
     auto result = Nan::New<Array>(transactions.size());
     for (size_t i = 0; i < transactions.size(); ++i) {
         const auto& transaction = transactions[i];
+
+        if(transaction == nullptr) continue;
+        
         auto txObj = makeTransactionInfoObject(transaction);
 
         if (result->Set(Nan::GetCurrentContext(), i, txObj).IsNothing()) {
