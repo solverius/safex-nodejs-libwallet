@@ -13,38 +13,32 @@ namespace Safex
 
   void WinWalletListenerProxy::moneySpent(void *target, const char *txId, uint64_t amount)
   {
-    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
-    sink->moneySpent((txId), amount);
+    return;
   }
 
   void WinWalletListenerProxy::moneyReceived(void *target, const char *txId, uint64_t amount)
   {
-    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
-    sink->moneyReceived((txId), amount);
+    return;
   }
 
   void WinWalletListenerProxy::unconfirmedMoneyReceived(void *target, const char *txId, uint64_t amount)
   {
-    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
-    sink->unconfirmedMoneyReceived(std::string(txId), amount);
+    return;
   }
 
   void WinWalletListenerProxy::tokensSpent(void *target, const char *txId, uint64_t token_amount)
   {
-    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
-    sink->tokensSpent(std::string(txId), token_amount);
+    return;
   }
 
   void WinWalletListenerProxy::tokensReceived(void *target, const char *txId, uint64_t token_amount)
   {
-    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
-    sink->tokensReceived(std::string(txId), token_amount);
+   return;
   }
 
   void WinWalletListenerProxy::unconfirmedTokensReceived(void *target, const char *txId, uint64_t token_amount)
   {
-    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
-    sink->unconfirmedTokensReceived(std::string(txId), token_amount);
+    return;
   }
 
   void WinWalletListenerProxy::newBlock(void *target, uint64_t height)
@@ -59,8 +53,7 @@ namespace Safex
 
   void WinWalletListenerProxy::updated(void *target)
   {
-    WinWalletListener *sink = static_cast<WinWalletListener *>(target);
-    sink->updated();
+   return;
   }
 
   void WinWalletListenerProxy::refreshed(void *target)
