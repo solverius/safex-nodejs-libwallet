@@ -63,10 +63,11 @@ namespace Safex
     std::vector<std::string> ret;
     uint64_t txid_size = 0;
     while(temp[0] != 0) {
-      if(txid_size >= 6 * 1024 * 1024 -64) break;
+      if(txid_size >= 256 * 1024 -64) break;
       
-      unsigned char txid[64];
+      unsigned char txid[65];
       memmove((void *)txid, (void *)temp, 64);
+      txid[64] = '\0';
       ret.push_back(std::string((char*)txid));
       temp+=64;
       txid_size+=64;

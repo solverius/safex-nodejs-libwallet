@@ -105,6 +105,9 @@ WinTransactionInfo::Transfer::Transfer(uint64_t _amount, uint64_t _token_amount,
     memcpy(&transfer_len, buffer, sizeof(uint32_t));
     offset += sizeof(uint32_t);
     for(uint32_t i = 0; i < transfer_len; ++i) {
+      if(offset >= 2047*1024+sizeof(uint32_t)) {
+        break;
+      }
       uint64_t amount;
       uint64_t token_amount;
       std::string addr;
