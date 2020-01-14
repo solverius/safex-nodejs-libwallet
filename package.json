@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/safex/safex-nodejs-libwallet.git"
+    "url": "git+https://github.com/ddabek/safex-nodejs-libwallet.git"
   },
   "keywords": [
     "Safex",
@@ -25,7 +25,7 @@
   ],
   "license": "LGPL-3.0-or-later",
   "gypfile": true,
-  "homepage": "https://github.com/safex/safex-nodejs-libwallet#readme",
+  "homepage": "https://github.com/ddabek/safex-nodejs-libwallet#readme",
   "engines": {
     "node": "10"
   },
@@ -47,7 +47,7 @@
     "module_name": "safex",
     "module_path": "./lib/binding/",
     "remote_path": "{version}",
-    "host": "https://github.com/safex/safex-nodejs-libwallet/releases/download/"
+    "host": "https://github.com/ddabek/safex-nodejs-libwallet/releases/download/"
   },
   "scripts": {
     "build": "node-pre-gyp configure build",
