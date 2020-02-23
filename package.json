@@ -27,9 +27,7 @@
   },
   "dependencies": {
     "nan": "^2.10.0",
-    "node-pre-gyp": "^0.14.0"
-  },
-  "devDependencies": {
+    "node-pre-gyp": "^0.14.0",
     "aws-sdk": "^2.244.1",
     "node-gyp": "^6.1.0",
     "rimraf": "^2.6.2",
