@@ -48,7 +48,7 @@ NAN_METHOD(SetupLog) {
         return;
     }
 
-    Nan::Utf8String filename(info[1]->ToString());
+    Nan::Utf8String filename(info[1]->ToString(context).ToLocalChecked());
     mlog_configure(*filename, false);
     mlog_set_log(configureString);
 }
