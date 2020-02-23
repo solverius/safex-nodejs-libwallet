@@ -19,10 +19,6 @@
     "wallet",
     "nodejs"
   ],
-  "author": "exantech",
-  "contributors": [
-    "Marko Atanasievski"
-  ],
   "license": "LGPL-3.0-or-later",
   "gypfile": true,
   "homepage": "https://github.com/ddabek/safex-nodejs-libwallet#readme",
@@ -35,7 +31,7 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.244.1",
-    "node-gyp": "^3.6.2",
+    "node-gyp": "^6.1.0",
     "rimraf": "^2.6.2",
     "tap": "^12.0.1"
   },
