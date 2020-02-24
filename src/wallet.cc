@@ -320,7 +320,8 @@ NAN_MODULE_INIT(Wallet::Init) {
     for (const auto& info: walletFunctions) {
         Nan::SetPrototypeMethod(tpl,info.name,info.func);
     }
-    constructor.Reset(tpl->GetFunction());
+    Local<Context> context = Nan::GetCurrentContext();
+    constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
 }
 
 v8::Local<v8::Object> Wallet::NewInstance(SafexNativeWallet *wallet) {
