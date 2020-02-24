@@ -365,8 +365,10 @@ NAN_METHOD(Wallet::Close)  {
         Nan::ThrowError("Function accepts one optional boolean argument");
         return;
     }
+    
+    Local<Context> context = Nan::GetCurrentContext();
 
-    bool store = info.Length() == 0 ? false : info[0]->ToBoolean()->Value();
+    bool store = info.Length() == 0 ? false : info[0]->ToBoolean()->Value(context).ToLocalChecked();
 
     CloseWalletTask* task = new CloseWalletTask(obj->wallet_, store);
     auto promise = task->Enqueue();
