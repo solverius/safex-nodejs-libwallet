@@ -42,13 +42,15 @@ NAN_METHOD(SetupLog) {
         mlog_set_log(configureString);
         return;
     }
+    
+    v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
 
     if (!info[1]->IsString()) {
         Nan::ThrowError("Filename argument is expected");
         return;
     }
 
-    Nan::Utf8String filename(info[1]->ToString());
+    Nan::Utf8String filename(info[1]->ToString(context).ToLocalChecked());
     mlog_configure(*filename, false);
     mlog_set_log(configureString);
 }

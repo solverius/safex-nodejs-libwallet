@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/safex/safex-nodejs-libwallet.git"
+    "url": "git+https://github.com/ddabek/safex-nodejs-libwallet.git"
   },
   "keywords": [
     "Safex",
@@ -19,23 +19,17 @@
     "wallet",
     "nodejs"
   ],
-  "author": "exantech",
-  "contributors": [
-    "Marko Atanasievski"
-  ],
   "license": "LGPL-3.0-or-later",
   "gypfile": true,
-  "homepage": "https://github.com/safex/safex-nodejs-libwallet#readme",
+  "homepage": "https://github.com/ddabek/safex-nodejs-libwallet#readme",
   "engines": {
-    "node": "10"
+    "node": "13"
   },
   "dependencies": {
-    "nan": "^2.10.0",
-    "node-pre-gyp": "^0.9.1"
-  },
-  "devDependencies": {
+    "nan": "^2.14.0",
+    "node-pre-gyp": "^0.14.0",
     "aws-sdk": "^2.244.1",
-    "node-gyp": "^3.6.2",
+    "node-gyp": "^6.1.0",
     "rimraf": "^2.6.2",
     "tap": "^12.0.1"
   },
@@ -47,7 +41,7 @@
     "module_name": "safex",
     "module_path": "./lib/binding/",
     "remote_path": "{version}",
-    "host": "https://github.com/safex/safex-nodejs-libwallet/releases/download/"
+    "host": "https://github.com/ddabek/safex-nodejs-libwallet/releases/download/"
   },
   "scripts": {
     "build": "node-pre-gyp configure build",
