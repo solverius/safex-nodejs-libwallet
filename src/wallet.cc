@@ -365,7 +365,7 @@ NAN_METHOD(Wallet::Close)  {
         Nan::ThrowError("Function accepts one optional boolean argument");
         return;
     }
-    bool store = info.Length() == 0 ? false : info[0]->ToBoolean(Isolate* isolate)->Value();
+    bool store = info.Length() == 0 ? false : info[0]->ToBoolean()->Value();
 
     CloseWalletTask* task = new CloseWalletTask(obj->wallet_, store);
     auto promise = task->Enqueue();
