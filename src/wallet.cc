@@ -399,7 +399,7 @@ NAN_METHOD(Wallet::SetSeedLanguage) {
             return;
         }
 
-    obj->wallet_->setSeedLanguage(toStdString(info[0]->ToString()));
+    obj->wallet_->setSeedLanguage(toStdString(Nan::To<v8::String>(info[0]).ToLocalChecked()));
 
     info.GetReturnValue().Set(info.Holder());
 }
