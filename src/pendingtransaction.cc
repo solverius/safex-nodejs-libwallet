@@ -40,7 +40,7 @@ NAN_MODULE_INIT(PendingTransaction::Init) {
         Nan::SetPrototypeMethod(tpl, info.name, info.func);
     }
 
-    constructor.Reset(tpl->GetFunction());
+    constructor.Reset(tpl->GetFunction(Nan::GetCurrentContext()).ToLocalChecked()));
 }
 
 NAN_METHOD(PendingTransaction::New) {
