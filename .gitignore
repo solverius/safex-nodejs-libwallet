@@ -2,7 +2,6 @@
 **/node_modules/**
 /lib
 /deps
-/monero
 /node_modules
 /build
 boost*

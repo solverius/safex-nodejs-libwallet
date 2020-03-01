@@ -64,6 +64,12 @@ safexcore/build: boost safexcore
 	mkdir -p deps
 	cd safexcore/build && cmake -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON \
 		-DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost \
+		-DProtobuf_USE_STATIC_LIBS=ON \
+		-DBUILD_SAFEX_PROTOBUF_RPC=ON \
+		-DARCH="x86-64" -D \
+		-DBUILD_64=ON -D \
+		-DCMAKE_BUILD_TYPE=release \
+		-DBUILD_TAG="mac-x64" \
 		-DCMAKE_BUILD_TYPE=${SAFEX_BUILD_TYPE} \
 		-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true \
 		-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps \
