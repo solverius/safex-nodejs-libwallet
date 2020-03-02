@@ -23,7 +23,7 @@
   "gypfile": true,
   "homepage": "https://github.com/ddabek/safex-nodejs-libwallet#readme",
   "engines": {
-    "node": "^12"
+    "node": "13.8"
   },
   "dependencies": {
     "nan": "^2.14.0",
