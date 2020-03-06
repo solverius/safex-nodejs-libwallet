@@ -41,7 +41,7 @@ deps: boost safexcore/build
 	cp boost/lib/*.a deps
 
 safexcore:
-	git clone --depth 1 --recurse-submodules https://github.com/ddabek/safexcore
+	git clone --depth 1 -b develop --recurse-submodules https://github.com/safex/safexcore
 	cp safexcore/src/wallet/api/wallet_api.h include
 	
 ifeq ($(OS),Windows_NT)
@@ -69,7 +69,6 @@ safexcore/build: boost safexcore
 		-DARCH="x86-64" -D \
 		-DBUILD_64=ON -D \
 		-DCMAKE_BUILD_TYPE=release \
-		-DBUILD_TAG="mac-x64" \
 		-DCMAKE_BUILD_TYPE=${SAFEX_BUILD_TYPE} \
 		-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true \
 		-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps \
