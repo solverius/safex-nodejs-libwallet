@@ -149,6 +149,7 @@
             "-lssl",
             "-lcrypto",
             "-lz",
+            "-lprotobuf",
             ""
           ],
           "include_dirs": [
