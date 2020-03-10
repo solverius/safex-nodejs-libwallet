@@ -41,7 +41,7 @@ deps: boost safexcore/build
 	cp boost/lib/*.a deps
 
 safexcore:
-	git clone --depth 1 -b develop --recurse-submodules https://github.com/safex/safexcore
+	git clone --depth 1 -b develop --recurse-submodules https://github.com/VanGrx/safexcore
 	cp safexcore/src/wallet/api/wallet_api.h include
 	
 ifeq ($(OS),Windows_NT)

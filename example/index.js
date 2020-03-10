@@ -27,7 +27,7 @@ var args = {
     'path': wallet_path,
  	'password': '123',
 	'network': "testnet",
- 	'daemonAddress': '192.168.1.22:29393',
+ 	'daemonAddress': '127.0.0.1:29393',
  	'restoreHeight': 0,
     'addressString':  'SFXtzU6Azx3N61CBXBK2KZBGUw2U3XQXKEZkSvBrfeczNvn6yXeWk4wXkNajNNe7xv1eeuH4rrrFiJMC5Ed1uN3GXt5vuDJkV3B',
     'viewKeyString':  'c135405a2f0e0b6302e0c2d0a5f056fbf7f37eaad7bf67769d6fa35d2a55e200',
@@ -72,6 +72,16 @@ promise
 		console.log("seed: " + w.seed());
 
 		wallet = w;
+
+		if (wallet) {
+			var r = wallet.createSafexAccount("test", "Test account",args["password"]);
+
+			if(r)
+				console.log("Created acccount test");
+			else
+				console.log("Didn't create account test");
+		}
+
 		wallet.on('newBlock', function (height) {
 			if(height-lastHeight>100) {
 				console.log("blockchain updated, height: " + height);

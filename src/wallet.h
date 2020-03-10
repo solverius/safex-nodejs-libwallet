@@ -106,6 +106,8 @@ public:
 
     static NAN_METHOD(CreateTransaction);
 
+    static NAN_METHOD(CreateSafexAccount);
+
     static NAN_METHOD(SignMessage);
     static NAN_METHOD(VerifySignedMessage);
 

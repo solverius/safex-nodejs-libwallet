@@ -301,6 +301,7 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"startRefresh", StartRefresh},
         {"pauseRefresh", PauseRefresh},
         {"createTransaction", CreateTransaction},
+        {"createSafexAccount", CreateSafexAccount},
         {"signMessage", SignMessage},
         {"verifySignedMessage", VerifySignedMessage},
         {"history", TransactionHistory},
@@ -707,6 +708,28 @@ NAN_METHOD(Wallet::CreateTransaction) {
     CreateTransactionTask* task = new CreateTransactionTask(txArgs, obj->wallet_);
     auto promise = task->Enqueue();
     info.GetReturnValue().Set(promise);
+}
+
+NAN_METHOD(Wallet::CreateSafexAccount) {
+
+    if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
+        Nan::ThrowTypeError("Function accepts string argument");
+        return;
+    }
+
+    auto username = toStdString(info[0]);
+    auto desc = toStdString(info[1]);
+    auto password = toStdString(info[2]);
+
+    auto description = std::vector<uint8_t>(desc.begin(),desc.end());
+
+     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+     auto res = obj->wallet_->createSafexAccount(username, description, password);
+
+
+    info.GetReturnValue().Set(Nan::New(res));
+
 }
 
 

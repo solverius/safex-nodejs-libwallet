@@ -91,6 +91,9 @@ declare namespace monero {
     on(event: 'refreshed' | 'updated', callback: () => void): Wallet;
     off(event?: WalletEvent): Wallet;
     store(): Promise<void>;
+    createSafexAccount(username: string,
+                       description: string,
+                       password: string): boolean;
     createTransaction(options: {
       address: string,
       amount: string,
