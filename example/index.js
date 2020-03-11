@@ -90,7 +90,13 @@ promise
 				console.log("Safex account secret key: " + accs[i].privateKey);
 			}
 
-			var acc = wallet.getSafexAccount("test");
+			r = wallet.recoverSafexAccount("saved","c6ddeb2996cf1c742e3dba0c53d1dd161c659a0a9b9baf87de8ce3dc0d43de0e",args["password"]);
+			if(r)
+				console.log("Safex account recovered");
+			else
+				console.log("Didn't recover safex account");
+
+			var acc = wallet.getSafexAccount("saved");
 
 			console.log("Safex account username: " + acc.username);
 			console.log("Safex account data: " 		   + acc.data);
