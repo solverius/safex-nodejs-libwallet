@@ -328,6 +328,7 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"getSafexAccounts", GetSafexAccounts},
         {"getSafexAccount", GetSafexAccount},
         {"recoverSafexAccount",RecoverSafexAccount},
+        {"removeSafexAccount",RemoveSafexAccount},
         {"signMessage", SignMessage},
         {"verifySignedMessage", VerifySignedMessage},
         {"history", TransactionHistory},
@@ -818,6 +819,22 @@ NAN_METHOD(Wallet::RecoverSafexAccount) {
 
     auto res = obj->wallet_->recoverSafexAccount(username, secret_key, password);
 
+
+    info.GetReturnValue().Set(Nan::New(res));
+
+}
+
+NAN_METHOD(Wallet::RemoveSafexAccount) {
+
+    if (info.Length() != 1 || !info[0]->IsString()) {
+        Nan::ThrowTypeError("Function accepts string argument");
+        return;
+    }
+
+    auto username = toStdString(info[0]);
+
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+    auto res = obj->wallet_->removeSafexAccount(username);
 
     info.GetReturnValue().Set(Nan::New(res));
 

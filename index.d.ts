@@ -1,5 +1,3 @@
-import {bool} from "aws-sdk/clients/signer";
-
 export = monero;
 export as namespace monero;
 
@@ -108,6 +106,7 @@ declare namespace monero {
     recoverSafexAccount(username: string,
                         secretKey: string,
                         password: string): boolean;
+    removeSafexAccount(username: string): boolean;
     createTransaction(options: {
       address: string,
       amount: string,

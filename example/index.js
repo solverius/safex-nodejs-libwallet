@@ -103,6 +103,21 @@ promise
 			console.log("Safex account public key: " + acc.publicKey);
 			console.log("Safex account secret key: " + acc.privateKey);
 
+			r = wallet.removeSafexAccount("test");
+			if(r)
+				console.log("Safex account removed");
+			else
+				console.log("Didn't remove safex account");
+
+			accs = wallet.getSafexAccounts();
+
+			for (i in accs){
+				console.log("Safex account " +i+" username: " + accs[i].username);
+				console.log("Safex account data: " 		   + accs[i].data);
+				console.log("Safex account public key: " + accs[i].publicKey);
+				console.log("Safex account secret key: " + accs[i].privateKey);
+			}
+
 		}
 
 		wallet.on('newBlock', function (height) {
