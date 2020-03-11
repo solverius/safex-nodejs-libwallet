@@ -102,6 +102,7 @@ declare namespace monero {
                        description: string,
                        password: string): boolean;
     getSafexAccounts(): SafexAccount[];
+    getSafexAccount(username: string): SafexAccount;
     createTransaction(options: {
       address: string,
       amount: string,

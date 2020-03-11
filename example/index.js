@@ -84,11 +84,18 @@ promise
 			var accs = wallet.getSafexAccounts();
 
 			for (i in accs){
-				console.log("Safex account username: " + accs[i].username);
+				console.log("Safex account " +i+" username: " + accs[i].username);
 				console.log("Safex account data: " 		   + accs[i].data);
 				console.log("Safex account public key: " + accs[i].publicKey);
 				console.log("Safex account secret key: " + accs[i].privateKey);
 			}
+
+			var acc = wallet.getSafexAccount("test");
+
+			console.log("Safex account username: " + acc.username);
+			console.log("Safex account data: " 		   + acc.data);
+			console.log("Safex account public key: " + acc.publicKey);
+			console.log("Safex account secret key: " + acc.privateKey);
 
 		}
 
