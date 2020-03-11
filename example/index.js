@@ -80,6 +80,16 @@ promise
 				console.log("Created acccount test");
 			else
 				console.log("Didn't create account test");
+
+			var accs = wallet.getSafexAccounts();
+
+			for (i in accs){
+				console.log("Safex account username: " + accs[i].username);
+				console.log("Safex account data: " 		   + accs[i].data);
+				console.log("Safex account public key: " + accs[i].publicKey);
+				console.log("Safex account secret key: " + accs[i].privateKey);
+			}
+
 		}
 
 		wallet.on('newBlock', function (height) {

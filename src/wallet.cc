@@ -174,6 +174,29 @@ Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transa
     return result;
 }
 
+Local<Object> makeSafexAccountObject(const SafexNativeSafexAccount& safexAccount) {
+
+    auto result = Nan::New<Object>();
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("username").ToLocalChecked(),
+                Nan::New(safexAccount.getUsername()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("data").ToLocalChecked(),
+                Nan::New(safexAccount.getData()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("publicKey").ToLocalChecked(),
+                Nan::New(safexAccount.getPubKey()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("privateKey").ToLocalChecked(),
+                Nan::New(safexAccount.getSecKey()).ToLocalChecked());
+
+    return result;
+}
+
 }
 
 Nan::Persistent<v8::Function> Wallet::constructor;
@@ -302,6 +325,7 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"pauseRefresh", PauseRefresh},
         {"createTransaction", CreateTransaction},
         {"createSafexAccount", CreateSafexAccount},
+        {"getSafexAccounts", GetSafexAccounts},
         {"signMessage", SignMessage},
         {"verifySignedMessage", VerifySignedMessage},
         {"history", TransactionHistory},
@@ -729,6 +753,34 @@ NAN_METHOD(Wallet::CreateSafexAccount) {
 
 
     info.GetReturnValue().Set(Nan::New(res));
+
+}
+
+NAN_METHOD(Wallet::GetSafexAccounts) {
+
+    if (info.Length() != 0) {
+        Nan::ThrowTypeError("Function accepts no arguments");
+        return;
+    }
+
+     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+    auto safexAccounts = obj->wallet_->getSafexAccounts();
+    auto result = Nan::New<Array>(safexAccounts.size());
+
+    for (size_t i = 0; i < safexAccounts.size(); ++i) {
+            const auto& safexAccount = safexAccounts[i];
+
+            auto safexAccountObj = makeSafexAccountObject(safexAccount);
+
+            if (result->Set(Nan::GetCurrentContext(), i, safexAccountObj).IsNothing()) {
+                Nan::ThrowError("Couldn't make safexAccount info list: unknown error");
+                return;
+            }
+        }
+
+
+    info.GetReturnValue().Set(result);
 
 }
 

@@ -39,6 +39,13 @@ declare namespace monero {
     total: number,
   };
 
+  type SafexAccount = {
+    username: string,
+    data: string,
+    publicKey: string,
+    privateKey: string,
+  };
+
   type Transaction = {
     commit(): Promise<void>;
     amount(): string;
@@ -94,6 +101,7 @@ declare namespace monero {
     createSafexAccount(username: string,
                        description: string,
                        password: string): boolean;
+    getSafexAccounts(): SafexAccount[];
     createTransaction(options: {
       address: string,
       amount: string,
