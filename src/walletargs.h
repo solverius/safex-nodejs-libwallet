@@ -69,4 +69,18 @@ struct CreateTransactionArgs {
     Safex::TransactionType tx_type;
 };
 
+struct CreateAdvancedTransactionArgs {
+    //returns error string
+    std::string Init(const Nan::FunctionCallbackInfo<v8::Value>& args);
+    static const uint32_t DEFAULT_MIXIN;
+
+    std::string address;
+    std::string safexUsername;
+    uint64_t amount;
+    std::string paymentId;
+    uint32_t mixin;
+    Safex::PendingTransaction::Priority priority = Safex::PendingTransaction::Priority_Low;
+    Safex::TransactionType tx_type;
+};
+
 }

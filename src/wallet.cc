@@ -324,6 +324,7 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"startRefresh", StartRefresh},
         {"pauseRefresh", PauseRefresh},
         {"createTransaction", CreateTransaction},
+        {"createAdvancedTransaction", CreateAdvancedTransaction},
         {"createSafexAccount", CreateSafexAccount},
         {"getSafexAccounts", GetSafexAccounts},
         {"getSafexAccount", GetSafexAccount},
@@ -733,6 +734,19 @@ NAN_METHOD(Wallet::CreateTransaction) {
     }
     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
     CreateTransactionTask* task = new CreateTransactionTask(txArgs, obj->wallet_);
+    auto promise = task->Enqueue();
+    info.GetReturnValue().Set(promise);
+}
+
+NAN_METHOD(Wallet::CreateAdvancedTransaction) {
+    CreateAdvancedTransactionArgs txArgs;
+    std::string error = txArgs.Init(info);
+    if (!error.empty()) {
+        Nan::ThrowError(error.c_str());
+        return;
+    }
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+    CreateAdvancedTransactionTask* task = new CreateAdvancedTransactionTask(txArgs, obj->wallet_);
     auto promise = task->Enqueue();
     info.GetReturnValue().Set(promise);
 }

@@ -51,7 +51,17 @@ enum NetworkType : uint8_t {
 enum class TransactionType {
   CashTransaction = 0,
   TokenTransaction = 1,
-  MigrationTransaction = 2
+  MigrationTransaction = 2,
+  StakeTokenTransaction = 3,
+  UnstakeTokenTransaction = 4,
+  PurchaseTransaction = 5,
+  CreateAccountTransaction = 6,
+  EditAccountTransaction = 7,
+  CreateOfferTransaction = 8,
+  EditOfferTransaction = 9,
+  FeedbackTransaction = 10,
+  CreatePricePegTransaction = 11,
+  UpdatePricePegTransaction = 12
 };
 
 namespace Utils {
@@ -108,6 +118,20 @@ struct PendingTransaction
     virtual uint64_t txCount() const = 0;
     virtual std::vector<uint32_t> subaddrAccount() const = 0;
     virtual std::vector<std::set<uint32_t>> subaddrIndices() const = 0;
+};
+
+struct AdvancedCommand{
+    TransactionType m_transaction_type;
+};
+
+
+struct CreateAccountCommand : public AdvancedCommand
+{
+public:
+    CreateAccountCommand():AdvancedCommand{TransactionType::CreateAccountTransaction}{}
+    CreateAccountCommand(const std::string& _username):AdvancedCommand{TransactionType::CreateAccountTransaction},m_username{_username}{}
+
+    std::string m_username;
 };
 
 /**
@@ -746,6 +770,10 @@ struct Wallet
      */
 
     virtual PendingTransaction * createSweepUnmixableTransaction() = 0;
+
+
+    virtual PendingTransaction * createAdvancedTransaction(const std::string &dst_addr, const std::string &payment_id, optional<uint64_t> value_amount, uint32_t mixin_count,
+                                                           PendingTransaction::Priority priority, uint32_t subaddr_account, std::set<uint32_t> subaddr_indices, AdvancedCommand& advancedCommnand) = 0;
 
    /*!
     * \brief loadUnsignedTx  - creates transaction from unsigned tx file

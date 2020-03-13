@@ -115,6 +115,15 @@ declare namespace monero {
       priority?:number,
       tx_type?: number
     }): Promise<Transaction>;
+    createAdvancedTransaction(options: {
+      address: string,
+      amount: string,
+      paymentId?: string,
+      mixin?: number,
+      priority?:number,
+      tx_type?: number,
+      safex_username?: string
+    }): Promise<Transaction>;
     history(): TransactionInfo[];
     path(): string;
     network(): Network;

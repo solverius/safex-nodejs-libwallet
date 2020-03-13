@@ -99,6 +99,19 @@ private:
     SafexNativeWallet* wallet_;
 };
 
+class CreateAdvancedTransactionTask: public DeferredTask {
+public:
+    CreateAdvancedTransactionTask(const CreateAdvancedTransactionArgs& args, SafexNativeWallet* wallet): args_(args), wallet_(wallet) {}
+
+    virtual std::string doWork() override;
+    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+
+private:
+    CreateAdvancedTransactionArgs args_;
+    SafexNativePendingTransaction* transaction_ = nullptr;
+    SafexNativeWallet* wallet_;
+};
+
 class CommitTransactionTask: public DeferredTask {
 public:
     CommitTransactionTask(SafexNativePendingTransaction* transaction): transaction_(transaction) {}

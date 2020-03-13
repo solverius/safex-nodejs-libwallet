@@ -170,6 +170,26 @@ Local<Value> CreateTransactionTask::afterWork(std::string& error) {
     return PendingTransaction::NewInstance(transaction_);
 }
 
+std::string CreateAdvancedTransactionTask::doWork() {
+    //std::cout << "CreateTransactionTask::doWork amount=" <<  args_.amount << " tx_type=" << static_cast<int>(args_.tx_type) << std::endl;
+
+    if(args_.tx_type==Safex::TransactionType::CreateAccountTransaction){
+        Safex::CreateAccountCommand s{args_.safexUsername};
+
+        transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
+            if (!wallet_->errorString().empty()) {
+                return wallet_->errorString();
+            }
+    } else
+        return "Bad tx type given";
+
+    return {};
+}
+
+Local<Value> CreateAdvancedTransactionTask::afterWork(std::string& error) {
+    return PendingTransaction::NewInstance(transaction_);
+}
+
 std::string CommitTransactionTask::doWork() {
     if (!transaction_->commit()) {
         return "Couldn't commit transaction: " + transaction_->errorString();

@@ -74,9 +74,19 @@ promise
 
 			if (!sent) {
 				sent = true;
-				wallet.createTransaction({
+
+				var r = wallet.createSafexAccount("test", "Test account",args["password"]);
+
+				if(r)
+					console.log("Created acccount test");
+				else
+					console.log("Didn't create account test");
+
+				wallet.createAdvancedTransaction({
 					'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
 					'amount': '1', //safex atomic units as string
+					'tx_type': '6',
+					'safex_username': 'test',
 				}).then((tx) => {
 					console.log("transaction created: " + tx.transactionsIds());
 					
