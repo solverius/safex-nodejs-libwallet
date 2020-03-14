@@ -10,6 +10,7 @@ using namespace v8;
 namespace exawallet {
 
 const uint32_t CreateTransactionArgs::DEFAULT_MIXIN = 6;
+const uint32_t CreateAdvancedTransactionArgs::DEFAULT_MIXIN = 6;
 
 template<typename T>
 T convertValue(Local<Value> value);
@@ -232,6 +233,35 @@ std::string CreateTransactionArgs::Init(const Nan::FunctionCallbackInfo<Value>& 
     if (!getRequiredProperty<std::string>(obj, "amount", amountStr)) {
         return std::string("Required property not found: amount");
     }
+    amount = std::stoull(amountStr);
+    paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
+    mixin = getOptionalProperty<uint32_t>(obj, "mixin", DEFAULT_MIXIN);
+    priority = static_cast<Safex::PendingTransaction::Priority>(getOptionalProperty<uint32_t>(obj, "priority",
+            static_cast<uint32_t>(Safex::PendingTransaction::Priority::Priority_Medium)));
+    tx_type = static_cast<Safex::TransactionType>(getOptionalProperty<uint32_t>(obj, "tx_type",
+            static_cast<uint32_t>(Safex::TransactionType::CashTransaction)));
+
+    return {};
+}
+
+std::string CreateAdvancedTransactionArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
+    if (args.Length() != 1 || !args[0]->IsObject()) {
+        return "Argument must be an object";
+    }
+
+    auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
+
+    if (!getRequiredProperty<std::string>(obj, "address", address)) {
+        return std::string("Required property not found: address");
+    }
+
+    std::string amountStr;
+    if (!getRequiredProperty<std::string>(obj, "amount", amountStr)) {
+        return std::string("Required property not found: amount");
+    }
+
+    safexUsername = getOptionalProperty<std::string>(obj, "safex_username", "");
+
     amount = std::stoull(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
     mixin = getOptionalProperty<uint32_t>(obj, "mixin", DEFAULT_MIXIN);

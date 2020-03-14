@@ -51,7 +51,17 @@ enum NetworkType : uint8_t {
 enum class TransactionType {
   CashTransaction = 0,
   TokenTransaction = 1,
-  MigrationTransaction = 2
+  MigrationTransaction = 2,
+  StakeTokenTransaction = 3,
+  UnstakeTokenTransaction = 4,
+  PurchaseTransaction = 5,
+  CreateAccountTransaction = 6,
+  EditAccountTransaction = 7,
+  CreateOfferTransaction = 8,
+  EditOfferTransaction = 9,
+  FeedbackTransaction = 10,
+  CreatePricePegTransaction = 11,
+  UpdatePricePegTransaction = 12
 };
 
 namespace Utils {
@@ -108,6 +118,20 @@ struct PendingTransaction
     virtual uint64_t txCount() const = 0;
     virtual std::vector<uint32_t> subaddrAccount() const = 0;
     virtual std::vector<std::set<uint32_t>> subaddrIndices() const = 0;
+};
+
+struct AdvancedCommand{
+    TransactionType m_transaction_type;
+};
+
+
+struct CreateAccountCommand : public AdvancedCommand
+{
+public:
+    CreateAccountCommand():AdvancedCommand{TransactionType::CreateAccountTransaction}{}
+    CreateAccountCommand(const std::string& _username):AdvancedCommand{TransactionType::CreateAccountTransaction},m_username{_username}{}
+
+    std::string m_username;
 };
 
 /**
@@ -195,6 +219,27 @@ struct TransactionHistory
     virtual TransactionInfo * transaction(const std::string &id) const = 0;
     virtual std::vector<TransactionInfo*> getAll() const = 0;
     virtual void refresh() = 0;
+};
+
+struct SafexAccount {
+public:
+    SafexAccount(){}
+    SafexAccount(std::string &usr, const std::string &_data, const std::string &_pub_key, const std::string &_sec_key):
+            username(usr),
+            data(_data),
+            pub_key(_pub_key),
+            sec_key(_sec_key) {}
+
+private:
+    std::string username;
+    std::string data;
+    std::string pub_key;
+    std::string sec_key;
+public:
+    std::string getUsername() const {return username;}
+    std::string getData() const {return data;}
+    std::string getPubKey() const {return pub_key;}
+    std::string getSecKey() const {return sec_key;}
 };
 
 /**
@@ -489,6 +534,15 @@ struct Wallet
     */
     virtual void setRefreshFromBlockHeight(uint64_t refresh_from_block_height) = 0;
 
+
+    virtual bool createSafexAccount(const std::string& username, const std::vector<uint8_t>& description, const std::string& password) = 0;
+
+    virtual std::vector<SafexAccount> getSafexAccounts() = 0;
+
+    virtual SafexAccount getSafexAccount(const std::string& username) = 0;
+    virtual bool recoverSafexAccount(const std::string& username, const std::string& private_key, const std::string& password) = 0;
+    virtual bool removeSafexAccount(const std::string& username) = 0;
+
    /*!
     * \brief getRestoreHeight - get wallet creation height
     *
@@ -716,6 +770,10 @@ struct Wallet
      */
 
     virtual PendingTransaction * createSweepUnmixableTransaction() = 0;
+
+
+    virtual PendingTransaction * createAdvancedTransaction(const std::string &dst_addr, const std::string &payment_id, optional<uint64_t> value_amount, uint32_t mixin_count,
+                                                           PendingTransaction::Priority priority, uint32_t subaddr_account, std::set<uint32_t> subaddr_indices, AdvancedCommand& advancedCommnand) = 0;
 
    /*!
     * \brief loadUnsignedTx  - creates transaction from unsigned tx file

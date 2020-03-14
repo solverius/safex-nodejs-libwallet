@@ -27,11 +27,11 @@ var args = {
     'path': wallet_path,
  	'password': '123',
 	'network': "testnet",
- 	'daemonAddress': '192.168.1.22:29393',
- 	'restoreHeight': 0,
-    'addressString':  'SFXtzU6Azx3N61CBXBK2KZBGUw2U3XQXKEZkSvBrfeczNvn6yXeWk4wXkNajNNe7xv1eeuH4rrrFiJMC5Ed1uN3GXt5vuDJkV3B',
-    'viewKeyString':  'c135405a2f0e0b6302e0c2d0a5f056fbf7f37eaad7bf67769d6fa35d2a55e200',
-    'spendKeyString':  '5270759c9602bef14a0f937f25cc84e4b599b5ab3e22ab874ceff7799ec69a03'
+ 	'daemonAddress': '127.0.0.1:29393',
+ 	'restoreHeight': 195000,
+    'addressString':  'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp',
+    'viewKeyString':  '15593dfcbd182ce6640700593ae2a9fa722ff1edd2acaba14be13b2c16916c0a',
+    'spendKeyString':  '1d60513005ed051dec31aa8d22dbd8f2c1bd6171d504aa485a487940ef49a10b'
 }
 
 if (!safex.walletExists(wallet_path)) {
@@ -72,6 +72,54 @@ promise
 		console.log("seed: " + w.seed());
 
 		wallet = w;
+
+		if (wallet) {
+			var r = wallet.createSafexAccount("test", "Test account",args["password"]);
+
+			if(r)
+				console.log("Created acccount test");
+			else
+				console.log("Didn't create account test");
+
+			var accs = wallet.getSafexAccounts();
+
+			for (i in accs){
+				console.log("Safex account " +i+" username: " + accs[i].username);
+				console.log("Safex account data: " 		   + accs[i].data);
+				console.log("Safex account public key: " + accs[i].publicKey);
+				console.log("Safex account secret key: " + accs[i].privateKey);
+			}
+
+			r = wallet.recoverSafexAccount("saved","c6ddeb2996cf1c742e3dba0c53d1dd161c659a0a9b9baf87de8ce3dc0d43de0e",args["password"]);
+			if(r)
+				console.log("Safex account recovered");
+			else
+				console.log("Didn't recover safex account");
+
+			var acc = wallet.getSafexAccount("saved");
+
+			console.log("Safex account username: " + acc.username);
+			console.log("Safex account data: " 		   + acc.data);
+			console.log("Safex account public key: " + acc.publicKey);
+			console.log("Safex account secret key: " + acc.privateKey);
+
+			r = wallet.removeSafexAccount("test");
+			if(r)
+				console.log("Safex account removed");
+			else
+				console.log("Didn't remove safex account");
+
+			accs = wallet.getSafexAccounts();
+
+			for (i in accs){
+				console.log("Safex account " +i+" username: " + accs[i].username);
+				console.log("Safex account data: " 		   + accs[i].data);
+				console.log("Safex account public key: " + accs[i].publicKey);
+				console.log("Safex account secret key: " + accs[i].privateKey);
+			}
+
+		}
+
 		wallet.on('newBlock', function (height) {
 			if(height-lastHeight>100) {
 				console.log("blockchain updated, height: " + height);

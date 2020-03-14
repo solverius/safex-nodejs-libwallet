@@ -174,6 +174,29 @@ Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transa
     return result;
 }
 
+Local<Object> makeSafexAccountObject(const SafexNativeSafexAccount& safexAccount) {
+
+    auto result = Nan::New<Object>();
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("username").ToLocalChecked(),
+                Nan::New(safexAccount.getUsername()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("data").ToLocalChecked(),
+                Nan::New(safexAccount.getData()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("publicKey").ToLocalChecked(),
+                Nan::New(safexAccount.getPubKey()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("privateKey").ToLocalChecked(),
+                Nan::New(safexAccount.getSecKey()).ToLocalChecked());
+
+    return result;
+}
+
 }
 
 Nan::Persistent<v8::Function> Wallet::constructor;
@@ -301,6 +324,12 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"startRefresh", StartRefresh},
         {"pauseRefresh", PauseRefresh},
         {"createTransaction", CreateTransaction},
+        {"createAdvancedTransaction", CreateAdvancedTransaction},
+        {"createSafexAccount", CreateSafexAccount},
+        {"getSafexAccounts", GetSafexAccounts},
+        {"getSafexAccount", GetSafexAccount},
+        {"recoverSafexAccount",RecoverSafexAccount},
+        {"removeSafexAccount",RemoveSafexAccount},
         {"signMessage", SignMessage},
         {"verifySignedMessage", VerifySignedMessage},
         {"history", TransactionHistory},
@@ -707,6 +736,122 @@ NAN_METHOD(Wallet::CreateTransaction) {
     CreateTransactionTask* task = new CreateTransactionTask(txArgs, obj->wallet_);
     auto promise = task->Enqueue();
     info.GetReturnValue().Set(promise);
+}
+
+NAN_METHOD(Wallet::CreateAdvancedTransaction) {
+    CreateAdvancedTransactionArgs txArgs;
+    std::string error = txArgs.Init(info);
+    if (!error.empty()) {
+        Nan::ThrowError(error.c_str());
+        return;
+    }
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+    CreateAdvancedTransactionTask* task = new CreateAdvancedTransactionTask(txArgs, obj->wallet_);
+    auto promise = task->Enqueue();
+    info.GetReturnValue().Set(promise);
+}
+
+NAN_METHOD(Wallet::CreateSafexAccount) {
+
+    if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
+        Nan::ThrowTypeError("Function accepts string argument");
+        return;
+    }
+
+    auto username = toStdString(info[0]);
+    auto desc = toStdString(info[1]);
+    auto password = toStdString(info[2]);
+
+    auto description = std::vector<uint8_t>(desc.begin(),desc.end());
+
+     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+     auto res = obj->wallet_->createSafexAccount(username, description, password);
+
+
+    info.GetReturnValue().Set(Nan::New(res));
+
+}
+
+NAN_METHOD(Wallet::GetSafexAccounts) {
+
+    if (info.Length() != 0) {
+        Nan::ThrowTypeError("Function accepts no arguments");
+        return;
+    }
+
+     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+    auto safexAccounts = obj->wallet_->getSafexAccounts();
+    auto result = Nan::New<Array>(safexAccounts.size());
+
+    for (size_t i = 0; i < safexAccounts.size(); ++i) {
+            const auto& safexAccount = safexAccounts[i];
+
+            auto safexAccountObj = makeSafexAccountObject(safexAccount);
+
+            if (result->Set(Nan::GetCurrentContext(), i, safexAccountObj).IsNothing()) {
+                Nan::ThrowError("Couldn't make safexAccount info list: unknown error");
+                return;
+            }
+        }
+
+
+    info.GetReturnValue().Set(result);
+
+}
+
+NAN_METHOD(Wallet::GetSafexAccount) {
+
+    if (info.Length() != 1 || !info[0]->IsString()) {
+        Nan::ThrowTypeError("Function accepts string argument");
+        return;
+    }
+
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+    auto username = toStdString(info[0]);
+
+    auto safexAccount = obj->wallet_->getSafexAccount(username);
+    auto safexAccountObj = makeSafexAccountObject(safexAccount);
+
+    info.GetReturnValue().Set(safexAccountObj);
+}
+
+NAN_METHOD(Wallet::RecoverSafexAccount) {
+
+    if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
+        Nan::ThrowTypeError("Function accepts string arguments");
+        return;
+    }
+
+    auto username = toStdString(info[0]);
+    auto secret_key = toStdString(info[1]);
+    auto password = toStdString(info[2]);
+
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+    auto res = obj->wallet_->recoverSafexAccount(username, secret_key, password);
+
+
+    info.GetReturnValue().Set(Nan::New(res));
+
+}
+
+NAN_METHOD(Wallet::RemoveSafexAccount) {
+
+    if (info.Length() != 1 || !info[0]->IsString()) {
+        Nan::ThrowTypeError("Function accepts string argument");
+        return;
+    }
+
+    auto username = toStdString(info[0]);
+
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+    auto res = obj->wallet_->removeSafexAccount(username);
+
+    info.GetReturnValue().Set(Nan::New(res));
+
 }
 
 

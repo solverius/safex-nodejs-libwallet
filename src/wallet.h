@@ -105,6 +105,13 @@ public:
     static NAN_METHOD(TransactionHistory);
 
     static NAN_METHOD(CreateTransaction);
+    static NAN_METHOD(CreateAdvancedTransaction);
+
+    static NAN_METHOD(CreateSafexAccount);
+    static NAN_METHOD(GetSafexAccounts);
+    static NAN_METHOD(GetSafexAccount);
+    static NAN_METHOD(RecoverSafexAccount);
+    static NAN_METHOD(RemoveSafexAccount);
 
     static NAN_METHOD(SignMessage);
     static NAN_METHOD(VerifySignedMessage);

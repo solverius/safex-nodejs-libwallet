@@ -39,6 +39,13 @@ declare namespace monero {
     total: number,
   };
 
+  type SafexAccount = {
+    username: string,
+    data: string,
+    publicKey: string,
+    privateKey: string,
+  };
+
   type Transaction = {
     commit(): Promise<void>;
     amount(): string;
@@ -91,6 +98,15 @@ declare namespace monero {
     on(event: 'refreshed' | 'updated', callback: () => void): Wallet;
     off(event?: WalletEvent): Wallet;
     store(): Promise<void>;
+    createSafexAccount(username: string,
+                       description: string,
+                       password: string): boolean;
+    getSafexAccounts(): SafexAccount[];
+    getSafexAccount(username: string): SafexAccount;
+    recoverSafexAccount(username: string,
+                        secretKey: string,
+                        password: string): boolean;
+    removeSafexAccount(username: string): boolean;
     createTransaction(options: {
       address: string,
       amount: string,
@@ -98,6 +114,15 @@ declare namespace monero {
       mixin?: number,
       priority?:number,
       tx_type?: number
+    }): Promise<Transaction>;
+    createAdvancedTransaction(options: {
+      address: string,
+      amount: string,
+      paymentId?: string,
+      mixin?: number,
+      priority?:number,
+      tx_type?: number,
+      safex_username?: string
     }): Promise<Transaction>;
     history(): TransactionInfo[];
     path(): string;
