@@ -262,6 +262,8 @@ std::string CreateAdvancedTransactionArgs::Init(const Nan::FunctionCallbackInfo<
 
     safexUsername = getOptionalProperty<std::string>(obj, "safex_username", "");
 
+    safexData = getOptionalProperty<std::string>(obj, "safex_data", "");
+
     amount = std::stoull(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
     mixin = getOptionalProperty<uint32_t>(obj, "mixin", DEFAULT_MIXIN);

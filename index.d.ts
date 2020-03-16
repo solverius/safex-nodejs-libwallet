@@ -122,7 +122,8 @@ declare namespace monero {
       mixin?: number,
       priority?:number,
       tx_type?: number,
-      safex_username?: string
+      safex_username?: string,
+      safex_data?: string
     }): Promise<Transaction>;
     history(): TransactionInfo[];
     path(): string;
