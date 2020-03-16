@@ -96,13 +96,23 @@ promise
 						// 	'safex_username': 'saved',
 						// 	'safex_data': 'New data created',
 					// * Create Safex offer
-					'tx_type': '8',
+						// 'tx_type': '8',
+						// 'safex_username': 'saved',
+						// 'safex_offer_title': 'New offer',
+						// 'safex_offer_price': 150000000,
+						// 'safex_offer_quantity': 50,
+						// 'safex_offer_description': 'Perfect NodeJS offer',
+						// 'safex_offer_price_peg_used': 0,
+					// * Edit Safex offer
+					'tx_type': '9',
+					'safex_offer_id': '9208b97cf9afbeac317bb25aa43c573fd82758923ea8219e0ead88f2c5e39ed8',
 					'safex_username': 'saved',
-					'safex_offer_title': 'New offer',
+					'safex_offer_title': 'New edited offer',
 					'safex_offer_price': 150000000,
 					'safex_offer_quantity': 50,
-					'safex_offer_description': 'Perfect NodeJS offer',
+					'safex_offer_description': 'Perfect NodeJS offer + 1',
 					'safex_offer_price_peg_used': 0,
+					'safex_offer_active': 1
 				}).then((tx) => {
 					console.log("transaction created: " + tx.transactionsIds());
 					

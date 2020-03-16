@@ -194,6 +194,13 @@ std::string CreateAdvancedTransactionTask::doWork() {
                  if (!wallet_->errorString().empty()) {
                      return wallet_->errorString();
                  }
+    } else if(args_.tx_type==Safex::TransactionType::EditOfferTransaction){
+                  Safex::EditOfferCommand s{args_.safexOfferId, args_.safexUsername, args_.safexOfferActive, args_.safexOfferTitle, args_.safexOfferPrice, args_.safexOfferQuantity, args_.safexOfferDescription, args_.safexOfferPricePegUsed,
+                                              args_.safexOfferPricePegId, args_.safexOfferMinSfxPrice};
+                  transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
+                      if (!wallet_->errorString().empty()) {
+                          return wallet_->errorString();
+                      }
     } else
         return "Bad tx type given";
 
