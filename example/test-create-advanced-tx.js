@@ -92,9 +92,17 @@ promise
 						// 'tx_type': '6',
 						// 'safex_username': 'saved',
 					// * Edit Safex account
-						'tx_type': '7',
-						'safex_username': 'saved',
-						'safex_data': 'New data created',
+						// 	'tx_type': '7',
+						// 	'safex_username': 'saved',
+						// 	'safex_data': 'New data created',
+					// * Create Safex offer
+					'tx_type': '8',
+					'safex_username': 'saved',
+					'safex_offer_title': 'New offer',
+					'safex_offer_price': 150000000,
+					'safex_offer_quantity': 50,
+					'safex_offer_description': 'Perfect NodeJS offer',
+					'safex_offer_price_peg_used': 0,
 				}).then((tx) => {
 					console.log("transaction created: " + tx.transactionsIds());
 					
