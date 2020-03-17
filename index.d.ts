@@ -138,6 +138,7 @@ declare namespace monero {
       safex_price_peg_description?: string,
       safex_price_peg_currency?: string,
       safex_price_peg_rate?: number,
+      safex_price_peg_id?: string,
     }): Promise<Transaction>;
     history(): TransactionInfo[];
     path(): string;

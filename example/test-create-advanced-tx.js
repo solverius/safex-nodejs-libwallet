@@ -120,14 +120,24 @@ promise
 						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
 						// 'amount': '100000000000000',
 					// * Stake token
-					'tx_type': '11',
+						// 'tx_type': '11',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '1',
+						// 'safex_price_peg_title': 'Saved price peg', // testnet
+						// 'safex_price_peg_creator': 'saved',
+						// 'safex_price_peg_description': 'Best peg evar', // testnet
+						// 'safex_price_peg_currency': 'USD',
+						// 'safex_price_peg_rate': 0.35, // testnet
+					// * Stake token
+					'tx_type': '12',
 					'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
 					'amount': '1',
+					'safex_price_peg_id': '87b0aea851d0bea491ec08a4e5e3860209f90773e535aeff1d6cb7cc3ce5bd6f',
 					'safex_price_peg_title': 'Saved price peg', // testnet
 					'safex_price_peg_creator': 'saved',
 					'safex_price_peg_description': 'Best peg evar', // testnet
 					'safex_price_peg_currency': 'USD',
-					'safex_price_peg_rate': 0.35, // testnet
+					'safex_price_peg_rate': 0.45, // testnet
 				}).then((tx) => {
 					console.log("transaction created: " + tx.transactionsIds());
 					
