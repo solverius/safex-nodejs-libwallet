@@ -132,7 +132,12 @@ declare namespace monero {
       safex_offer_price_peg_id?: string,
       safex_offer_min_sfx_price?: number,
       safex_offer_active?: number,
-      safex_offer_id?: string
+      safex_offer_id?: string,
+      safex_price_peg_title?: string,
+      safex_price_peg_creator?: string,
+      safex_price_peg_description?: string,
+      safex_price_peg_currency?: string,
+      safex_price_peg_rate?: number,
     }): Promise<Transaction>;
     history(): TransactionInfo[];
     path(): string;

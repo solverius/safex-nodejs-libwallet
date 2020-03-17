@@ -116,9 +116,18 @@ promise
 						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
 						// 'amount': '100000000000000',
 					// * Stake token
-					'tx_type': '4',
+						// 'tx_type': '4',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '100000000000000',
+					// * Stake token
+					'tx_type': '11',
 					'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
-					'amount': '100000000000000',
+					'amount': '1',
+					'safex_price_peg_title': 'Saved price peg', // testnet
+					'safex_price_peg_creator': 'saved',
+					'safex_price_peg_description': 'Best peg evar', // testnet
+					'safex_price_peg_currency': 'USD',
+					'safex_price_peg_rate': 0.35, // testnet
 				}).then((tx) => {
 					console.log("transaction created: " + tx.transactionsIds());
 					
