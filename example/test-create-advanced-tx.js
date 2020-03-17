@@ -112,7 +112,11 @@ promise
 						// 'safex_offer_price_peg_used': 0,
 						// 'safex_offer_active': 1,
 					// * Stake token
-					'tx_type': '3',
+						// 'tx_type': '3',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '100000000000000',
+					// * Stake token
+					'tx_type': '4',
 					'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
 					'amount': '100000000000000',
 				}).then((tx) => {
