@@ -251,14 +251,10 @@ std::string CreateAdvancedTransactionArgs::Init(const Nan::FunctionCallbackInfo<
 
     auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
 
-    if (!getRequiredProperty<std::string>(obj, "address", address)) {
-        return std::string("Required property not found: address");
-    }
+    address = getOptionalProperty<std::string>(obj, "address", "");
 
     std::string amountStr;
-    if (!getRequiredProperty<std::string>(obj, "amount", amountStr)) {
-        return std::string("Required property not found: amount");
-    }
+    amountStr = getOptionalProperty<std::string>(obj, "amount", "0");
 
     safexUsername = getOptionalProperty<std::string>(obj, "safex_username", "");
 
