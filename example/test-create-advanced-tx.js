@@ -139,12 +139,18 @@ promise
 						// 'safex_price_peg_currency': 'USD',
 						// 'safex_price_peg_rate': 0.45, // testnet
 					// * Purchase
-					'tx_type': '5',
+						// 'tx_type': '5',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '1',
+						// 'safex_offer_id': 'd00ad413b3789e9d4159568f354a96354e60441ff456e05d53d727f0e42cb9f3',
+						// 'safex_purchase_quantity': 2, // testnet
+					// * Feedback
+					'tx_type': '10',
 					'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
 					'amount': '1',
 					'safex_offer_id': 'd00ad413b3789e9d4159568f354a96354e60441ff456e05d53d727f0e42cb9f3',
-					'safex_purchase_quantity': 2, // testnet
-					'mixin': 3,
+					'safex_feedback_stars_given': 2,
+					'safex_feedback_comment': 'Not great, not terrible...',
 				}).then((tx) => {
 					console.log("transaction created: " + tx.transactionsIds());
 					

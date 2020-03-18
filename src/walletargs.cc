@@ -283,6 +283,9 @@ std::string CreateAdvancedTransactionArgs::Init(const Nan::FunctionCallbackInfo<
 
     safexPurchaseQuantity = getOptionalProperty<uint64_t>(obj, "safex_purchase_quantity", 0);
 
+    safexFeedbackStarsGiven = getOptionalProperty<uint64_t>(obj, "safex_feedback_stars_given", 0);
+    safexFeedbackComment = getOptionalProperty<std::string>(obj, "safex_feedback_comment", "");
+
     amount = std::stoull(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
     mixin = getOptionalProperty<uint32_t>(obj, "mixin", DEFAULT_MIXIN);
