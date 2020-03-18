@@ -281,6 +281,8 @@ std::string CreateAdvancedTransactionArgs::Init(const Nan::FunctionCallbackInfo<
     safexPricePegRate = getOptionalProperty<double>(obj, "safex_price_peg_rate", 0);
     safexPricePegId = getOptionalProperty<std::string>(obj, "safex_price_peg_id", "");
 
+    safexPurchaseQuantity = getOptionalProperty<uint64_t>(obj, "safex_purchase_quantity", 0);
+
     amount = std::stoull(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
     mixin = getOptionalProperty<uint32_t>(obj, "mixin", DEFAULT_MIXIN);

@@ -92,6 +92,7 @@ struct CreateAdvancedTransactionArgs {
     std::string safexPricePegCurrency;
     double      safexPricePegRate;
     std::string safexPricePegId;
+    uint64_t    safexPurchaseQuantity;
     uint64_t amount;
     std::string paymentId;
     uint32_t mixin;
