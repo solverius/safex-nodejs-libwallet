@@ -116,13 +116,32 @@ declare namespace monero {
       tx_type?: number
     }): Promise<Transaction>;
     createAdvancedTransaction(options: {
-      address: string,
-      amount: string,
+      address?: string,
+      amount?: string,
       paymentId?: string,
       mixin?: number,
       priority?:number,
       tx_type?: number,
-      safex_username?: string
+      safex_username?: string,
+      safex_data?: string,
+      safex_offer_title?: string,
+      safex_offer_price?: number,
+      safex_offer_quantity?: number,
+      safex_offer_description?: string,
+      safex_offer_price_peg_used?: number,
+      safex_offer_price_peg_id?: string,
+      safex_offer_min_sfx_price?: number,
+      safex_offer_active?: number,
+      safex_offer_id?: string,
+      safex_price_peg_title?: string,
+      safex_price_peg_creator?: string,
+      safex_price_peg_description?: string,
+      safex_price_peg_currency?: string,
+      safex_price_peg_rate?: number,
+      safex_price_peg_id?: string,
+      safex_purchase_quantity?: number,
+      safex_feedback_stars_given?: number,
+      safex_feedback_comment?: string,
     }): Promise<Transaction>;
     history(): TransactionInfo[];
     path(): string;

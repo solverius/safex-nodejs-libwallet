@@ -251,16 +251,36 @@ std::string CreateAdvancedTransactionArgs::Init(const Nan::FunctionCallbackInfo<
 
     auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
 
-    if (!getRequiredProperty<std::string>(obj, "address", address)) {
-        return std::string("Required property not found: address");
-    }
+    address = getOptionalProperty<std::string>(obj, "address", "");
 
     std::string amountStr;
-    if (!getRequiredProperty<std::string>(obj, "amount", amountStr)) {
-        return std::string("Required property not found: amount");
-    }
+    amountStr = getOptionalProperty<std::string>(obj, "amount", "0");
 
     safexUsername = getOptionalProperty<std::string>(obj, "safex_username", "");
+
+    safexData = getOptionalProperty<std::string>(obj, "safex_data", "");
+
+    safexOfferTitle = getOptionalProperty<std::string>(obj, "safex_offer_title", "");
+    safexOfferPrice = getOptionalProperty<uint64_t>(obj, "safex_offer_price", 0);
+    safexOfferQuantity = getOptionalProperty<uint64_t>(obj, "safex_offer_quantity", 0);
+    safexOfferDescription = getOptionalProperty<std::string>(obj, "safex_offer_description", "");
+    safexOfferPricePegUsed = getOptionalProperty<uint64_t>(obj, "safex_offer_price_peg_used", 0);
+    safexOfferPricePegId = getOptionalProperty<std::string>(obj, "safex_offer_price_peg_id", "");
+    safexOfferMinSfxPrice = getOptionalProperty<uint64_t>(obj, "safex_offer_min_sfx_price", 0);
+    safexOfferActive = getOptionalProperty<uint64_t>(obj, "safex_offer_active", 1);
+    safexOfferId = getOptionalProperty<std::string>(obj, "safex_offer_id", "");
+
+    safexPricePegTitle = getOptionalProperty<std::string>(obj, "safex_price_peg_title", "");
+    safexPricePegCreator = getOptionalProperty<std::string>(obj, "safex_price_peg_creator", "");
+    safexPricePegDescription = getOptionalProperty<std::string>(obj, "safex_price_peg_description", "");
+    safexPricePegCurrency = getOptionalProperty<std::string>(obj, "safex_price_peg_currency", "");
+    safexPricePegRate = getOptionalProperty<double>(obj, "safex_price_peg_rate", 0);
+    safexPricePegId = getOptionalProperty<std::string>(obj, "safex_price_peg_id", "");
+
+    safexPurchaseQuantity = getOptionalProperty<uint64_t>(obj, "safex_purchase_quantity", 0);
+
+    safexFeedbackStarsGiven = getOptionalProperty<uint64_t>(obj, "safex_feedback_stars_given", 0);
+    safexFeedbackComment = getOptionalProperty<std::string>(obj, "safex_feedback_comment", "");
 
     amount = std::stoull(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");

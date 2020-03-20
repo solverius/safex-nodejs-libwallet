@@ -58,6 +58,14 @@ promise
 		console.log("seed: " + w.seed());
 
 		wallet = w;
+
+		var r = wallet.recoverSafexAccount("saved","c6ddeb2996cf1c742e3dba0c53d1dd161c659a0a9b9baf87de8ce3dc0d43de0e",args["password"]);
+
+		if(r)
+			console.log("Created acccount saved");
+		else
+			console.log("Didn't create account saved");
+
 		wallet.on('newBlock', function (height) {
 			if(height-lastHeight>1000) {
 				console.log("blockchain updated, height: " + height);
@@ -75,18 +83,74 @@ promise
 			if (!sent) {
 				sent = true;
 
-				var r = wallet.createSafexAccount("test", "Test account",args["password"]);
 
-				if(r)
-					console.log("Created acccount test");
-				else
-					console.log("Didn't create account test");
 
 				wallet.createAdvancedTransaction({
+					// * Create Safex account
+						// 'tx_type': '6',
+						// 'safex_username': 'saved',
+					// * Edit Safex account
+						// 	'tx_type': '7',
+						// 	'safex_username': 'saved',
+						// 	'safex_data': 'New data created',
+					// * Create Safex offer
+						// 'tx_type': '8',
+						// 'safex_username': 'saved',
+						// 'safex_offer_title': 'New offer',
+						// 'safex_offer_price': 150000000,
+						// 'safex_offer_quantity': 50,
+						// 'safex_offer_description': 'Perfect NodeJS offer',
+						// 'safex_offer_price_peg_used': 0,
+					// * Edit Safex offer
+						// 'tx_type': '9',
+						// 'safex_offer_id': '9208b97cf9afbeac317bb25aa43c573fd82758923ea8219e0ead88f2c5e39ed8',
+						// 'safex_username': 'saved',
+						// 'safex_offer_title': 'New edited offer',
+						// 'safex_offer_price': 150000000,
+						// 'safex_offer_quantity': 50,
+						// 'safex_offer_description': 'Perfect NodeJS offer + 1',
+						// 'safex_offer_price_peg_used': 0,
+						// 'safex_offer_active': 1,
+					// * Stake token
+						// 'tx_type': '3',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '100000000000000',
+					// * Unstake token
+						// 'tx_type': '4',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '100000000000000',
+					// * Create Price Peg
+						// 'tx_type': '11',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '1',
+						// 'safex_price_peg_title': 'Saved price peg', // testnet
+						// 'safex_price_peg_creator': 'saved',
+						// 'safex_price_peg_description': 'Best peg evar', // testnet
+						// 'safex_price_peg_currency': 'USD',
+						// 'safex_price_peg_rate': 0.35, // testnet
+					// * Update Price Peg
+						// 'tx_type': '12',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '1',
+						// 'safex_price_peg_id': '87b0aea851d0bea491ec08a4e5e3860209f90773e535aeff1d6cb7cc3ce5bd6f',
+						// 'safex_price_peg_title': 'Saved price peg', // testnet
+						// 'safex_price_peg_creator': 'saved',
+						// 'safex_price_peg_description': 'Best peg evar', // testnet
+						// 'safex_price_peg_currency': 'USD',
+						// 'safex_price_peg_rate': 0.45, // testnet
+					// * Purchase
+						// 'tx_type': '5',
+						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
+						// 'amount': '1',
+						// 'safex_offer_id': 'd00ad413b3789e9d4159568f354a96354e60441ff456e05d53d727f0e42cb9f3',
+						// 'safex_purchase_quantity': 2, // testnet
+					// * Feedback
+					'tx_type': '10',
 					'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
-					'amount': '1', //safex atomic units as string
-					'tx_type': '6',
-					'safex_username': 'test',
+					'amount': '1',
+					'safex_offer_id': 'd00ad413b3789e9d4159568f354a96354e60441ff456e05d53d727f0e42cb9f3',
+					'safex_feedback_stars_given': 2,
+					'safex_feedback_comment': 'Not great, not terrible...',
 				}).then((tx) => {
 					console.log("transaction created: " + tx.transactionsIds());
 					

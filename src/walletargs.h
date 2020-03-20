@@ -76,6 +76,25 @@ struct CreateAdvancedTransactionArgs {
 
     std::string address;
     std::string safexUsername;
+    std::string safexData;
+    std::string safexOfferTitle;
+    uint64_t    safexOfferPrice;
+    uint64_t    safexOfferQuantity;
+    std::string safexOfferDescription;
+    bool        safexOfferPricePegUsed;
+    std::string safexOfferPricePegId;
+    uint64_t    safexOfferMinSfxPrice;
+    bool        safexOfferActive;
+    std::string safexOfferId;
+    std::string safexPricePegTitle;
+    std::string safexPricePegCreator;
+    std::string safexPricePegDescription;
+    std::string safexPricePegCurrency;
+    double      safexPricePegRate;
+    std::string safexPricePegId;
+    uint64_t    safexPurchaseQuantity;
+    uint64_t    safexFeedbackStarsGiven;
+    std::string safexFeedbackComment;
     uint64_t amount;
     std::string paymentId;
     uint32_t mixin;
