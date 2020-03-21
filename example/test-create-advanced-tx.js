@@ -59,7 +59,7 @@ promise
 
 		wallet = w;
 
-		var r = wallet.recoverSafexAccount("saved","c6ddeb2996cf1c742e3dba0c53d1dd161c659a0a9b9baf87de8ce3dc0d43de0e",args["password"]);
+		var r = wallet.recoverSafexAccount("saved","c6ddeb2996cf1c742e3dba0c53d1dd161c659a0a9b9baf87de8ce3dc0d43de0e");
 
 		if(r)
 			console.log("Created acccount saved");

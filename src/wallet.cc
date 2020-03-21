@@ -753,20 +753,19 @@ NAN_METHOD(Wallet::CreateAdvancedTransaction) {
 
 NAN_METHOD(Wallet::CreateSafexAccount) {
 
-    if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
+    if (info.Length() != 2 || !info[0]->IsString() || !info[1]->IsString()) {
         Nan::ThrowTypeError("Function accepts string argument");
         return;
     }
 
     auto username = toStdString(info[0]);
     auto desc = toStdString(info[1]);
-    auto password = toStdString(info[2]);
 
     auto description = std::vector<uint8_t>(desc.begin(),desc.end());
 
      Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
-     auto res = obj->wallet_->createSafexAccount(username, description, password);
+     auto res = obj->wallet_->createSafexAccount(username, description);
 
 
     info.GetReturnValue().Set(Nan::New(res));
@@ -820,18 +819,17 @@ NAN_METHOD(Wallet::GetSafexAccount) {
 
 NAN_METHOD(Wallet::RecoverSafexAccount) {
 
-    if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
+    if (info.Length() != 2 || !info[0]->IsString() || !info[1]->IsString()) {
         Nan::ThrowTypeError("Function accepts string arguments");
         return;
     }
 
     auto username = toStdString(info[0]);
     auto secret_key = toStdString(info[1]);
-    auto password = toStdString(info[2]);
 
     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
-    auto res = obj->wallet_->recoverSafexAccount(username, secret_key, password);
+    auto res = obj->wallet_->recoverSafexAccount(username, secret_key);
 
 
     info.GetReturnValue().Set(Nan::New(res));

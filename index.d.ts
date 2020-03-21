@@ -99,13 +99,11 @@ declare namespace monero {
     off(event?: WalletEvent): Wallet;
     store(): Promise<void>;
     createSafexAccount(username: string,
-                       description: string,
-                       password: string): boolean;
+                       description: string): boolean;
     getSafexAccounts(): SafexAccount[];
     getSafexAccount(username: string): SafexAccount;
     recoverSafexAccount(username: string,
-                        secretKey: string,
-                        password: string): boolean;
+                        secretKey: string): boolean;
     removeSafexAccount(username: string): boolean;
     createTransaction(options: {
       address: string,
@@ -182,6 +180,13 @@ declare namespace monero {
 
   function setupLog(level: 0 | 1 | 2 | 3 | 4, output?: string): void;
   function createWallet(options: {
+    path: string,
+    password: string,
+    network?: Network,
+    daemonAddress: string,
+    language?: Language,
+  }): Promise<Wallet>;
+  function createWalletFromKeys(options: {
     path: string,
     password: string,
     network?: Network,
