@@ -4,9 +4,6 @@ SAFEX_BUILD_TYPE?=Debug
 BOOST_VERSION=1.66.0
 BOOST_DIRNAME=boost_1_66_0
 
-PROTOBUF_VERSION=3.10.0
-PROTOBUF_DIRNAME=protobuf-3.10.0
-
 PWD=${shell pwd}
 BOOST_LIBS=chrono,date_time,filesystem,program_options,regex,serialization,system,thread,locale
 THREADS?=6
@@ -24,8 +21,6 @@ clean:
 	rm -rf deps
 	rm -rf build
 	rm -rf lib
-	rm -rf protobuf
-	rm -rf  ${PROTOBUF_DIRNAME}
 
 ${BOOST_DIRNAME}.tar.bz2: 
 	curl -L -o "${BOOST_DIRNAME}.tar.bz2" \
@@ -39,22 +34,11 @@ boost: ${BOOST_DIRNAME}
 	cd ${BOOST_DIRNAME} && ./b2 -j4 cxxflags=-fPIC cflags=-fPIC -a link=static \
 		threading=multi threadapi=pthread --prefix=${PWD}/boost install
 
-${PROTOBUF_DIRNAME}.tar.gz:
-	curl -L -o "${PROTOBUF_DIRNAME}.tar.gz" \
-            https://github.com/protocolbuffers/protobuf/archive/v3.10.0.tar.gz
-
-${PROTOBUF_DIRNAME}: ${PROTOBUF_DIRNAME}.tar.gz
-	tar -xf ${PROTOBUF_DIRNAME}.tar.gz
-	cd ${PROTOBUF_DIRNAME} && ./autogen.sh && ./configure --prefix=${PWD}/protobuf "CFLAGS=-fPIC" "CXXFLAGS=-fPIC"
-
-protobuf: ${PROTOBUF_DIRNAME}
-	cd ${PROTOBUF_DIRNAME} && make && make install
 
 .PHONY: deps
-deps: boost protobuf safexcore/build
+deps: boost safexcore/build
 	mkdir -p deps
 	cp boost/lib/*.a deps
-	cp protobuf/lib/*.a deps
 
 safexcore:
 	git clone --depth 1 -b develop --recurse-submodules https://github.com/VanGrx/safexcore
@@ -75,13 +59,11 @@ safexcore/build: boost safexcore
 		
 else
 #linux, mac
-safexcore/build: boost protobuf safexcore
+safexcore/build: boost safexcore
 	mkdir -p safexcore/build
 	mkdir -p deps
 	cd safexcore/build && cmake -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON \
 		-DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost \
-		-DProtobuf_USE_STATIC_LIBS=ON \
-		-DBUILD_SAFEX_PROTOBUF_RPC=ON \
 		-DARCH="x86-64" -D \
 		-DBUILD_64=ON -D \
 		-DCMAKE_BUILD_TYPE=release \
