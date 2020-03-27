@@ -145,7 +145,6 @@
             "../deps/libboost_chrono.a",
             "../deps/libboost_program_options.a",
             "../deps/libboost_regex.a",
-            "../deps/libprotobuf.a",
             "<@(additional_libraries)",
             "-lssl",
             "-lcrypto",
