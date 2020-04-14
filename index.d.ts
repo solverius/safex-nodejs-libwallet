@@ -44,6 +44,7 @@ declare namespace monero {
     data: string,
     publicKey: string,
     privateKey: string,
+    status: number
   };
 
   type Transaction = {

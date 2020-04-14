@@ -194,6 +194,10 @@ Local<Object> makeSafexAccountObject(const SafexNativeSafexAccount& safexAccount
                 Nan::New("privateKey").ToLocalChecked(),
                 Nan::New(safexAccount.getSecKey()).ToLocalChecked());
 
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("status").ToLocalChecked(),
+                Nan::New((uint32_t)safexAccount.getStatus()));
+
     return result;
 }
 
