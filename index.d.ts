@@ -47,6 +47,20 @@ declare namespace monero {
     status: number
   };
 
+  type SafexOffer = {
+    title: string,
+    quantity: string,
+    price: string,
+    minSfxPrice: string,
+    pricePegUsed: boolean,
+    pricePegID: string,
+    description: string,
+    seller: string,
+    active: boolean,
+    offerID: string,
+    currency: string
+  };
+
   type Transaction = {
     commit(): Promise<void>;
     amount(): string;
@@ -106,6 +120,8 @@ declare namespace monero {
     recoverSafexAccount(username: string,
                         secretKey: string): boolean;
     removeSafexAccount(username: string): boolean;
+    getMySafexOffers(): SafexOffer[];
+    listSafexOffers(active: boolean): SafexOffer[];
     createTransaction(options: {
       address: string,
       amount: string,

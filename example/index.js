@@ -61,6 +61,23 @@ const nextTick = () => {
 		console.log("public spend key: " + wallet.publicSpendKey());
                 console.log("block chain height: " + wallet.blockchainHeight());
                 console.log("daemon block chain height: " + wallet.daemonBlockchainHeight());
+
+        var offrs = wallet.listSafexOffers(true);
+		for (i in offrs){
+				console.log("Safex offer " +i+" title: " + offrs[i].title);
+				console.log("Safex offer description: "  + offrs[i].description);
+				console.log("Safex offer quantity: " + offrs[i].quantity);
+				console.log("Safex offer price: " + offrs[i].price);
+				console.log("Safex offer minSfxPrice: " + offrs[i].minSfxPrice);
+				console.log("Safex offer pricePegUsed: " + offrs[i].pricePegUsed);
+				console.log("Safex offer pricePegID: " + offrs[i].pricePegID);
+				console.log("Safex offer seller: " + offrs[i].seller);
+				console.log("Safex offer active: " + offrs[i].active);
+				console.log("Safex offer offerID: " + offrs[i].offerID);
+				console.log("Safex offer currency: " + offrs[i].currency);
+			}
+
+
     }
 
     setTimeout(nextTick, 10000);

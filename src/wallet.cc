@@ -201,6 +201,57 @@ Local<Object> makeSafexAccountObject(const SafexNativeSafexAccount& safexAccount
     return result;
 }
 
+Local<Object> makeSafexOfferObject(const SafexNativeSafexOffer& safexOffer) {
+
+    auto result = Nan::New<Object>();
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("title").ToLocalChecked(),
+                Nan::New(safexOffer.getTitle()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("quantity").ToLocalChecked(),
+                convertAmount(safexOffer.getQuantity()));
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("price").ToLocalChecked(),
+                convertAmount(safexOffer.getPrice()));
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("minSfxPrice").ToLocalChecked(),
+                convertAmount(safexOffer.getMin_sfx_price()));
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("description").ToLocalChecked(),
+                Nan::New(safexOffer.getDescription()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("active").ToLocalChecked(),
+                Nan::New((bool)safexOffer.getActive()));
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("pricePegUsed").ToLocalChecked(),
+                Nan::New((bool)safexOffer.getPrice_peg_used()));
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("offerID").ToLocalChecked(),
+                Nan::New(safexOffer.getOffer_id()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("pricePegID").ToLocalChecked(),
+                Nan::New(safexOffer.getPrice_peg_id()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("seller").ToLocalChecked(),
+                Nan::New(safexOffer.getSeller()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+                Nan::New("currency").ToLocalChecked(),
+                Nan::New(safexOffer.getCurrency()).ToLocalChecked());
+
+    return result;
+}
+
 }
 
 Nan::Persistent<v8::Function> Wallet::constructor;
@@ -334,6 +385,8 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"getSafexAccount", GetSafexAccount},
         {"recoverSafexAccount",RecoverSafexAccount},
         {"removeSafexAccount",RemoveSafexAccount},
+        {"getMySafexOffers", GetMySafexOffers},
+        {"listSafexOffers", ListSafexOffers},
         {"signMessage", SignMessage},
         {"verifySignedMessage", VerifySignedMessage},
         {"history", TransactionHistory},
@@ -854,6 +907,62 @@ NAN_METHOD(Wallet::RemoveSafexAccount) {
 
     info.GetReturnValue().Set(Nan::New(res));
 
+}
+
+NAN_METHOD(Wallet::GetMySafexOffers) {
+
+    if (info.Length() != 0) {
+        Nan::ThrowTypeError("Function accepts no arguments");
+        return;
+    }
+
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+    auto safexOffers = obj->wallet_->getMySafexOffers();
+    auto result = Nan::New<Array>(safexOffers.size());
+
+    for (size_t i = 0; i < safexOffers.size(); ++i) {
+            const auto& safexOffer = safexOffers[i];
+
+            auto safexOfferObj = makeSafexOfferObject(safexOffer);
+
+            if (result->Set(Nan::GetCurrentContext(), i, safexOfferObj).IsNothing()) {
+                Nan::ThrowError("Couldn't make safexOffer info list: unknown error");
+                return;
+            }
+        }
+
+
+    info.GetReturnValue().Set(result);
+}
+
+NAN_METHOD(Wallet::ListSafexOffers) {
+
+    if (info.Length() != 1 || !info[0]->IsBoolean()) {
+        Nan::ThrowTypeError("Function accepts boolean argument");
+        return;
+    }
+
+    bool active = Nan::To<bool>(info[0]).FromJust();
+
+    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+    auto safexOffers = obj->wallet_->listSafexOffers(active);
+    auto result = Nan::New<Array>(safexOffers.size());
+
+    for (size_t i = 0; i < safexOffers.size(); ++i) {
+            const auto& safexOffer = safexOffers[i];
+
+            auto safexOfferObj = makeSafexOfferObject(safexOffer);
+
+            if (result->Set(Nan::GetCurrentContext(), i, safexOfferObj).IsNothing()) {
+                Nan::ThrowError("Couldn't make safexOffer info list: unknown error");
+                return;
+            }
+        }
+
+
+    info.GetReturnValue().Set(result);
 }
 
 
