@@ -46,6 +46,7 @@ using SafexNativeTransactionHistory     = Safex::TransactionHistory;
 using SafexNativeAddressBook            = Safex::AddressBook;
 using SafexNativeAddressBookRow         = Safex::AddressBookRow;
 using SafexNativeSafexAccount           = Safex::SafexAccount;
+using SafexNativeSafexOffer             = Safex::SafexOffer;
 #endif
 
 #endif //WIN_SAFEX_NODEJS_LIBWALLET_NATIVESAFEXWALLET_H

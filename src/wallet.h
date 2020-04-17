@@ -113,6 +113,9 @@ public:
     static NAN_METHOD(RecoverSafexAccount);
     static NAN_METHOD(RemoveSafexAccount);
 
+    static NAN_METHOD(GetMySafexOffers);
+    static NAN_METHOD(ListSafexOffers);
+
     static NAN_METHOD(SignMessage);
     static NAN_METHOD(VerifySignedMessage);
 
