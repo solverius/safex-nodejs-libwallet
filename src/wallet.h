@@ -53,6 +53,8 @@ public:
     virtual void tokensSpent(const std::string &txId, uint64_t token_amount) override;
     virtual void tokensReceived(const std::string &txId, uint64_t token_amount) override;
     virtual void unconfirmedTokensReceived(const std::string &txId, uint64_t token_amount) override;
+    virtual void advancedReceived(const std::string &txId, const uint8_t output_type) override;
+
 
     virtual void newBlock(uint64_t height) override;
     virtual void updated() override;

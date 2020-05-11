@@ -52,6 +52,12 @@ void Wallet::unconfirmedTokensReceived(const std::string &tx, uint64_t token_amo
   // async->Enqueue();
 }
 
+void Wallet::advancedReceived(const std::string &txId, const uint8_t output_type) {
+  // AsyncCallback<TransactionAmount>* async = constructAsyncCallback<TransactionAmount>(this, "advancedReceived");
+  // async->param = TransactionAmount{tx, std::to_string(output_type)};
+  // async->Enqueue();
+}
+
 void Wallet::updated() {
     AsyncCallback<void>* async = constructAsyncCallback<void>(this, "updated");
     async->Enqueue();
