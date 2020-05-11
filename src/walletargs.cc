@@ -261,12 +261,22 @@ std::string CreateAdvancedTransactionArgs::Init(const Nan::FunctionCallbackInfo<
     safexData = getOptionalProperty<std::string>(obj, "safex_data", "");
 
     safexOfferTitle = getOptionalProperty<std::string>(obj, "safex_offer_title", "");
-    safexOfferPrice = getOptionalProperty<uint64_t>(obj, "safex_offer_price", 0);
-    safexOfferQuantity = getOptionalProperty<uint64_t>(obj, "safex_offer_quantity", 0);
+
+    std::string priceStr;
+    priceStr = getOptionalProperty<std::string>(obj, "safex_offer_price", "0");
+    safexOfferPrice = std::stoull(priceStr);
+
+    std::string quantityStr;
+    quantityStr = getOptionalProperty<std::string>(obj, "safex_offer_quantity", "0");
+    safexOfferQuantity = std::stoull(quantityStr);
+
+    std::string minSfxPriceStr;
+    minSfxPriceStr = getOptionalProperty<std::string>(obj, "safex_offer_min_sfx_price", "0");
+    safexOfferMinSfxPrice = std::stoull(minSfxPriceStr);
+
     safexOfferDescription = getOptionalProperty<std::string>(obj, "safex_offer_description", "");
     safexOfferPricePegUsed = getOptionalProperty<uint64_t>(obj, "safex_offer_price_peg_used", 0);
     safexOfferPricePegId = getOptionalProperty<std::string>(obj, "safex_offer_price_peg_id", "");
-    safexOfferMinSfxPrice = getOptionalProperty<uint64_t>(obj, "safex_offer_min_sfx_price", 0);
     safexOfferActive = getOptionalProperty<uint64_t>(obj, "safex_offer_active", 1);
     safexOfferId = getOptionalProperty<std::string>(obj, "safex_offer_id", "");
 
