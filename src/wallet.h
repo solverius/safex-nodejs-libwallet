@@ -92,6 +92,8 @@ public:
     static NAN_METHOD(UnlockedBalance);
     static NAN_METHOD(TokenBalance);
     static NAN_METHOD(UnlockedTokenBalance);
+    static NAN_METHOD(StakedTokenBalance);
+    static NAN_METHOD(UnlockedStakedTokenBalance);
 
     static NAN_METHOD(BlockChainHeight);
     static NAN_METHOD(DaemonBlockChainHeight);
