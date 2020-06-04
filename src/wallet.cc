@@ -174,6 +174,20 @@ Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transa
     return result;
 }
 
+Local<Object> makeInterstObject(const std::pair<uint64_t, uint64_t>& interestData) {
+    auto result = Nan::New<Object>();
+
+    result->Set(Nan::GetCurrentContext(),
+            Nan::New("tokenStaked").ToLocalChecked(),
+            Nan::New(std::to_string(interestData.first).c_str()).ToLocalChecked());
+
+    result->Set(Nan::GetCurrentContext(),
+        Nan::New("collectedInterest").ToLocalChecked(),
+            Nan::New(std::to_string(interestData.second).c_str()).ToLocalChecked());
+
+    return result;
+}
+
 Local<Object> makeSafexAccountObject(const SafexNativeSafexAccount& safexAccount) {
 
     auto result = Nan::New<Object>();
@@ -373,6 +387,7 @@ NAN_MODULE_INIT(Wallet::Init) {
         {"unlockedTokenBalance", UnlockedTokenBalance},
         {"stakedTokenBalance", StakedTokenBalance},
         {"unlockedStakedTokenBalance", UnlockedStakedTokenBalance},
+        {"getMyInterest", GetMyInterest},
         {"blockchainHeight", BlockChainHeight},
         {"daemonBlockchainHeight", DaemonBlockChainHeight},
         {"synchronized", Synchronized},
@@ -689,6 +704,28 @@ NAN_METHOD(Wallet::UnlockedBalance) {
           Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
           info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->unlockedStakedTokenBalanceAll()).c_str()).ToLocalChecked());
+  }
+
+  NAN_METHOD(Wallet::GetMyInterest) {
+        Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+
+        std::vector<std::pair<uint64_t, uint64_t>> interest_per_output;
+
+        uint64_t total_interest = obj->wallet_->getMyInterest(interest_per_output);
+
+        auto result = Nan::New<Array>(interest_per_output.size());
+        for (size_t i = 0; i < interest_per_output.size(); ++i) {
+            const auto& output = interest_per_output[i];
+            
+            auto interestObj = makeInterstObject(output);
+
+            if (result->Set(Nan::GetCurrentContext(), i, interestObj).IsNothing()) {
+                Nan::ThrowError("Couldn't make interest info list: unknown error");
+                return;
+            }
+        }
+
+        info.GetReturnValue().Set(result);
   }
 
 NAN_METHOD(Wallet::BlockChainHeight) {

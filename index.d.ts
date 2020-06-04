@@ -98,6 +98,11 @@ declare namespace monero {
     transactionType: number;
   };
 
+  type InterestInfo = {
+    tokenStaked: string;
+    collectedInterest: string;
+  };
+
   interface Wallet {
     address(): string;
     seed(): string;
@@ -158,6 +163,7 @@ declare namespace monero {
       safex_feedback_stars_given?: number,
       safex_feedback_comment?: string,
     }): Promise<Transaction>;
+    getMyInterest(): InterestInfo[];
     history(): TransactionInfo[];
     path(): string;
     network(): Network;
