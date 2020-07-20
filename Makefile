@@ -17,7 +17,6 @@ all: binding.gyp deps
 clean:
 	rm -rf boost
 	rm -rf safexcore/build
-	rm -rf ${BOOST_DIRNAME}
 	rm -rf deps
 	rm -rf build
 	rm -rf lib
@@ -25,23 +24,16 @@ clean:
 
 ${BOOST_DIRNAME}:
 	git clone --depth 1 -b boost-1.66.0 \
-	--recurse-submodules=libs/chrono \
-	--recurse-submodules=libs/date_time \
-	--recurse-submodules=libs/filesystem \
-	--recurse-submodules=libs/program_options \
-	--recurse-submodules=libs/regex \
-	--recurse-submodules=libs/serialization \
-	--recurse-submodules=libs/system \
-	--recurse-submodules=libs/thread \
-	--recurse-submodules=libs/locale \
-	--recurse-submodules=libs/config \
-	--recurse-submodules=tools \
+	--recurse-submodules --shallow-submodules \
 	https://github.com/boostorg/boost.git ${BOOST_DIRNAME}
-	cd ${BOOST_DIRNAME} && ./bootstrap.sh --with-libraries=${BOOST_LIBS}
+	cd ${BOOST_DIRNAME}/tools/build && git apply ../../../mac_fix.patch
 
 boost: ${BOOST_DIRNAME}
+	cd ${BOOST_DIRNAME} && ./bootstrap.sh --prefix=${PWD}/boost
+	cd ${BOOST_DIRNAME} && ./b2 headers
 	cd ${BOOST_DIRNAME} && ./b2 -j4 cxxflags=-fPIC cflags=-fPIC -a link=static \
-		threading=multi threadapi=pthread --prefix=${PWD}/boost install
+		threading=multi threadapi=pthread install
+	mkdir -p boost/include && cp -L -R ${BOOST_DIRNAME}/boost/ boost/include/  
 
 
 .PHONY: deps
