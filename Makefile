@@ -22,12 +22,21 @@ clean:
 	rm -rf build
 	rm -rf lib
 
-${BOOST_DIRNAME}.tar.bz2: 
-	curl -L -o "${BOOST_DIRNAME}.tar.bz2" \
-            http://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/${BOOST_DIRNAME}.tar.bz2/download
 
-${BOOST_DIRNAME}: ${BOOST_DIRNAME}.tar.bz2
-	tar -xf ${BOOST_DIRNAME}.tar.bz2
+${BOOST_DIRNAME}:
+	git clone --depth 1 -b boost-1.66.0 \
+	--recurse-submodules=libs/chrono \
+	--recurse-submodules=libs/date_time \
+	--recurse-submodules=libs/filesystem \
+	--recurse-submodules=libs/program_options \
+	--recurse-submodules=libs/regex \
+	--recurse-submodules=libs/serialization \
+	--recurse-submodules=libs/system \
+	--recurse-submodules=libs/thread \
+	--recurse-submodules=libs/locale \
+	--recurse-submodules=libs/config \
+	--recurse-submodules=tools \
+	https://github.com/boostorg/boost.git ${BOOST_DIRNAME}
 	cd ${BOOST_DIRNAME} && ./bootstrap.sh --with-libraries=${BOOST_LIBS}
 
 boost: ${BOOST_DIRNAME}
