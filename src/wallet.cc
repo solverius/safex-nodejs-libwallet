@@ -3,12 +3,11 @@
 #include <iostream>
 #include <algorithm>
 
-#include "deferredtask.h"
 #include "walletargs.h"
 #include "wallettasks.h"
 
 
-using namespace v8;
+using namespace Napi;
 
 namespace exawallet {
 
@@ -16,17 +15,19 @@ namespace {
 
 
 
-std::string toStdString(const Local<Value>& val) {
-    Nan::Utf8String nanStr(val);
-    return std::string (*nanStr);
+
+std::string toStdString(const Napi::Value& val) {
+    std::string nanStr = val.As<Napi::String>();
+    return nanStr;
 }
 
-bool toVectorString(Local<Value> args, std::vector<std::string>& append) {
-    Local<Array> items = Local<Array>::Cast(args);
-    append.reserve(append.size() + items->Length());
-    for (uint32_t i = 0; i < items->Length(); ++i) {
-        auto msigInfo = items->Get(Nan::GetCurrentContext(), i).ToLocalChecked();
-        if (!msigInfo->IsString()) {
+bool toVectorString(Napi::Value args, std::vector<std::string>& append) {
+    Napi::Env env = args.Env();
+    Napi::Array items = args.As<Napi::Array>();
+    append.reserve(append.size() + items.Length());
+    for (uint32_t i = 0; i < items.Length(); ++i) {
+        Napi::Value msigInfo = items[i];
+        if (!msigInfo.IsString()) {
             return false;
         }
 
@@ -62,213 +63,107 @@ bool convertNettype(Safex::NetworkType type, std::string& netstring) {
     return true;
 }
 
-Local<String> convertAmount(uint64_t amount) {
-    return Nan::New(std::to_string(amount).c_str()).ToLocalChecked();
+Napi::String convertAmount(Napi::Env env, uint64_t amount) {
+    return Napi::String::New(env, std::to_string(amount).c_str());
 }
 
-Local<Object> makeAddressBookRowInfoObject( SafexNativeAddressBookRow* row) {
-    auto result = Nan::New<Object>();
-    result->Set(Nan::GetCurrentContext(),
-                    Nan::New("rowID").ToLocalChecked(),
-                    Nan::New((uint32_t)row->getRowId())
-                    );
+Napi::Object makeAddressBookRowInfoObject(Napi::Env env, SafexNativeAddressBookRow* row) {
+    auto result = Napi::Object::New(env);
 
-    result->Set(Nan::GetCurrentContext(),
-                        Nan::New("address").ToLocalChecked(),
-                        Nan::New(row->getAddress().c_str()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                        Nan::New("description").ToLocalChecked(),
-                        Nan::New(row->getDescription().c_str()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                        Nan::New("paymentId").ToLocalChecked(),
-                        Nan::New(row->getPaymentId().c_str()).ToLocalChecked());
+     result.Set( "rowID",row->getRowId());
+     result.Set( "address",row->getAddress());
+     result.Set( "description",row->getDescription());
+     result.Set( "paymentId",row->getPaymentId());
 
     return result;
 }
 
-Local<Object> makeTransactionInfoObject(const SafexNativeTransactionInfo* transaction) {
+Napi::Object makeTransactionInfoObject(Napi::Env env, const SafexNativeTransactionInfo* transaction) {
 
-    // auto transfersNative = transaction->transfers();
-    // auto transfers = Nan::New<Array>(transfersNative.size());
+     auto transfersNative = transaction->transfers();
+     auto transfers = Napi::Array::New(env, transfersNative.size());
 
-    // for (size_t i = 0; i < transfersNative.size(); ++i) {
-    //     const auto& transfer = transfersNative[i];
+     for (size_t i = 0; i < transfersNative.size(); ++i) {
+         const auto& transfer = transfersNative[i];
 
-    //     auto trObj = Nan::New<Object>();
-    //     trObj->Set(Nan::GetCurrentContext(),
-    //                Nan::New("amount").ToLocalChecked(),
-    //                convertAmount(transfer.amount));
+         auto trObj = Napi::Object::New(env);
 
-    //     trObj->Set(Nan::GetCurrentContext(),
-    //                Nan::New("tokenAmount").ToLocalChecked(),
-    //                convertAmount(transfer.token_amount));
+         trObj.Set("amount", convertAmount(env, transfer.amount));
+         trObj.Set("tokenAmount", convertAmount(env, transfer.token_amount));
 
-    //     transfers->Set(Nan::GetCurrentContext(), i, trObj);
-    // }
+         transfers[i] = trObj;
+     }
 
-    auto result = Nan::New<Object>();
-    // result->Set(Nan::GetCurrentContext(),
-    //             Nan::New("transfers").ToLocalChecked(),
-    //             transfers);
+     auto result = Napi::Object::New(env);
 
+    result.Set("transfers", transfers);
 
-    const char* direction = transaction->direction() == Safex::TransactionInfo::Direction_In ? "in" : "out";
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("direction").ToLocalChecked(),
-                Nan::New(direction).ToLocalChecked());
+     const char* direction = transaction->direction() == Safex::TransactionInfo::Direction_In ? "in" : "out";
+     result.Set("direction", direction);
 
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("pending").ToLocalChecked(),
-                Nan::New(transaction->isPending()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("failed").ToLocalChecked(),
-                Nan::New(transaction->isFailed()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("amount").ToLocalChecked(),
-                convertAmount(transaction->amount()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("tokenAmount").ToLocalChecked(),
-                convertAmount(transaction->token_amount()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("fee").ToLocalChecked(),
-                convertAmount(transaction->fee()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("blockHeight").ToLocalChecked(),
-                Nan::New((uint32_t)transaction->blockHeight()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("subAddrAccount").ToLocalChecked(),
-                Nan::New((uint32_t)transaction->subaddrAccount()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("label").ToLocalChecked(),
-                Nan::New(transaction->label().c_str()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("confirmations").ToLocalChecked(),
-                Nan::New((uint32_t)transaction->confirmations()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("unlockTime").ToLocalChecked(),
-                Nan::New((uint32_t)transaction->unlockTime()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("id").ToLocalChecked(),
-                Nan::New(transaction->hash().c_str()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("timestamp").ToLocalChecked(),
-                Nan::New((uint32_t)transaction->timestamp()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("paymentId").ToLocalChecked(),
-                Nan::New(transaction->paymentId().c_str()).ToLocalChecked());
+    result.Set("pending", transaction->isPending());
+    result.Set("failed", transaction->isFailed());
+    result.Set("amount",  convertAmount(env, transaction->amount()));
+    result.Set("tokenAmount", convertAmount(env, transaction->token_amount()));
+    result.Set("fee", convertAmount(env, transaction->fee()));
+    result.Set("blockHeight", transaction->blockHeight());
+    result.Set("subAddrAccount", transaction->subaddrAccount());
+    result.Set("label", transaction->label());
+    result.Set("confirmations", transaction->confirmations());
+    result.Set("unlockTime", transaction->unlockTime());
+    result.Set("id", transaction->hash());
+    result.Set("timestamp", transaction->timestamp());
+    result.Set("paymentId", transaction->paymentId());
 
     return result;
 }
 
-Local<Object> makeInterstObject(const std::pair<uint64_t, uint64_t>& interestData) {
-    auto result = Nan::New<Object>();
+Napi::Object makeInterstObject(Napi::Env env, const std::pair<uint64_t, uint64_t>& interestData) {
+    auto result = Napi::Object::New(env);
 
-    result->Set(Nan::GetCurrentContext(),
-            Nan::New("tokenStaked").ToLocalChecked(),
-            Nan::New(std::to_string(interestData.first).c_str()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-        Nan::New("collectedInterest").ToLocalChecked(),
-            Nan::New(std::to_string(interestData.second).c_str()).ToLocalChecked());
+    result.Set("tokenStaked", std::to_string(interestData.first));
+    result.Set("collectedInterest", std::to_string(interestData.second));
 
     return result;
 }
 
-Local<Object> makeSafexAccountObject(const SafexNativeSafexAccount& safexAccount) {
+Napi::Object makeSafexAccountObject(Napi::Env env, const SafexNativeSafexAccount& safexAccount) {
 
-    auto result = Nan::New<Object>();
+    auto result = Napi::Object::New(env);
 
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("username").ToLocalChecked(),
-                Nan::New(safexAccount.getUsername()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("data").ToLocalChecked(),
-                Nan::New(safexAccount.getData()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("publicKey").ToLocalChecked(),
-                Nan::New(safexAccount.getPubKey()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("privateKey").ToLocalChecked(),
-                Nan::New(safexAccount.getSecKey()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("status").ToLocalChecked(),
-                Nan::New((uint32_t)safexAccount.getStatus()));
+    result.Set( "username", Napi::String::New(env, safexAccount.getUsername()));
+    result.Set( "data", Napi::String::New(env, safexAccount.getData()));
+    result.Set( "publicKey", Napi::String::New(env, safexAccount.getPubKey()));
+    result.Set( "privateKey", Napi::String::New(env, safexAccount.getSecKey()));
+    result.Set( "status", Napi::Number::New(env, safexAccount.getStatus()));
 
     return result;
 }
 
-Local<Object> makeSafexOfferObject(const SafexNativeSafexOffer& safexOffer) {
+Napi::Object makeSafexOfferObject(Napi::Env env, const SafexNativeSafexOffer& safexOffer) {
 
-    auto result = Nan::New<Object>();
+    auto result = Napi::Object::New(env);
 
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("title").ToLocalChecked(),
-                Nan::New(safexOffer.getTitle()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("quantity").ToLocalChecked(),
-                convertAmount(safexOffer.getQuantity()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("price").ToLocalChecked(),
-                convertAmount(safexOffer.getPrice()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("minSfxPrice").ToLocalChecked(),
-                convertAmount(safexOffer.getMin_sfx_price()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("description").ToLocalChecked(),
-                Nan::New(safexOffer.getDescription()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("active").ToLocalChecked(),
-                Nan::New((bool)safexOffer.getActive()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("pricePegUsed").ToLocalChecked(),
-                Nan::New((bool)safexOffer.getPrice_peg_used()));
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("offerID").ToLocalChecked(),
-                Nan::New(safexOffer.getOffer_id()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("pricePegID").ToLocalChecked(),
-                Nan::New(safexOffer.getPrice_peg_id()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("seller").ToLocalChecked(),
-                Nan::New(safexOffer.getSeller()).ToLocalChecked());
-
-    result->Set(Nan::GetCurrentContext(),
-                Nan::New("currency").ToLocalChecked(),
-                Nan::New(safexOffer.getCurrency()).ToLocalChecked());
+    result.Set("title", safexOffer.getTitle());
+    result.Set("quantity", convertAmount(env, safexOffer.getQuantity()));
+    result.Set("price", convertAmount(env, safexOffer.getPrice()));
+    result.Set("minSfxPrice",convertAmount(env, safexOffer.getMin_sfx_price()));
+    result.Set("description", safexOffer.getDescription());
+    result.Set("active", safexOffer.getActive());
+    result.Set("pricePegUsed", safexOffer.getPrice_peg_used());
+    result.Set("offerID", safexOffer.getOffer_id());
+    result.Set("pricePegID", safexOffer.getPrice_peg_id());
+    result.Set("seller", safexOffer.getSeller());
+    result.Set("currency", safexOffer.getCurrency());
 
     return result;
-}
 
 }
 
-Nan::Persistent<v8::Function> Wallet::constructor;
+} // namespace
+
+Napi::FunctionReference Wallet::constructor;
+
 
 Wallet::~Wallet() {
     if (wallet_) {
@@ -276,595 +171,669 @@ Wallet::~Wallet() {
     }
 }
 
-NAN_METHOD(Wallet::WalletExists) {
+Napi::Value Wallet::WalletExists(const Napi::CallbackInfo& info) {
 
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        Nan::ThrowTypeError("Function accepts path to wallet");
-        return;
+      Napi::Env env = info.Env();
+
+    if (info.Length() != 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "Function accepts path to wallet").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
     std::string path = toStdString(info[0]);
     auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     if (!manager) {
-        Nan::ThrowTypeError("Wallet manager could not be instantiated!");
-        return;
+        Napi::TypeError::New(env, "Wallet manager could not be instantiated!").ThrowAsJavaScriptException();
+        return env.Null();
     }
     bool exists = manager->walletExists(path);
-    info.GetReturnValue().Set(Nan::New(exists));
+
+    return Napi::Boolean::New(env, exists);
 }
 
-NAN_METHOD(Wallet::CreateWallet) {
+void Wallet::CreateWallet(const Napi::CallbackInfo& info) {
+      Napi::Env env = info.Env();
+
     CreateWalletArgs walletArgs;
     std::string error = walletArgs.Init(info);
     if (!error.empty()) {
-        Nan::ThrowError(error.c_str());
+        Napi::Error::New(env, error.c_str()).ThrowAsJavaScriptException();
         return;
     }
 
-    CreateWalletTask* task = new CreateWalletTask(walletArgs);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
+    Function callback = info[1].As<Function>();
+
+    CreateWalletTask* task = new CreateWalletTask(walletArgs, callback);
+    task->Queue();
+    return;
 }
 
-NAN_METHOD(Wallet::CreateWalletFromKeys) {
+void Wallet::CreateWalletFromKeys(const Napi::CallbackInfo& info) {
+      Napi::Env env = info.Env();
+
         CreateWalletFromKeysArgs walletArgs;
         std::string error = walletArgs.Init(info);
         if (!error.empty()) {
-          Nan::ThrowError(error.c_str());
+          Napi::Error::New(env, error.c_str()).ThrowAsJavaScriptException();
           return;
         }
 
-        CreateWalletFromKeysTask* task = new CreateWalletFromKeysTask(walletArgs);
-        auto promise = task->Enqueue();
-        info.GetReturnValue().Set(promise);
+        Function callback = info[1].As<Function>();
+
+        CreateWalletFromKeysTask* task = new CreateWalletFromKeysTask(walletArgs, callback);
+        task->Queue();
+        return;
 }
 
-NAN_METHOD(Wallet::OpenWallet) {
+void Wallet::OpenWallet(const Napi::CallbackInfo& info) {
+      Napi::Env env = info.Env();
+
     OpenWalletArgs walletArgs;
     std::string error = walletArgs.Init(info);
     if (!error.empty()) {
-        Nan::ThrowError(error.c_str());
+        Napi::Error::New(env, error.c_str()).ThrowAsJavaScriptException();
         return;
     }
 
-    OpenWalletTask* task = new OpenWalletTask(walletArgs);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
+    Function callback = info[1].As<Function>();
+
+    OpenWalletTask* task = new OpenWalletTask(walletArgs, callback);
+    task->Queue();
+    return;
 }
 
-NAN_METHOD(Wallet::RecoveryWallet) {
+void Wallet::RecoveryWallet(const Napi::CallbackInfo& info) {
+      Napi::Env env = info.Env();
+
     RecoveryWalletArgs walletArgs;
     std::string error = walletArgs.Init(info);
     if (!error.empty()) {
-        Nan::ThrowError(error.c_str());
+        Napi::Error::New(env, error.c_str()).ThrowAsJavaScriptException();
         return;
     }
 
-    RecoveryWalletTask* task = new RecoveryWalletTask(walletArgs);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
+    Function callback = info[1].As<Function>();
+
+    RecoveryWalletTask* task = new RecoveryWalletTask(walletArgs, callback);
+    task->Queue();
+    return;
 }
 
-MaybeLocal<Function> Wallet::FindCallback(const std::string& name) {
-    auto it = callbacks_.find(name);
-    if (it == callbacks_.end()) {
-        return MaybeLocal<Function>();
-    }
-    return Nan::New(it->second);
+Napi::Object Wallet::Init(Napi::Env env, Napi::Object exports) {
+    Napi::HandleScope scope(env);
+
+    Napi::Function func = DefineClass(env, "Wallet",
+                {
+                InstanceMethod("close", &Wallet::Close),
+                InstanceMethod("on", &Wallet::On),
+                InstanceMethod("off", &Wallet::Off),
+                InstanceMethod("address", &Wallet::Address),
+                InstanceMethod("seed", &Wallet::Seed),
+                InstanceMethod("setSeedLanguage", &Wallet::SetSeedLanguage),
+                InstanceMethod("store", &Wallet::Store),
+                InstanceMethod("path", &Wallet::Path),
+                InstanceMethod("network", &Wallet::NetType),
+                InstanceMethod("secretViewKey", &Wallet::SecretViewKey),
+                InstanceMethod("publicViewKey", &Wallet::PublicViewKey),
+                InstanceMethod("secretSpendKey", &Wallet::SecretSpendKey),
+                InstanceMethod("publicSpendKey", &Wallet::PublicSpendKey),
+                InstanceMethod("setPassword", &Wallet::SetPassword),
+                InstanceMethod("setRefreshFromBlockHeight", &Wallet::SetRefreshFromBlockHeight),
+                InstanceMethod("getRefreshFromBlockHeight", &Wallet::GetRefreshFromBlockHeight),
+                InstanceMethod("rescanBlockchain", &Wallet::RescanBlockchain),
+                InstanceMethod("rescanBlockchainAsync", &Wallet::RescanBlockchainAsync),
+                InstanceMethod("connected", &Wallet::Connected),
+                InstanceMethod("setTrustedDaemon", &Wallet::SetTrustedDaemon),
+                InstanceMethod("trustedDaemon", &Wallet::TrustedDaemon),
+                InstanceMethod("balance", &Wallet::Balance),
+                InstanceMethod("unlockedBalance", &Wallet::UnlockedBalance),
+                InstanceMethod("tokenBalance", &Wallet::TokenBalance),
+                InstanceMethod("unlockedTokenBalance", &Wallet::UnlockedTokenBalance),
+                InstanceMethod("stakedTokenBalance", &Wallet::StakedTokenBalance),
+                InstanceMethod("unlockedStakedTokenBalance", &Wallet::UnlockedStakedTokenBalance),
+                InstanceMethod("getMyInterest", &Wallet::GetMyInterest),
+                InstanceMethod("blockchainHeight", &Wallet::BlockChainHeight),
+                InstanceMethod("daemonBlockchainHeight", &Wallet::DaemonBlockChainHeight),
+                InstanceMethod("synchronized", &Wallet::Synchronized),
+                InstanceMethod("defaultMixin", &Wallet::DefaultMixin),
+                InstanceMethod("setDefaultMixin", &Wallet::SetDefaultMixin),
+                InstanceMethod("startRefresh", &Wallet::StartRefresh),
+                InstanceMethod("pauseRefresh", &Wallet::PauseRefresh),
+                InstanceMethod("createTransaction", &Wallet::CreateTransaction),
+                InstanceMethod("createAdvancedTransaction", &Wallet::CreateAdvancedTransaction),
+                InstanceMethod("createSafexAccount", &Wallet::CreateSafexAccount),
+                InstanceMethod("getSafexAccounts", &Wallet::GetSafexAccounts),
+                InstanceMethod("getSafexAccount", &Wallet::GetSafexAccount),
+                InstanceMethod("recoverSafexAccount", &Wallet::RecoverSafexAccount),
+                InstanceMethod("removeSafexAccount", &Wallet::RemoveSafexAccount),
+                InstanceMethod("getMySafexOffers", &Wallet::GetMySafexOffers),
+                InstanceMethod("listSafexOffers", &Wallet::ListSafexOffers),
+                InstanceMethod("signMessage", &Wallet::SignMessage),
+                InstanceMethod("verifySignedMessage", &Wallet::VerifySignedMessage),
+                InstanceMethod("history", &Wallet::TransactionHistory),
+                InstanceMethod("addressBook_GetAll", &Wallet::AddressBook_GetAll),
+                InstanceMethod("addressBook_AddRow", &Wallet::AddressBook_AddRow),
+                InstanceMethod("addressBook_DeleteRow", &Wallet::AddressBook_DeleteRow),
+                InstanceMethod("addressBook_ErrorString", &Wallet::AddressBook_ErrorString),
+                InstanceMethod("addressBook_LookupPID", &Wallet::AddressBook_LookupPID)
+                                      });
+
+
+
+    constructor = Napi::Persistent(func);
+    constructor.SuppressDestruct();
+
+    exports.Set("Wallet", func);
+
+    return exports;
 }
 
-NAN_MODULE_INIT(Wallet::Init) {
-    struct FunctionRegisterInfo {
-        const char* name;
-        Nan::FunctionCallback func;
-    };
+Napi::Object Wallet::NewInstance(Napi::Env env, SafexNativeWallet *wallet) {
 
-    static std::vector<FunctionRegisterInfo> walletFunctions = {
-        {"close", Close},
-        {"address", Address},
-        {"seed", Seed},
-        {"setSeedLanguage", SetSeedLanguage},
-        {"on", On},
-        {"off", Off},
-        {"store", Store},
-        {"path", Path},
-        {"network", NetType},
-        {"secretViewKey", SecretViewKey},
-        {"publicViewKey", PublicViewKey},
-        {"secretSpendKey", SecretSpendKey},
-        {"publicSpendKey", PublicSpendKey},
-        {"setPassword", SetPassword},
-        {"setRefreshFromBlockHeight", SetRefreshFromBlockHeight},
-        {"getRefreshFromBlockHeight", GetRefreshFromBlockHeight},
-        {"rescanBlockchain", RescanBlockchain},
-        {"rescanBlockchainAsync", RescanBlockchainAsync},
-        {"connected", Connected},
-        {"setTrustedDaemon", SetTrustedDaemon},
-        {"trustedDaemon", TrustedDaemon},
-        {"balance", Balance},
-        {"unlockedBalance", UnlockedBalance},
-        {"tokenBalance", TokenBalance},
-        {"unlockedTokenBalance", UnlockedTokenBalance},
-        {"stakedTokenBalance", StakedTokenBalance},
-        {"unlockedStakedTokenBalance", UnlockedStakedTokenBalance},
-        {"getMyInterest", GetMyInterest},
-        {"blockchainHeight", BlockChainHeight},
-        {"daemonBlockchainHeight", DaemonBlockChainHeight},
-        {"synchronized", Synchronized},
-        {"defaultMixin", DefaultMixin},
-        {"setDefaultMixin", SetDefaultMixin},
-        {"startRefresh", StartRefresh},
-        {"pauseRefresh", PauseRefresh},
-        {"createTransaction", CreateTransaction},
-        {"createAdvancedTransaction", CreateAdvancedTransaction},
-        {"createSafexAccount", CreateSafexAccount},
-        {"getSafexAccounts", GetSafexAccounts},
-        {"getSafexAccount", GetSafexAccount},
-        {"recoverSafexAccount",RecoverSafexAccount},
-        {"removeSafexAccount",RemoveSafexAccount},
-        {"getMySafexOffers", GetMySafexOffers},
-        {"listSafexOffers", ListSafexOffers},
-        {"signMessage", SignMessage},
-        {"verifySignedMessage", VerifySignedMessage},
-        {"history", TransactionHistory},
-        {"addressBook_GetAll", AddressBook_GetAll},
-        {"addressBook_AddRow", AddressBook_AddRow},
-        {"addressBook_DeleteRow", AddressBook_DeleteRow},
-        {"addressBook_ErrorString", AddressBook_ErrorString},
-        {"addressBook_LookupPID", AddressBook_LookupPID}
-    };
 
-    std::cout << "Wallet::Init" << std::endl;
+    Napi::EscapableHandleScope scope(env);
+    Napi::Object obj = constructor.New({});
 
-    auto tpl = Nan::New<FunctionTemplate>(Wallet::New);
-    tpl->SetClassName(Nan::New("Wallet").ToLocalChecked());
-    tpl->InstanceTemplate()->SetInternalFieldCount(walletFunctions.size());
+    Wallet* w = Napi::ObjectWrap<Wallet>::Unwrap(obj);
 
-    for (const auto& info: walletFunctions) {
-        Nan::SetPrototypeMethod(tpl, info.name, info.func);
-    }
-    constructor.Reset(tpl->GetFunction(Nan::GetCurrentContext()).ToLocalChecked());
-}
+    w->wallet_ = wallet;
 
-v8::Local<v8::Object> Wallet::NewInstance(SafexNativeWallet *wallet) {
-    const unsigned argc = 0;
-    Local<Value> argv[1] = { Nan::Null() };
-    Local<Function> cons = Nan::New(constructor);
-    Local<Context> context = Nan::GetCurrentContext();
-    Local<Object> instance = cons->NewInstance(context, argc, argv).ToLocalChecked();
-
-    Wallet* w = new Wallet(wallet);
     wallet->setListener(w);
     //TODO: make it configurable
     wallet->segregatePreForkOutputs(false);
     wallet->keyReuseMitigation2(false);
 
-    w->Wrap(instance);
-    return instance;
+    return scope.Escape(napi_value(obj)).ToObject();
+
 }
 
-NAN_METHOD(Wallet::New) {
 
-  if (info.IsConstructCall()) {
-    Wallet* obj = new Wallet(nullptr);
-    obj->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
-  } else {
-    const int argc = 0;
-    Local<Value> argv[1] = { Nan::Null()};
-    Local<Function> cons = Nan::New(constructor);
-    Local<Context> context = Nan::GetCurrentContext();
+void Wallet::Close(const Napi::CallbackInfo& info)  {
 
-    Local<Object> instance = cons->NewInstance(context, argc, argv).ToLocalChecked();
-    info.GetReturnValue().Set(instance);
-  }
+    Napi::Env env = info.Env();
+
+     if (info.Length() > 1 && !info[0].IsBoolean()) {
+         Napi::Error::New(env, "Function accepts one optional boolean argument").ThrowAsJavaScriptException();
+         return;
+     }
+     bool store = false;
+      if (info.Length() != 0) {
+          store = info[0].As<Napi::Boolean>().Value();
+      }
+
+     Function callback = info[1].As<Function>();
+
+     CloseWalletTask* task = new CloseWalletTask(this->wallet_, store, callback);
+     task->Queue();
+
+    return;
 }
 
-NAN_METHOD(Wallet::Close)  {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+Napi::Value Wallet::Address(const Napi::CallbackInfo& info) {
 
-    if (info.Length() > 1 && !info[0]->IsBoolean()) {
-        Nan::ThrowError("Function accepts one optional boolean argument");
-        return;
-    }
-    bool store = false;
-         if (info.Length() != 0) {
-             store = Nan::To<bool>(info[0]).FromJust();
-         }
+        auto buf = this->wallet_->address();
+        auto addr = Napi::String::New(info.Env(), buf.c_str());
 
-    CloseWalletTask* task = new CloseWalletTask(obj->wallet_, store);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
+        return addr;
 }
 
-NAN_METHOD(Wallet::Address) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+Napi::Value Wallet::Seed(const Napi::CallbackInfo& info) {
 
-    auto buf = obj->wallet_->address();
-    auto addr = Nan::New(buf.c_str()).ToLocalChecked();
+        auto buf = this->wallet_->seed();
+        auto seed = Napi::String::New(info.Env(), buf.c_str());
 
-    info.GetReturnValue().Set(addr);
+        return seed;
 }
 
-NAN_METHOD(Wallet::Seed) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+void Wallet::SetSeedLanguage(const Napi::CallbackInfo& info) {
 
-    auto buf = obj->wallet_->seed();
-    auto seed = Nan::New(buf.c_str()).ToLocalChecked();
+    Napi::Env env = info.Env();
 
-    info.GetReturnValue().Set(seed);
-}
-
-NAN_METHOD(Wallet::SetSeedLanguage) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    if (info.Length() != 1 || !info[0]->IsString()) {
-            Nan::ThrowTypeError("String argument is required");
-            return;
-        }
-
-    obj->wallet_->setSeedLanguage(toStdString(Nan::To<v8::String>(info[0]).ToLocalChecked()));
-
-    info.GetReturnValue().Set(info.Holder());
-}
-
-NAN_METHOD(Wallet::On) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    if (info.Length() != 2) {
-        Nan::ThrowError("2 arguments are required");
-        return;
-    }
-
-    if (!info[0]->IsString() || !info[1]->IsFunction()) {
-
-        Nan::ThrowTypeError("Function accepts string and function arguments");
-        return;
-    }
-
-    obj->callbacks_[toStdString(info[0])] = CopyablePersistentFunction(info.GetIsolate(), Local<Function>::Cast(info[1]));
-    info.GetReturnValue().Set(info.Holder());
-}
-
-NAN_METHOD(Wallet::Off) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    //delete all listeners
-    if (info.Length() == 0) {
-        obj->callbacks_.clear();
-        info.GetReturnValue().Set(info.Holder());
-        return;
-    }
-
-    if (info.Length() != 1 || !info[0]->IsString()) {
-
-        Nan::ThrowTypeError("Function accepts no arguments or event name");
-        return;
-    }
-
-    obj->callbacks_.erase(toStdString(info[0]));
-    info.GetReturnValue().Set(info.Holder());
-}
-
-NAN_METHOD(Wallet::Store) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    StoreWalletTask* task = new StoreWalletTask(obj->wallet_);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
-}
-
-NAN_METHOD(Wallet::Path) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(obj->wallet_->path().c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::NetType) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    std::string nettype;
-    if (!convertNettype(obj->wallet_->nettype(), nettype)) {
-        assert(0);
-    }
-
-    info.GetReturnValue().Set(Nan::New(nettype.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::SecretViewKey) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(obj->wallet_->secretViewKey().c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::PublicViewKey) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(obj->wallet_->publicViewKey().c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::SecretSpendKey) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(obj->wallet_->secretSpendKey().c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::PublicSpendKey) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(obj->wallet_->publicSpendKey().c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::SetPassword) {
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        Nan::ThrowTypeError("String argument is required");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    if (!obj->wallet_->setPassword(toStdString(Nan::To<v8::String>(info[0]).ToLocalChecked()))) {
-        Nan::ThrowError(obj->wallet_->errorString().c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(info.Holder());
-}
-
-NAN_METHOD(Wallet::SetRefreshFromBlockHeight) {
-    if (info.Length() != 1 || !info[0]->IsInt32()) {
-        Nan::ThrowTypeError("Integer argument is required");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    obj->wallet_->setRefreshFromBlockHeight(info[0]->Uint32Value(Nan::GetCurrentContext()).ToChecked());
-
-    info.GetReturnValue().Set(info.Holder());
-}
-
-NAN_METHOD(Wallet::GetRefreshFromBlockHeight) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New((uint32_t)obj->wallet_->getRefreshFromBlockHeight()));
-}
-
-NAN_METHOD(Wallet::Connected) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    std::string status;
-    switch (obj->wallet_->connected()) {
-    case Safex::Wallet::ConnectionStatus_Connected:
-        status = "connected";
-        break;
-    case Safex::Wallet::ConnectionStatus_Disconnected:
-        status = "disconnected";
-        break;
-    case Safex::Wallet::ConnectionStatus_WrongVersion:
-        status = "incompatible";
-        break;
-    default:
-        assert(0);
-        break;
-    }
-
-    info.GetReturnValue().Set(Nan::New(status.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::SetTrustedDaemon) {
-    if (info.Length() != 1 || !info[0]->IsBoolean()) {
-        Nan::ThrowTypeError("Bool argument is required");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    obj->wallet_->setTrustedDaemon(Nan::To<bool>(info[0]).FromJust());
-
-    info.GetReturnValue().Set(info.Holder());
-}
-
-NAN_METHOD(Wallet::TrustedDaemon) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(obj->wallet_->trustedDaemon()));
-}
-
-NAN_METHOD(Wallet::Balance) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    // it seems v8 doesn't have uint64
-    info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->balanceAll()).c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::UnlockedBalance) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->unlockedBalanceAll()).c_str()).ToLocalChecked());
-}
-
-  NAN_METHOD(Wallet::TokenBalance) {
-          Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-          // it seems v8 doesn't have uint64
-          info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->tokenBalanceAll()).c_str()).ToLocalChecked());
-  }
-
-  NAN_METHOD(Wallet::UnlockedTokenBalance) {
-          Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-          info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->unlockedTokenBalanceAll()).c_str()).ToLocalChecked());
-  }
-
-  NAN_METHOD(Wallet::StakedTokenBalance) {
-          Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-          // it seems v8 doesn't have uint64
-          info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->stakedTokenBalanceAll()).c_str()).ToLocalChecked());
-  }
-
-  NAN_METHOD(Wallet::UnlockedStakedTokenBalance) {
-          Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-          info.GetReturnValue().Set(Nan::New(std::to_string(obj->wallet_->unlockedStakedTokenBalanceAll()).c_str()).ToLocalChecked());
-  }
-
-  NAN_METHOD(Wallet::GetMyInterest) {
-        Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-        std::vector<std::pair<uint64_t, uint64_t>> interest_per_output;
-
-        uint64_t total_interest = obj->wallet_->getMyInterest(interest_per_output);
-
-        auto result = Nan::New<Array>(interest_per_output.size());
-        for (size_t i = 0; i < interest_per_output.size(); ++i) {
-            const auto& output = interest_per_output[i];
-            
-            auto interestObj = makeInterstObject(output);
-
-            if (result->Set(Nan::GetCurrentContext(), i, interestObj).IsNothing()) {
-                Nan::ThrowError("Couldn't make interest info list: unknown error");
+    if (info.Length() != 1 || !info[0].IsString()) {
+                Napi::TypeError::New(env, "String argument is required").ThrowAsJavaScriptException();
                 return;
-            }
-        }
-
-        info.GetReturnValue().Set(result);
-  }
-
-NAN_METHOD(Wallet::BlockChainHeight) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    info.GetReturnValue().Set(Nan::New((uint32_t)obj->wallet_->blockChainHeight()));
-}
-
-NAN_METHOD(Wallet::DaemonBlockChainHeight) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New((uint32_t)obj->wallet_->daemonBlockChainHeight()));
-}
-
-NAN_METHOD(Wallet::Synchronized) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(obj->wallet_->synchronized()));
-}
-
-NAN_METHOD(Wallet::GenPaymentId) {
-    info.GetReturnValue().Set(Nan::New(SafexNativeWallet::genPaymentId().c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::PaymentIdValid) {
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        Nan::ThrowTypeError("String argument is required");
-        return;
     }
 
-    info.GetReturnValue().Set(Nan::New(SafexNativeWallet::paymentIdValid(toStdString(info[0]))));
+    this->wallet_->setSeedLanguage(toStdString(info[0]));
+
+    return;
 }
 
-NAN_METHOD(Wallet::AddressValid) {
-    if (info.Length() != 2 || !info[0]->IsString() || !info[1]->IsString()) {
-        Nan::ThrowTypeError("2 string arguments are required");
-        return;
-    }
+void Wallet::On(const Napi::CallbackInfo& info) {
 
-    Safex::NetworkType nettype;
-    if (!getNettype(toStdString(info[1]), nettype)) {
-        Nan::ThrowError("wrong network type argument");
-        return;
-    }
-    bool valid = SafexNativeWallet::addressValid(toStdString(info[0]), nettype);
-    info.GetReturnValue().Set(Nan::New(valid));
-}
+    Napi::Env env = info.Env();
+    Napi::HandleScope scope(env);
 
-NAN_METHOD(Wallet::RescanBlockchain) {
-        Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-        obj->wallet_->setRefreshFromBlockHeight(0);
-        obj->wallet_->rescanBlockchain();
-}
-
-NAN_METHOD(Wallet::RescanBlockchainAsync) {
-        Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-        obj->wallet_->setRefreshFromBlockHeight(0);
-        obj->wallet_->rescanBlockchainAsync();
-}
-
-
-NAN_METHOD(Wallet::DefaultMixin) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    info.GetReturnValue().Set(Nan::New(obj->wallet_->defaultMixin()));
-}
-
-NAN_METHOD(Wallet::SetDefaultMixin) {
-    if (info.Length() != 1 || !info[0]->IsInt32()) {
-        Nan::ThrowTypeError("Integer argument is required");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    obj->wallet_->setDefaultMixin(Nan::To<v8::Int32>(info[0]).ToLocalChecked()->Value());
-}
-
-NAN_METHOD(Wallet::StartRefresh) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    obj->wallet_->startRefresh();
-}
-
-NAN_METHOD(Wallet::PauseRefresh) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    obj->wallet_->pauseRefresh();
-}
-
-NAN_METHOD(Wallet::TransactionHistory) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    auto history = obj->wallet_->history();
-    history->refresh();
-    auto transactions = history->getAll();
-    auto result = Nan::New<Array>(transactions.size());
-    for (size_t i = 0; i < transactions.size(); ++i) {
-        const auto& transaction = transactions[i];
-
-        if(transaction == nullptr) continue;
-        
-        auto txObj = makeTransactionInfoObject(transaction);
-
-        if (result->Set(Nan::GetCurrentContext(), i, txObj).IsNothing()) {
-            Nan::ThrowError("Couldn't make transaction info list: unknown error");
+        if (info.Length() != 2) {
+            Napi::Error::New(env, "2 arguments are required").ThrowAsJavaScriptException();
             return;
         }
-    }
 
-    info.GetReturnValue().Set(result);
+        if (!info[0].IsString() || !info[1].IsFunction()) {
+
+            Napi::TypeError::New(env, "Function accepts string and function arguments").ThrowAsJavaScriptException();
+            return;
+        }
+
+        this->callbacks_[toStdString(info[0])] = Napi::ThreadSafeFunction::New(
+            env,
+            info[1].As<Function>(),  // JavaScript function called asynchronously
+            toStdString(info[0]),         // Name
+            0,                       // Unlimited queue
+            1,                       // Only one thread will use this initially
+            []( Napi::Env ) {        // Finalizer used to clean threads up
+            } );
+
+
+    return;
 }
 
-NAN_METHOD(Wallet::CreateTransaction) {
-    CreateTransactionArgs txArgs;
-    std::string error = txArgs.Init(info);
-    if (!error.empty()) {
-        Nan::ThrowError(error.c_str());
+void Wallet::Off(const Napi::CallbackInfo& info) {
+     Napi::Env env = info.Env();
+     Napi::HandleScope scope(env);
+
+        //delete all listeners
+        if (info.Length() == 0) {
+            this->callbacks_.clear();
+            return;
+        }
+
+        if (info.Length() != 1 || !info[0].IsString()) {
+            Napi::TypeError::New(env, "Function accepts no arguments or event name").ThrowAsJavaScriptException();
+            return;
+        }
+
+        this->callbacks_.erase(toStdString(info[0]));
         return;
-    }
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    CreateTransactionTask* task = new CreateTransactionTask(txArgs, obj->wallet_);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
+
 }
 
-NAN_METHOD(Wallet::CreateAdvancedTransaction) {
-    CreateAdvancedTransactionArgs txArgs;
-    std::string error = txArgs.Init(info);
-    if (!error.empty()) {
-        Nan::ThrowError(error.c_str());
-        return;
-    }
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    CreateAdvancedTransactionTask* task = new CreateAdvancedTransactionTask(txArgs, obj->wallet_);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
+void Wallet::Store(const Napi::CallbackInfo& info) {
+
+
+    Function callback = info[0].As<Function>();
+
+    StoreWalletTask* task = new StoreWalletTask(this->wallet_, callback);
+    task->Queue();
+
+    return;
+
 }
 
-NAN_METHOD(Wallet::CreateSafexAccount) {
+Napi::Value Wallet::Path(const Napi::CallbackInfo& info) {
 
-    if (info.Length() != 2 || !info[0]->IsString() || !info[1]->IsString()) {
-        Nan::ThrowTypeError("Function accepts string argument");
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, this->wallet_->path().c_str());
+
+}
+
+Napi::Value Wallet::NetType(const Napi::CallbackInfo& info) {
+
+        Napi::Env env = info.Env();
+
+        std::string nettype;
+        if (!convertNettype(this->wallet_->nettype(), nettype)) {
+            Napi::TypeError::New(env, "Error getting nettype").ThrowAsJavaScriptException();
+            return Napi::String::New(env, "error");
+        }
+
+        return Napi::String::New(env, nettype.c_str());
+
+}
+
+Napi::Value Wallet::SecretViewKey(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, this->wallet_->secretViewKey().c_str());
+
+}
+
+Napi::Value Wallet::PublicViewKey(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, this->wallet_->publicViewKey().c_str());
+
+}
+
+Napi::Value Wallet::SecretSpendKey(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, this->wallet_->secretSpendKey().c_str());
+
+}
+
+Napi::Value Wallet::PublicSpendKey(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, this->wallet_->publicSpendKey().c_str());
+
+}
+
+Napi::Value Wallet::SetPassword(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+        if (info.Length() != 1 || !info[0].IsString()) {
+            Napi::TypeError::New(env, "String argument is required").ThrowAsJavaScriptException();
+            return env.Null();
+        }
+
+        bool res = this->wallet_->setPassword(toStdString(info[0].As<Napi::String>()));
+
+        if (!res) {
+            Napi::Error::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        }
+
+        return Napi::Boolean::New(env, res);
+
+}
+
+void Wallet::SetRefreshFromBlockHeight(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+        if (info.Length() != 1 || !info[0].IsNumber()) {
+            Napi::TypeError::New(env, "Integer argument is required").ThrowAsJavaScriptException();
+            return;
+        }
+
+        uint32_t height = info[0].As<Napi::Number>();
+
+        this->wallet_->setRefreshFromBlockHeight(height);
+
         return;
+
+}
+
+Napi::Value Wallet::GetRefreshFromBlockHeight(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    return Napi::Number::New(env, (uint32_t)this->wallet_->getRefreshFromBlockHeight());
+
+}
+
+Napi::Value Wallet::Connected(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+
+        std::string status;
+        switch (this->wallet_->connected()) {
+        case Safex::Wallet::ConnectionStatus_Connected:
+            status = "connected";
+            break;
+        case Safex::Wallet::ConnectionStatus_Disconnected:
+            status = "disconnected";
+            break;
+        case Safex::Wallet::ConnectionStatus_WrongVersion:
+            status = "incompatible";
+            break;
+        default:
+            Napi::TypeError::New(env, "Error getting connected status").ThrowAsJavaScriptException();
+            break;
+        }
+
+        return Napi::String::New(env, status.c_str());
+
+}
+
+void Wallet::SetTrustedDaemon(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+
+        if (info.Length() != 1 || !info[0].IsBoolean()) {
+            Napi::TypeError::New(env, "Bool argument is required").ThrowAsJavaScriptException();
+            return;
+        }
+
+        this->wallet_->setTrustedDaemon(info[0].As<Napi::Boolean>().Value());
+
+    return;
+
+}
+
+Napi::Value Wallet::TrustedDaemon(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    return Napi::Boolean::New(env, this->wallet_->trustedDaemon());
+
+}
+
+Napi::Value Wallet::Balance(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, std::to_string(this->wallet_->balanceAll()).c_str());
+
+}
+
+Napi::Value Wallet::UnlockedBalance(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, std::to_string(this->wallet_->unlockedBalanceAll()).c_str());
+
+}
+
+Napi::Value Wallet::TokenBalance(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, std::to_string(this->wallet_->tokenBalanceAll()).c_str());
+
+}
+
+Napi::Value Wallet::UnlockedTokenBalance(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, std::to_string(this->wallet_->unlockedTokenBalanceAll()).c_str());
+
+}
+
+Napi::Value Wallet::StakedTokenBalance(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, std::to_string(this->wallet_->stakedTokenBalanceAll()).c_str());
+
+}
+
+Napi::Value Wallet::UnlockedStakedTokenBalance(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, std::to_string(this->wallet_->unlockedStakedTokenBalanceAll()).c_str());
+
+}
+
+Napi::Value Wallet::GetMyInterest(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+            std::vector<std::pair<uint64_t, uint64_t>> interest_per_output;
+
+            uint64_t total_interest = this->wallet_->getMyInterest(interest_per_output);
+
+            auto result = Napi::Array::New(env, interest_per_output.size());
+            for (size_t i = 0; i < interest_per_output.size(); ++i) {
+                const auto& output = interest_per_output[i];
+
+                auto interestObj = makeInterstObject(env, output);
+
+                result[i] = interestObj;
+            }
+
+            return result;
+
+}
+
+Napi::Value Wallet::BlockChainHeight(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::Number::New(env, (uint32_t)this->wallet_->blockChainHeight());
+}
+
+Napi::Value Wallet::DaemonBlockChainHeight(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::Number::New(env, (uint32_t)this->wallet_->daemonBlockChainHeight());
+
+}
+
+Napi::Value Wallet::Synchronized(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::Boolean::New(env, this->wallet_->synchronized());
+
+}
+
+Napi::Value Wallet::GenPaymentId(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::String::New(env, SafexNativeWallet::genPaymentId().c_str());
+
+}
+
+Napi::Value Wallet::PaymentIdValid(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+        if (info.Length() != 1 || !info[0].IsString()) {
+            Napi::TypeError::New(env, "String argument is required").ThrowAsJavaScriptException();
+            return env.Null();
+        }
+
+        return Napi::Boolean::New(env, SafexNativeWallet::paymentIdValid(toStdString(info[0])));
+
+}
+
+Napi::Value Wallet::AddressValid(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+        if (info.Length() != 2 || !info[0].IsString() || !info[1].IsString()) {
+            Napi::TypeError::New(env, "2 string arguments are required").ThrowAsJavaScriptException();
+            return env.Null();
+        }
+
+        Safex::NetworkType nettype;
+        if (!getNettype(toStdString(info[1]), nettype)) {
+            Napi::Error::New(env, "wrong network type argument").ThrowAsJavaScriptException();
+            return env.Null();
+        }
+        bool valid = SafexNativeWallet::addressValid(toStdString(info[0]), nettype);
+        return Napi::Boolean::New(env, valid);
+
+}
+
+void Wallet::RescanBlockchain(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+            this->wallet_->setRefreshFromBlockHeight(0);
+            this->wallet_->rescanBlockchain();
+}
+
+void Wallet::RescanBlockchainAsync(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+            this->wallet_->setRefreshFromBlockHeight(0);
+            this->wallet_->rescanBlockchainAsync();
+
+}
+
+
+Napi::Value Wallet::DefaultMixin(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    return Napi::Number::New(env, this->wallet_->defaultMixin());
+
+}
+
+void Wallet::SetDefaultMixin(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+        if (info.Length() != 1 || !info[0].IsNumber()) {
+            Napi::TypeError::New(env, "Integer argument is required").ThrowAsJavaScriptException();
+            return;
+        }
+
+        this->wallet_->setDefaultMixin((info[0].As<Number>()));
+
+}
+
+Napi::Value Wallet::StartRefresh(const Napi::CallbackInfo& info) {
+    this->wallet_->startRefresh();
+
+}
+
+Napi::Value Wallet::PauseRefresh(const Napi::CallbackInfo& info) {
+    this->wallet_->pauseRefresh();
+}
+
+Napi::Value Wallet::TransactionHistory(const Napi::CallbackInfo& info) {
+
+        Napi::Env env = info.Env();
+
+        auto history = this->wallet_->history();
+        history->refresh();
+        auto transactions = history->getAll();
+        auto result = Napi::Array::New(env, transactions.size());
+        for (size_t i = 0; i < transactions.size(); ++i) {
+            const auto& transaction = transactions[i];
+
+            if(transaction == nullptr) continue;
+
+            auto txObj = makeTransactionInfoObject(env, transaction);
+
+            result[i] = txObj;
+        }
+
+        return result;
+
+}
+
+void Wallet::CreateTransaction(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+        CreateTransactionArgs txArgs;
+        std::string error = txArgs.Init(info);
+        if (!error.empty()) {
+            Napi::Error::New(env, error.c_str()).ThrowAsJavaScriptException();
+            return;
+        }
+
+        Function callback = info[1].As<Function>();
+
+
+        CreateTransactionTask* task = new CreateTransactionTask(txArgs, this->wallet_, callback);
+        task->Queue();
+        return;
+
+}
+
+void Wallet::CreateAdvancedTransaction(const Napi::CallbackInfo& info) {
+
+        Napi::Env env = info.Env();
+
+        CreateAdvancedTransactionArgs txArgs;
+        std::string error = txArgs.Init(info);
+        if (!error.empty()) {
+            Napi::Error::New(env, error.c_str()).ThrowAsJavaScriptException();
+            return;
+        }
+
+        Function callback = info[1].As<Function>();
+
+        CreateAdvancedTransactionTask* task = new CreateAdvancedTransactionTask(txArgs, this->wallet_, callback);
+        task->Queue();
+        return;
+
+}
+
+Napi::Value Wallet::CreateSafexAccount(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 2 || !info[0].IsString() || !info[1].IsString()) {
+        Napi::TypeError::New(env, "Function accepts string argument").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
     auto username = toStdString(info[0]);
@@ -872,259 +841,269 @@ NAN_METHOD(Wallet::CreateSafexAccount) {
 
     auto description = std::vector<uint8_t>(desc.begin(),desc.end());
 
-     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
-     auto res = obj->wallet_->createSafexAccount(username, description);
+    auto res = this->wallet_->createSafexAccount(username, description);
 
+    return Napi::Boolean::New(env, res);
 
-    info.GetReturnValue().Set(Nan::New(res));
 
 }
 
-NAN_METHOD(Wallet::GetSafexAccounts) {
+Napi::Value Wallet::GetSafexAccounts(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
 
     if (info.Length() != 0) {
-        Nan::ThrowTypeError("Function accepts no arguments");
-        return;
+        Napi::TypeError::New(env, "Function accepts no arguments").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
-     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-
-    auto safexAccounts = obj->wallet_->getSafexAccounts();
-    auto result = Nan::New<Array>(safexAccounts.size());
+    auto safexAccounts = this->wallet_->getSafexAccounts();
+    auto result = Napi::Array::New(env, safexAccounts.size());
 
     for (size_t i = 0; i < safexAccounts.size(); ++i) {
             const auto& safexAccount = safexAccounts[i];
 
-            auto safexAccountObj = makeSafexAccountObject(safexAccount);
+            auto safexAccountObj = makeSafexAccountObject(env, safexAccount);
 
-            if (result->Set(Nan::GetCurrentContext(), i, safexAccountObj).IsNothing()) {
-                Nan::ThrowError("Couldn't make safexAccount info list: unknown error");
-                return;
-            }
+            result[i] = safexAccountObj;
+
         }
 
 
-    info.GetReturnValue().Set(result);
+    return result;
+
 
 }
 
-NAN_METHOD(Wallet::GetSafexAccount) {
+Napi::Value Wallet::GetSafexAccount(const Napi::CallbackInfo& info) {
 
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        Nan::ThrowTypeError("Function accepts string argument");
-        return;
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "Function accepts string argument").ThrowAsJavaScriptException();
+        return env.Null();
     }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
     auto username = toStdString(info[0]);
 
-    auto safexAccount = obj->wallet_->getSafexAccount(username);
-    auto safexAccountObj = makeSafexAccountObject(safexAccount);
+    auto safexAccount = this->wallet_->getSafexAccount(username);
+    auto safexAccountObj = makeSafexAccountObject(env, safexAccount);
 
-    info.GetReturnValue().Set(safexAccountObj);
+    return safexAccountObj;
+
 }
 
-NAN_METHOD(Wallet::RecoverSafexAccount) {
+Napi::Value Wallet::RecoverSafexAccount(const Napi::CallbackInfo& info) {
 
-    if (info.Length() != 2 || !info[0]->IsString() || !info[1]->IsString()) {
-        Nan::ThrowTypeError("Function accepts string arguments");
-        return;
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 2 || !info[0].IsString() || !info[1].IsString()) {
+        Napi::TypeError::New(env, "Function accepts string arguments").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
     auto username = toStdString(info[0]);
     auto secret_key = toStdString(info[1]);
 
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
-    auto res = obj->wallet_->recoverSafexAccount(username, secret_key);
+    auto res = this->wallet_->recoverSafexAccount(username, secret_key);
 
 
-    info.GetReturnValue().Set(Nan::New(res));
+    return Napi::Boolean::New(env, res);
 
 }
 
-NAN_METHOD(Wallet::RemoveSafexAccount) {
+Napi::Value Wallet::RemoveSafexAccount(const Napi::CallbackInfo& info) {
 
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        Nan::ThrowTypeError("Function accepts string argument");
-        return;
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "Function accepts string argument").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
     auto username = toStdString(info[0]);
 
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    auto res = obj->wallet_->removeSafexAccount(username);
+    auto res = this->wallet_->removeSafexAccount(username);
 
-    info.GetReturnValue().Set(Nan::New(res));
+    return Napi::Boolean::New(env, res);
+
 
 }
 
-NAN_METHOD(Wallet::GetMySafexOffers) {
+Napi::Value Wallet::GetMySafexOffers(const Napi::CallbackInfo& info) {
 
-    if (info.Length() != 0) {
-        Nan::ThrowTypeError("Function accepts no arguments");
-        return;
-    }
+    Napi::Env env = info.Env();
 
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+        if (info.Length() != 0) {
+            Napi::TypeError::New(env, "Function accepts no arguments").ThrowAsJavaScriptException();
+            return env.Null();
+        }
 
-    auto safexOffers = obj->wallet_->getMySafexOffers();
-    auto result = Nan::New<Array>(safexOffers.size());
+        auto safexOffers = this->wallet_->getMySafexOffers();
+        auto result = Napi::Array::New(env, safexOffers.size());
 
-    for (size_t i = 0; i < safexOffers.size(); ++i) {
-            const auto& safexOffer = safexOffers[i];
+        for (size_t i = 0; i < safexOffers.size(); ++i) {
+                const auto& safexOffer = safexOffers[i];
 
-            auto safexOfferObj = makeSafexOfferObject(safexOffer);
+                auto safexOfferObj = makeSafexOfferObject(env, safexOffer);
 
-            if (result->Set(Nan::GetCurrentContext(), i, safexOfferObj).IsNothing()) {
-                Nan::ThrowError("Couldn't make safexOffer info list: unknown error");
-                return;
-            }
+                result[i] = safexOfferObj;
+        }
+
+        return result;
+
+}
+
+Napi::Value Wallet::ListSafexOffers(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+
+        if (info.Length() != 1 || !info[0].IsBoolean()) {
+            Napi::TypeError::New(env, "Function accepts boolean argument").ThrowAsJavaScriptException();
+            return env.Null();
+        }
+
+        bool active = info[0].As<Napi::Boolean>().Value();
+
+
+        auto safexOffers = this->wallet_->listSafexOffers(active);
+        auto result = Napi::Array::New(env, safexOffers.size());
+
+        for (size_t i = 0; i < safexOffers.size(); ++i) {
+                const auto& safexOffer = safexOffers[i];
+
+                auto safexOfferObj = makeSafexOfferObject(env, safexOffer);
+
+                result[i] = safexOfferObj;
         }
 
 
-    info.GetReturnValue().Set(result);
+        return result;
+
 }
 
-NAN_METHOD(Wallet::ListSafexOffers) {
 
-    if (info.Length() != 1 || !info[0]->IsBoolean()) {
-        Nan::ThrowTypeError("Function accepts boolean argument");
-        return;
-    }
+Napi::Value Wallet::SignMessage(const Napi::CallbackInfo& info) {
 
-    bool active = Nan::To<bool>(info[0]).FromJust();
+    Napi::Env env = info.Env();
 
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
-    auto safexOffers = obj->wallet_->listSafexOffers(active);
-    auto result = Nan::New<Array>(safexOffers.size());
-
-    for (size_t i = 0; i < safexOffers.size(); ++i) {
-            const auto& safexOffer = safexOffers[i];
-
-            auto safexOfferObj = makeSafexOfferObject(safexOffer);
-
-            if (result->Set(Nan::GetCurrentContext(), i, safexOfferObj).IsNothing()) {
-                Nan::ThrowError("Couldn't make safexOffer info list: unknown error");
-                return;
-            }
+        if (info.Length() != 1 || !info[0].IsString()) {
+            Napi::TypeError::New(env, "Function accepts string argument").ThrowAsJavaScriptException();
+            return env.Null();
         }
 
-
-    info.GetReturnValue().Set(result);
-}
-
-
-NAN_METHOD(Wallet::SignMessage) {
-
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        Nan::ThrowTypeError("Function accepts string argument");
-        return;
-    }
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    auto signature = obj->wallet_->signMessage(toStdString(info[0]));
-    if (obj->wallet_->status() != Safex::Wallet::Status_Ok) {
-        Nan::ThrowTypeError(obj->wallet_->errorString().c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(Nan::New(signature.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(Wallet::VerifySignedMessage) {
-
-    if (info.Length() != 3 || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
-        Nan::ThrowTypeError("Function accepts message, monero address and signature as string arguments");
-        return;
-    }
-
-    auto message = toStdString(info[0]);
-    auto address = toStdString(info[1]);
-    auto signature = toStdString(info[2]);
-
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    bool valid = obj->wallet_->verifySignedMessage(message, address, signature);
-
-    if (obj->wallet_->status() != Safex::Wallet::Status_Ok) {
-        Nan::ThrowTypeError(obj->wallet_->errorString().c_str());
-        return;
-    }
-
-    info.GetReturnValue().Set(valid);
-}
-
-NAN_METHOD(Wallet::AddressBook_GetAll) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-    auto addressBook = obj->wallet_->addressBook();
-    addressBook->refresh();
-    auto rows = addressBook->getAll();
-    auto result = Nan::New<Array>(rows.size());
-    for (size_t i = 0; i < rows.size(); ++i) {
-        const auto& row = rows[i];
-        auto rowObj = makeAddressBookRowInfoObject(row);
-
-        if (result->Set(Nan::GetCurrentContext(), i, rowObj).IsNothing()) {
-            Nan::ThrowError("Couldn't make row info list: unknown error");
-            return;
+        auto signature = this->wallet_->signMessage(toStdString(info[0]));
+        if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+            Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+            return env.Null();
         }
-    }
 
-    info.GetReturnValue().Set(result);
+        return Napi::String::New(env, signature.c_str());
+
 }
 
-NAN_METHOD(Wallet::AddressBook_AddRow) {
-     if (info.Length() != 3  || !info[0]->IsString() || !info[1]->IsString() || !info[2]->IsString()) {
-        Nan::ThrowTypeError("Function accepts address, payment ID and description");
-        return;
+Napi::Value Wallet::VerifySignedMessage(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+        if (info.Length() != 3 || !info[0].IsString() || !info[1].IsString() || !info[2].IsString()) {
+            Napi::TypeError::New(env, "Function accepts message, monero address and signature as string arguments").ThrowAsJavaScriptException();
+            return env.Null();
+        }
+
+        auto message = toStdString(info[0]);
+        auto address = toStdString(info[1]);
+        auto signature = toStdString(info[2]);
+
+        bool valid = this->wallet_->verifySignedMessage(message, address, signature);
+
+        if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+            Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+            return env.Null();
+        }
+
+        return Napi::Boolean::New(env, valid);
+
+}
+
+Napi::Value Wallet::AddressBook_GetAll(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    auto addressBook = this->wallet_->addressBook();
+        addressBook->refresh();
+        auto rows = addressBook->getAll();
+        auto result = Napi::Array::New(env, rows.size());
+        for (size_t i = 0; i < rows.size(); ++i) {
+            const auto& row = rows[i];
+            auto rowObj = makeAddressBookRowInfoObject(env, row);
+
+            result[i] = rowObj;
+        }
+
+        return result;
+
+}
+
+Napi::Value Wallet::AddressBook_AddRow(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+     if (info.Length() != 3  || !info[0].IsString() || !info[1].IsString() || !info[2].IsString()) {
+        Napi::TypeError::New(env, "Function accepts address, payment ID and description").ThrowAsJavaScriptException();
+        return env.Null();
      }
 
      auto address = toStdString(info[0]);
      auto paymentID = toStdString(info[1]);
      auto description = toStdString(info[2]);
 
-     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
 
-     bool valid = obj->wallet_->addressBook()->addRow(address, paymentID, description);
+     bool valid = this->wallet_->addressBook()->addRow(address, paymentID, description);
 
-     info.GetReturnValue().Set(valid);
+     return Napi::Boolean::New(env, valid);
+
 }
 
-NAN_METHOD(Wallet::AddressBook_DeleteRow) {
-     if (info.Length() != 1 || !info[0]->IsInt32() ) {
-        Nan::ThrowTypeError("Function accepts rowId");
-        return;
-     }
+Napi::Value Wallet::AddressBook_DeleteRow(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
 
-     auto rowID = Nan::To<v8::Int32>(info[0]).ToLocalChecked()->Value();
-     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-     bool valid = obj->wallet_->addressBook()->deleteRow(rowID);
-     info.GetReturnValue().Set(valid);
+         if (info.Length() != 1 || !info[0].IsNumber() ) {
+            Napi::TypeError::New(env, "Function accepts rowId").ThrowAsJavaScriptException();
+            return env.Null();
+         }
+
+         uint32_t rowID = info[0].As<Napi::Number>();
+         bool valid = this->wallet_->addressBook()->deleteRow(rowID);
+         return Napi::Boolean::New(env, valid);
+
 }
 
-NAN_METHOD(Wallet::AddressBook_ErrorString) {
-    Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
+Napi::Value Wallet::AddressBook_ErrorString(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
 
-    auto buf = obj->wallet_->addressBook()->errorString();
-    auto err = Nan::New(buf.c_str()).ToLocalChecked();
+        auto buf = this->wallet_->addressBook()->errorString();
+        auto err = Napi::String::New(env, buf.c_str());
 
-    info.GetReturnValue().Set(err);
+        return err;
+
 }
 
-NAN_METHOD(Wallet::AddressBook_LookupPID) {
-    if (info.Length() != 1 || !info[0]->IsString() ) {
-        Nan::ThrowTypeError("Function accepts paymentID");
-        return;
-    }
+Napi::Value Wallet::AddressBook_LookupPID(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
 
-     auto paymentID = toStdString(info[0]);
-     Wallet* obj = ObjectWrap::Unwrap<Wallet>(info.Holder());
-     auto rowId = obj->wallet_->addressBook()->lookupPaymentID(paymentID);
+        if (info.Length() != 1 || !info[0].IsString() ) {
+            Napi::TypeError::New(env, "Function accepts paymentID").ThrowAsJavaScriptException();
+            return env.Null();
+        }
 
-    info.GetReturnValue().Set(rowId);
+         auto paymentID = toStdString(info[0]);
+         auto rowId = this->wallet_->addressBook()->lookupPaymentID(paymentID);
+
+         return Napi::Number::New(env, rowId);
+
 }
 
 
