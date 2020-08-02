@@ -36,32 +36,31 @@ boost: ${BOOST_DIRNAME}
 
 
 .PHONY: deps
-deps: boost safexcore/build
+deps: boost safexcore-build
 	mkdir -p deps
 	cp boost/lib/*.a deps
+
+deps-win: safexcore-win-build
+	mkdir -p deps
 
 safexcore:
 	git clone --depth 1 -b develop --recurse-submodules https://github.com/VanGrx/safexcore
 	cp safexcore/src/wallet/api/wallet_api.h include
 	
-ifeq ($(OS),Windows_NT)
+
 #windows
-safexcore/build: boost safexcore
+safexcore-win-build: safexcore
 	mkdir -p safexcore/build
-	mkdir -p deps
-	cp safexcore/src/wallet/api/win_wrapper/windows_wrapper.h include
-	cd safexcore/build && cmake -G "MSYS Makefiles" -DBUILD_TAG="win-x64" -DCMAKE_TOOLCHAIN_FILE=../cmake/64-bit-toolchain.cmake -DMSYS2_FOLDER=c:/msys64 -DARCH="x86-64" \
-	 -DBUILD_64=ON  -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON -DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true \
-	  -DBUILD_WIN_WALLET_WRAPPER=ON -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps ..
-	cd safexcore/build && make -j${THREADS}
-	cp safexcore/build/src/wallet/api/win_wrapper/libwin_wallet_wrapper.* ${PWD}/deps
-	cd deps &&  '${PWD}/lib.exe' /machine:x64 /def:libwin_wallet_wrapper.def
-		
-else
+	cd safexcore/build && cmake -DARCH="x86-64" \
+	 -DBUILD_64=ON  -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=OFF -DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true \
+	  -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps -DCMAKE_TOOLCHAIN_FILE=$(CURDIR)/safexcore/contrib/depends/x86_64-w64-mingw32/share/toolchain.cmake ..
+	cd safexcore/build && make wallet_api -j${THREADS}
+	cp safexcore/build/lib/libwallet_api.dll.a ${PWD}/deps
+	cp safexcore/build/src/wallet/api/libwallet_api.dll ${PWD}/deps	
+
 #linux, mac
-safexcore/build: boost safexcore
+safexcore-build: boost safexcore
 	mkdir -p safexcore/build
-	mkdir -p deps
 	cd safexcore/build && cmake -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON \
 		-DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost \
 		-DARCH="x86-64" -D \
@@ -75,5 +74,5 @@ safexcore/build: boost safexcore
 	cd safexcore/build && make -j${THREADS} wallet_merged epee easylogging lmdb unbound VERBOSE=1
 	cp safexcore/build/lib/libwallet_merged.a ${PWD}/deps
 
-endif
+
 
