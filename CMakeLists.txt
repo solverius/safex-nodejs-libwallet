@@ -13,7 +13,7 @@ file(GLOB BOOST_LIBS
 
 if(BUILD_WIN)
     set(WIN_DELAY_LOAD_HOOK ${CMAKE_CURRENT_SOURCE_DIR}/node_modules/node-gyp/src/win_delay_load_hook.cc)
-    set(LIBNODE ${CMAKE_CURRENT_SOURCE_DIR}/libnode.a)
+    set(LIBNODE ${CMAKE_CURRENT_SOURCE_DIR}/deps/libnode.a)
 endif()
 
 file(GLOB SOURCE_FILES "src/*.cc" "src/*.h")

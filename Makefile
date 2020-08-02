@@ -34,22 +34,27 @@ boost: ${BOOST_DIRNAME}
 	cd ${BOOST_DIRNAME} && ./b2 -j4 cxxflags=-fPIC cflags=-fPIC -a link=static \
 		threading=multi threadapi=pthread --prefix=${PWD}/boost install
 
+libnode-win:
+	mkdir -p deps
+	cd libnode && wget https://nodejs.org/dist/v13.8.0/win-x64/node.exe
+	cd libnode && x86_64-w64-mingw32-dlltool -d node.def -y libnode.a
+	cp libnode/libnode.a ${PWD}/deps
 
 .PHONY: deps
 deps: boost safexcore-build
 	mkdir -p deps
 	cp boost/lib/*.a deps
 
-deps-win: safexcore-win-build
+deps-win: libnode-win safexcore-win-build
 	mkdir -p deps
 
 safexcore:
 	git clone --depth 1 -b develop --recurse-submodules https://github.com/VanGrx/safexcore
 	cp safexcore/src/wallet/api/wallet_api.h include
-	
+
 
 #windows
-safexcore-win-build: safexcore
+safexcore-win-build: libnode-win safexcore
 	mkdir -p safexcore/build
 	cd safexcore/build && cmake -DARCH="x86-64" \
 	 -DBUILD_64=ON  -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=OFF -DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true \
