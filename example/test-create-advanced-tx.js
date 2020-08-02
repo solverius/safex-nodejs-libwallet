@@ -181,8 +181,8 @@ var lastHeight = 0;
 			console.log("unconfirmed money received. tx: " + tx + ", amount: " + amount);
 		});
 
-		wallet.on('moneyReceived', function(tx, amount) {
-			console.log("money received. tx: " + tx + ", amount: " + amount);
+		wallet.on('moneyReceived', function(tx) {
+			console.log("money received. tx: " + tx.tx + ", amount: " + tx.amount);
 		});
 
 		wallet.on('moneySpent', function(tx, amount) {
