@@ -1,74 +1,63 @@
 #pragma once
 
-#include "deferredtask.h"
 #include "walletargs.h"
 
 #include "safexnativewallet.h"
 
-#if _MSC_VER //windows node-gyp build
-#include <windows_wrapper.h>
-#include <winwallet.h>
-#include <winwalletlistener.h>
-#include <winwalletmanager.h>
-#include <winpendingtransaction.h>
-#endif
-
 namespace exawallet {
 
-class CreateWalletTask: public DeferredTask {
+class CreateWalletTask: public Napi::AsyncWorker {
 public:
-    CreateWalletTask(const CreateWalletArgs& args): args_(args) {}
+    CreateWalletTask(const CreateWalletArgs& args, Napi::Function& callback): args_(args), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+    void Execute();
+    void OnOK();
 
 private:
-    CreateWalletArgs args_;
+  CreateWalletArgs args_;
   SafexNativeWallet* wallet_ = nullptr;
+  Napi::String error;
 };
 
-class CreateWalletFromKeysTask: public DeferredTask {
+class CreateWalletFromKeysTask: public Napi::AsyncWorker {
 public:
-  CreateWalletFromKeysTask(const CreateWalletFromKeysArgs& args): args_(args) {}
+    CreateWalletFromKeysTask(const CreateWalletFromKeysArgs& args, Napi::Function& callback): args_(args), Napi::AsyncWorker(callback) {}
 
-  virtual std::string doWork() override;
-  virtual v8::Local<v8::Value> afterWork(std::string& error) override;
-
+    void Execute();
+    void OnOK();
 private:
   CreateWalletFromKeysArgs args_;
   SafexNativeWallet* wallet_ = nullptr;
 };
 
-class OpenWalletTask: public DeferredTask {
+class OpenWalletTask: public Napi::AsyncWorker {
 public:
-    OpenWalletTask(const OpenWalletArgs& args): args_(args) {}
+    OpenWalletTask(const OpenWalletArgs& args, Napi::Function& callback): args_(args), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
-
+    void Execute();
+    void OnOK();
 private:
     OpenWalletArgs args_;
     SafexNativeWallet* wallet_ = nullptr;
 };
 
-class CloseWalletTask: public DeferredTask {
+class CloseWalletTask: public Napi::AsyncWorker {
 public:
-    CloseWalletTask(SafexNativeWallet* wallet, bool store): wallet_(wallet), store_(store) {}
+    CloseWalletTask(SafexNativeWallet* wallet, bool store, Napi::Function& callback): wallet_(wallet), store_(store), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+    void Execute();
 
 private:
   SafexNativeWallet* wallet_ = nullptr;
     bool store_;
 };
 
-class RecoveryWalletTask: public DeferredTask {
+class RecoveryWalletTask: public Napi::AsyncWorker {
 public:
-    RecoveryWalletTask(const RecoveryWalletArgs& args): args_(args) {}
+    RecoveryWalletTask(const RecoveryWalletArgs& args, Napi::Function& callback): args_(args), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+    void Execute();
+    void OnOK();
 
 private:
     RecoveryWalletArgs args_;
@@ -76,22 +65,23 @@ private:
 };
 
 
-class StoreWalletTask: public DeferredTask {
+class StoreWalletTask: public Napi::AsyncWorker {
 public:
-    StoreWalletTask(SafexNativeWallet* wallet): wallet_(wallet) {}
+    StoreWalletTask(SafexNativeWallet* wallet, Napi::Function& callback): wallet_(wallet), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+
+    void Execute();
+
 private:
   SafexNativeWallet* wallet_;
 };
 
-class CreateTransactionTask: public DeferredTask {
+class CreateTransactionTask: public Napi::AsyncWorker {
 public:
-    CreateTransactionTask(const CreateTransactionArgs& args, SafexNativeWallet* wallet): args_(args), wallet_(wallet) {}
+    CreateTransactionTask(const CreateTransactionArgs& args, SafexNativeWallet* wallet, Napi::Function& callback): args_(args), wallet_(wallet), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+    void Execute();
+    void OnOK();
 
 private:
     CreateTransactionArgs args_;
@@ -99,12 +89,12 @@ private:
     SafexNativeWallet* wallet_;
 };
 
-class CreateAdvancedTransactionTask: public DeferredTask {
+class CreateAdvancedTransactionTask: public Napi::AsyncWorker {
 public:
-    CreateAdvancedTransactionTask(const CreateAdvancedTransactionArgs& args, SafexNativeWallet* wallet): args_(args), wallet_(wallet) {}
+    CreateAdvancedTransactionTask(const CreateAdvancedTransactionArgs& args, SafexNativeWallet* wallet, Napi::Function& callback): args_(args), wallet_(wallet), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+    void Execute();
+    void OnOK();
 
 private:
     CreateAdvancedTransactionArgs args_;
@@ -112,24 +102,23 @@ private:
     SafexNativeWallet* wallet_;
 };
 
-class CommitTransactionTask: public DeferredTask {
+class CommitTransactionTask: public Napi::AsyncWorker {
 public:
-    CommitTransactionTask(SafexNativePendingTransaction* transaction): transaction_(transaction) {}
+    CommitTransactionTask(SafexNativePendingTransaction* transaction, Napi::Function& callback): transaction_(transaction), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+    void Execute();
 
 private:
     SafexNativePendingTransaction* transaction_;
 };
 
-class RestoreMultisigTransactionTask: public DeferredTask {
+class RestoreMultisigTransactionTask: public Napi::AsyncWorker {
 public:
-    RestoreMultisigTransactionTask(const std::string& transactionData, SafexNativeWallet* wallet)
-        : transactionData_(transactionData), wallet_(wallet) {}
+    RestoreMultisigTransactionTask(const std::string& transactionData, SafexNativeWallet* wallet, Napi::Function& callback)
+        : transactionData_(transactionData), wallet_(wallet), Napi::AsyncWorker(callback) {}
 
-    virtual std::string doWork() override;
-    virtual v8::Local<v8::Value> afterWork(std::string& error) override;
+    void Execute();
+    void OnOK();
 
 private:
     std::string transactionData_;

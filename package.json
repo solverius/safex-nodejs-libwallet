@@ -26,7 +26,8 @@
     "node": "13.8"
   },
   "dependencies": {
-    "nan": "^2.14.0",
+    "node-addon-api": "^3.0.0",
+    "cmake-js": "",
     "node-pre-gyp": "^0.14.0",
     "aws-sdk": "^2.495.0",
     "node-gyp": "^6.1.0",
@@ -44,11 +45,11 @@
     "host": "https://github.com/ddabek/safex-nodejs-libwallet/releases/download/"
   },
   "scripts": {
-    "build": "node-pre-gyp configure build",
+    "build": "./install.sh",
     "publish": "node-pre-gyp configure build package",
     "publishGithub": "node-pre-gyp-github publish",
     "prepublishOnly": "npm ls",
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "./install.sh",
     "test": "node test/index.js"
   }
 }

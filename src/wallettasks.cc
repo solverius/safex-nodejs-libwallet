@@ -9,85 +9,90 @@
 
 namespace exawallet {
 
-using namespace v8;
+using namespace Napi;
 
-std::string CreateWalletTask::doWork() {
+void CreateWalletTask::Execute() {
+
     auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     if (manager->walletExists(args_.path)) {
-        return "Wallet already exists: " + args_.path;
+        SetError("Wallet already exists: " + args_.path);
     }
 
     wallet_ = manager->createWallet(args_.path, args_.password, args_.language, args_.nettype);
 
     if (!wallet_) {
-        return "WalletManager returned null wallet pointer";
+        SetError( "WalletManager returned null wallet pointer");
     }
 
     if (!wallet_->errorString().empty()) {
-        return wallet_->errorString();
+        SetError( wallet_->errorString());
     }
 
     if (!wallet_->init(args_.daemonAddress)) {
-        return "Couldn't init wallet";
+        SetError("Couldn't init wallet");
     }
 
     wallet_->setTrustedDaemon(true);
     wallet_->startRefresh();
-    return {};
+
+return;
 }
 
-Local<Value> CreateWalletTask::afterWork(std::string& error) {
-    return Wallet::NewInstance(wallet_);
+void CreateWalletTask::OnOK() {
+    Callback().Call({Env().Null(), Wallet::NewInstance(Env(),wallet_)});
+    return;
 }
 
-std::string CreateWalletFromKeysTask::doWork() {
+void CreateWalletFromKeysTask::Execute() {
   auto manager = SafexNativeWalletManagerFactory::getWalletManager();
   if (manager->walletExists(args_.path)) {
-    return "Wallet already exists: " + args_.path;
+      SetError( "Wallet already exists: " + args_.path);
   }
 
   wallet_ = manager->createWalletFromKeys(args_.path, args_.password, args_.language, args_.nettype, args_.restoreHeight, args_.addressString, args_.viewKeyString, args_.spendKeyString);
 
 
   if (!wallet_) {
-    return "WalletManager returned null wallet pointer";
+      SetError( "WalletManager returned null wallet pointer");
   }
 
   if (!wallet_->errorString().empty()) {
-    return wallet_->errorString();
+      SetError( wallet_->errorString());
   }
 
   if (!wallet_->init(args_.daemonAddress)) {
-    return "Couldn't init wallet";
+      SetError( "Couldn't init wallet");
   }
 
   wallet_->setTrustedDaemon(true);
   wallet_->startRefresh();
-  return {};
+
+return;
 }
 
-Local<Value> CreateWalletFromKeysTask::afterWork(std::string& error) {
-  return Wallet::NewInstance(wallet_);
+void CreateWalletFromKeysTask::OnOK() {
+    Callback().Call({Env().Null(), Wallet::NewInstance(Env(),wallet_)});
+    return;
 }
 
-std::string OpenWalletTask::doWork() {
+void OpenWalletTask::Execute() {
     auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     if (!manager->walletExists(args_.path)) {
-        return "wallet does not exist: " + args_.path;
+        SetError( "wallet does not exist: " + args_.path);
     }
 
     wallet_ = manager->openWallet(args_.path, args_.password, args_.nettype);
 
     if (!wallet_) {
-        return "WalletManager returned null wallet pointer";
+        SetError( "WalletManager returned null wallet pointer");
     }
 
     if (!wallet_->errorString().empty()) {
-        return wallet_->errorString();
+        SetError( wallet_->errorString());
     }
 
     if (!wallet_->init(args_.daemonAddress)) {
-        return "Couldn't init wallet";
+        SetError( "Couldn't init wallet");
     }
 
     //set refresh height as latest block wallet has seen - 1 day
@@ -96,24 +101,21 @@ std::string OpenWalletTask::doWork() {
 
     wallet_->setTrustedDaemon(true);
     wallet_->startRefresh();
-    return {};
+return;
 }
 
-Local<Value> OpenWalletTask::afterWork(std::string& error) {
-    return Wallet::NewInstance(wallet_);
+void OpenWalletTask::OnOK() {
+    Callback().Call({Env().Null(), Wallet::NewInstance(Env(),wallet_)});
+    return;
 }
 
-std::string CloseWalletTask::doWork() {
+void CloseWalletTask::Execute() {
     auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     manager->closeWallet(wallet_, store_);
-    return {};
+    return;
 }
 
-Local<Value> CloseWalletTask::afterWork(std::string& error) {
-    return Nan::Undefined();
-}
-
-std::string RecoveryWalletTask::doWork() {
+void RecoveryWalletTask::Execute() {
     auto manager = SafexNativeWalletManagerFactory::getWalletManager();
 
     wallet_ = manager->recoveryWallet(args_.path,
@@ -123,140 +125,121 @@ std::string RecoveryWalletTask::doWork() {
                                        args_.restoreHeight);
 
     if (!wallet_) {
-        return "WalletManager returned null wallet pointer";
+        SetError( "WalletManager returned null wallet pointer");
     }
 
     if (!wallet_->errorString().empty()) {
-        return wallet_->errorString();
+        SetError( wallet_->errorString());
     }
     
     if (!wallet_->init(args_.daemonAddress)) {
-        return "Couldn't init wallet";
+        SetError( "Couldn't init wallet");
     }
 
     wallet_->setTrustedDaemon(true);
     wallet_->startRefresh();
-    return {};
 }
 
-Local<Value> RecoveryWalletTask::afterWork(std::string& error) {
-    return Wallet::NewInstance(wallet_);
+void RecoveryWalletTask::OnOK() {
+    Callback().Call({Env().Null(), Wallet::NewInstance(Env(),wallet_)});
+    return;
 }
 
-std::string StoreWalletTask::doWork() {
+
+void StoreWalletTask::Execute() {
     if (!wallet_->store(wallet_->path())) {
         std::cout << "Error storing wallet path:" << wallet_->path() << std::endl;
-        return "Couldn't store wallet";
+        SetError( "Couldn't store wallet");
     }
 
-    return {};
-}
-Local<Value> StoreWalletTask::afterWork(std::string& error) {
-    return Nan::Undefined();
+    return;
 }
 
-std::string CreateTransactionTask::doWork() {
+
+void CreateTransactionTask::Execute() {
     //std::cout << "CreateTransactionTask::doWork amount=" <<  args_.amount << " tx_type=" << static_cast<int>(args_.tx_type) << std::endl;
 
     transaction_ = wallet_->createTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, args_.tx_type);
     if (!wallet_->errorString().empty()) {
-        return wallet_->errorString();
+        SetError( wallet_->errorString());
     }
 
-    return {};
+    return;
 }
 
-Local<Value> CreateTransactionTask::afterWork(std::string& error) {
-    return PendingTransaction::NewInstance(transaction_);
+void CreateTransactionTask::OnOK() {
+    Callback().Call({Env().Null(), PendingTransaction::NewInstance(Env(), transaction_)});
+    return;
 }
 
-std::string CreateAdvancedTransactionTask::doWork() {
+void CreateAdvancedTransactionTask::Execute() {
     //std::cout << "CreateTransactionTask::doWork amount=" <<  args_.amount << " tx_type=" << static_cast<int>(args_.tx_type) << std::endl;
 
     if(args_.tx_type==Safex::TransactionType::CreateAccountTransaction){
         Safex::CreateAccountCommand s{args_.safexUsername};
 
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-            if (!wallet_->errorString().empty()) {
-                return wallet_->errorString();
-            }
+
     } else if(args_.tx_type==Safex::TransactionType::EditAccountTransaction){
        Safex::EditAccountCommand s{args_.safexUsername, args_.safexData};
 
        transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-           if (!wallet_->errorString().empty()) {
-               return wallet_->errorString();
-           }
+
     } else if(args_.tx_type==Safex::TransactionType::CreateOfferTransaction){
        Safex::CreateOfferCommand s{args_.safexUsername, args_.safexOfferTitle, args_.safexOfferPrice, args_.safexOfferQuantity, args_.safexOfferDescription,args_.safexOfferPricePegUsed,
                                    args_.safexOfferPricePegId, args_.safexOfferMinSfxPrice};
        transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-           if (!wallet_->errorString().empty()) {
-               return wallet_->errorString();
-           }
+
     } else if(args_.tx_type==Safex::TransactionType::EditOfferTransaction){
         Safex::EditOfferCommand s{args_.safexOfferId, args_.safexUsername, args_.safexOfferActive, args_.safexOfferTitle, args_.safexOfferPrice, args_.safexOfferQuantity, args_.safexOfferDescription, args_.safexOfferPricePegUsed,
                                     args_.safexOfferPricePegId, args_.safexOfferMinSfxPrice};
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-            if (!wallet_->errorString().empty()) {
-                return wallet_->errorString();
-            }
+
     } else if(args_.tx_type==Safex::TransactionType::StakeTokenTransaction){
         Safex::StakeTokenCommand s{args_.address,args_.amount};
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-            if (!wallet_->errorString().empty()) {
-                return wallet_->errorString();
-            }
+
     } else if(args_.tx_type==Safex::TransactionType::UnstakeTokenTransaction){
         Safex::UnstakeTokenCommand s{args_.address,args_.amount};
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-           if (!wallet_->errorString().empty()) {
-               return wallet_->errorString();
-           }
+
     } else if(args_.tx_type==Safex::TransactionType::CreatePricePegTransaction){
         Safex::CreatePricePegCommand s{args_.safexPricePegTitle,args_.safexPricePegCreator,args_.safexPricePegDescription,args_.safexPricePegCurrency,args_.safexPricePegRate};
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-           if (!wallet_->errorString().empty()) {
-               return wallet_->errorString();
-           }
+
     } else if(args_.tx_type==Safex::TransactionType::UpdatePricePegTransaction){
         Safex::UpdatePricePegCommand s{args_.safexPricePegId,args_.safexPricePegTitle,args_.safexPricePegCreator,args_.safexPricePegDescription,args_.safexPricePegCurrency,args_.safexPricePegRate};
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-          if (!wallet_->errorString().empty()) {
-              return wallet_->errorString();
-          }
+
     } else if(args_.tx_type==Safex::TransactionType::PurchaseTransaction){
         Safex::PurchaseCommand s{args_.safexOfferId, args_.safexPurchaseQuantity};
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-        if (!wallet_->errorString().empty()) {
-          return wallet_->errorString();
-        }
+
     } else if(args_.tx_type==Safex::TransactionType::FeedbackTransaction){
         Safex::FeedbackCommand s{args_.safexOfferId, args_.safexFeedbackStarsGiven, args_.safexFeedbackComment};
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
-        if (!wallet_->errorString().empty()) {
-          return wallet_->errorString();
-        }
     } else
-        return "Bad tx type given";
+        SetError( "Bad tx type given");
 
-    return {};
-}
-
-Local<Value> CreateAdvancedTransactionTask::afterWork(std::string& error) {
-    return PendingTransaction::NewInstance(transaction_);
-}
-
-std::string CommitTransactionTask::doWork() {
-    if (!transaction_->commit()) {
-        return "Couldn't commit transaction: " + transaction_->errorString();
+    if (!wallet_->errorString().empty()) {
+        SetError( wallet_->errorString());
     }
 
-    return {};
+    return;
 }
 
-Local<Value> CommitTransactionTask::afterWork(std::string& error) {
-    return Nan::Undefined();
+void CreateAdvancedTransactionTask::OnOK() {
+    Callback().Call({Env().Null(), PendingTransaction::NewInstance(Env(),transaction_)});
+    return;
 }
+
+void CommitTransactionTask::Execute() {
+    if (!transaction_->commit()) {
+        SetError( "Couldn't commit transaction: " + transaction_->errorString());
+    }
+
+    return;
+}
+
 
 }

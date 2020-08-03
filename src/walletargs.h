@@ -1,6 +1,7 @@
 #pragma once
 
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 
 #include <wallet_api.h>
 
@@ -8,7 +9,7 @@ namespace exawallet {
 
 struct CreateWalletArgs {
     //returns error string
-    std::string Init(const Nan::FunctionCallbackInfo<v8::Value>& args);
+    std::string Init(const Napi::CallbackInfo& args);
 
     std::string path;
     std::string password;
@@ -19,7 +20,7 @@ struct CreateWalletArgs {
 
 struct CreateWalletFromKeysArgs {
   //returns error string
-  std::string Init(const Nan::FunctionCallbackInfo<v8::Value>& args);
+  std::string Init(const Napi::CallbackInfo& args);
 
   std::string path;
   std::string password;
@@ -34,7 +35,7 @@ struct CreateWalletFromKeysArgs {
 
 struct OpenWalletArgs {
     //returns error string
-    std::string Init(const Nan::FunctionCallbackInfo<v8::Value>& args);
+    std::string Init(const Napi::CallbackInfo& args);
 
     std::string path;
     std::string password;
@@ -45,7 +46,7 @@ struct OpenWalletArgs {
 
 struct RecoveryWalletArgs {
     //returns error string
-    std::string Init(const Nan::FunctionCallbackInfo<v8::Value>& args);
+    std::string Init(const Napi::CallbackInfo& args);
 
     std::string path;
     std::string password;
@@ -58,7 +59,7 @@ struct RecoveryWalletArgs {
 
 struct CreateTransactionArgs {
     //returns error string
-    std::string Init(const Nan::FunctionCallbackInfo<v8::Value>& args);
+    std::string Init(const Napi::CallbackInfo& args);
     static const uint32_t DEFAULT_MIXIN;
 
     std::string address;
@@ -71,7 +72,7 @@ struct CreateTransactionArgs {
 
 struct CreateAdvancedTransactionArgs {
     //returns error string
-    std::string Init(const Nan::FunctionCallbackInfo<v8::Value>& args);
+    std::string Init(const Napi::CallbackInfo& args);
     static const uint32_t DEFAULT_MIXIN;
 
     std::string address;

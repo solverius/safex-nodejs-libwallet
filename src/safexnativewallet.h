@@ -7,35 +7,6 @@
 
 #include <wallet_api.h>
 
-#if _MSC_VER //windows node-gyp build
-namespace Safex {
-  struct WinWallet;
-  struct WinWalletListener;
-  struct WinWalletManager;
-  struct WinWalletManagerFactory;
-  struct WinPendingTransaction;
-  struct WinTransactionInfo;
-  struct WinTransactionHistory;
-  struct WinAddressBookRow;
-}
-
-#endif
-
-
-
-//SafexNativeWallet is a type that represents OS agnostic interface
-#if _MSC_VER //windows node-gyp build
-
-using SafexNativeWallet                 = Safex::WinWallet;
-using SafexNativeWalletListener         = Safex::WinWalletListener;
-using SafexNativeWalletManager          = Safex::WinWalletManager;
-using SafexNativeWalletManagerFactory   = Safex::WinWalletManagerFactory;
-using SafexNativePendingTransaction     = Safex::WinPendingTransaction;
-using SafexNativeTransactionInfo        = Safex::WinTransactionInfo;
-using SafexNativeTransactionHistory     = Safex::WinTransactionHistory;
-using SafexNativeAddressBookRow         = Safex::WinAddressBookRow;
-#else
-
 using SafexNativeWallet                 = Safex::Wallet;
 using SafexNativeWalletListener         = Safex::WalletListener;
 using SafexNativeWalletManager          = Safex::WalletManager;
@@ -47,6 +18,5 @@ using SafexNativeAddressBook            = Safex::AddressBook;
 using SafexNativeAddressBookRow         = Safex::AddressBookRow;
 using SafexNativeSafexAccount           = Safex::SafexAccount;
 using SafexNativeSafexOffer             = Safex::SafexOffer;
-#endif
 
 #endif //WIN_SAFEX_NODEJS_LIBWALLET_NATIVESAFEXWALLET_H

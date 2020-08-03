@@ -5,11 +5,11 @@
 #include <wallet_api.h>
 #include "wallettasks.h"
 
-using namespace v8;
+using namespace Napi;
 
 namespace exawallet {
 
-Nan::Persistent<Function> PendingTransaction::constructor;
+Napi::FunctionReference PendingTransaction::constructor;
 
 PendingTransaction::~PendingTransaction() {
     if (transaction) {
@@ -17,109 +17,99 @@ PendingTransaction::~PendingTransaction() {
     }
 }
 
-NAN_MODULE_INIT(PendingTransaction::Init) {
-    struct FunctionRegisterInfo {
-        const char* name;
-        Nan::FunctionCallback func;
-    };
+Napi::Object PendingTransaction::Init(Napi::Env env, Napi::Object exports) {
 
-    static std::vector<FunctionRegisterInfo> functions = {
-        {"commit", Commit},
-        {"amount", Amount},
-        {"dust", Dust},
-        {"fee", Fee},
-        {"transactionsIds", TransactionsIds},
-        {"transactionsCount", TransactionsCount}
-    };
+    Napi::HandleScope scope(env);
 
-    Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(PendingTransaction::New);
-    tpl->SetClassName(Nan::New("PendingTransaction").ToLocalChecked());
-    tpl->InstanceTemplate()->SetInternalFieldCount(functions.size());
+   Napi::Function func = DefineClass(env, "PendingTransaction",
+     {InstanceMethod("commit", &PendingTransaction::Commit),
+     InstanceMethod("amount", &PendingTransaction::Amount),
+     InstanceMethod("dust", &PendingTransaction::Dust),
+     InstanceMethod("fee", &PendingTransaction::Fee),
+     InstanceMethod("transactionsIds", &PendingTransaction::TransactionsIds)});
 
-    for (const auto& info: functions) {
-        Nan::SetPrototypeMethod(tpl, info.name, info.func);
+  constructor = Napi::Persistent(func);
+  constructor.SuppressDestruct();
+
+  exports.Set("PendingTransaction", func);
+
+  return exports;
+}
+
+
+Napi::Object PendingTransaction::NewInstance(Napi::Env env, SafexNativePendingTransaction* tx){
+
+    Napi::EscapableHandleScope scope(env);
+    Napi::Object obj = constructor.New({});
+
+    PendingTransaction* pt = Napi::ObjectWrap<PendingTransaction>::Unwrap(obj);
+
+    pt->transaction = tx;
+
+    return scope.Escape(napi_value(obj)).ToObject();
+}
+
+
+void PendingTransaction::Commit(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    if (!info[0].IsFunction()) {
+
+        Napi::TypeError::New(env, "Function accepts function(callback) argument").ThrowAsJavaScriptException();
+        return;
     }
 
-    constructor.Reset(tpl->GetFunction(Nan::GetCurrentContext()).ToLocalChecked());
+  Function callback = info[0].As<Function>();
+
+  CommitTransactionTask* task = new CommitTransactionTask(this->transaction, callback);
+  task->Queue();
+
+  return;
 }
 
-NAN_METHOD(PendingTransaction::New) {
+Napi::Value PendingTransaction::Amount(const Napi::CallbackInfo& info) {
 
-  if (info.IsConstructCall()) {
-    PendingTransaction* obj = new PendingTransaction(nullptr);
-    obj->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
-  } else {
-    const int argc = 0;
-    Local<Value> argv[1] = { Nan::Null() };
-    Local<Function> cons = Nan::New(constructor);
-    Local<Context> context = Nan::GetCurrentContext();
-    Local<Object> instance = cons->NewInstance(context, argc, argv).ToLocalChecked();
-    info.GetReturnValue().Set(instance);
-  }
+    Napi::Env env = info.Env();
+    auto amount = std::to_string(this->transaction->amount());
+
+    return Napi::String::New(env, amount.c_str());
 }
 
-Local<Object> PendingTransaction::NewInstance(SafexNativePendingTransaction* tx) {
-    const unsigned argc = 0;
-    Local<Value> argv[1] = { Nan::Null() };
-    Local<Function> cons = Nan::New(constructor);
-    Local<Context> context = Nan::GetCurrentContext();
-    Local<Object> instance = cons->NewInstance(context, argc, argv).ToLocalChecked();
+Napi::Value PendingTransaction::Dust(const Napi::CallbackInfo& info) {
 
-    PendingTransaction* t = new PendingTransaction(tx);
-    t->Wrap(instance);
-    return instance;
+     Napi::Env env = info.Env();
+     auto dust = std::to_string(this->transaction->dust());
+
+     return Napi::String::New(env, dust.c_str());
 }
 
-NAN_METHOD(PendingTransaction::Commit) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
+Napi::Value PendingTransaction::Fee(const Napi::CallbackInfo& info) {
 
-    CommitTransactionTask* task = new CommitTransactionTask(obj->transaction);
-    auto promise = task->Enqueue();
-    info.GetReturnValue().Set(promise);
+     Napi::Env env = info.Env();
+     auto fee = std::to_string(this->transaction->fee());
+
+     return Napi::String::New(env, fee.c_str());
 }
 
-NAN_METHOD(PendingTransaction::Amount) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
-    auto amount = std::to_string(obj->transaction->amount());
+Napi::Value PendingTransaction::TransactionsIds(const Napi::CallbackInfo& info) {
 
-    info.GetReturnValue().Set(Nan::New(amount.c_str()).ToLocalChecked());
+     Napi::Env env = info.Env();
+     auto transactions = this->transaction->txid();
+     auto result = Napi::Array::New(env, transactions.size());
+
+     for (size_t i = 0; i < transactions.size(); ++i) {
+         auto id = Napi::String::New(env, transactions[i].c_str());
+         result[i] = id;
+     }
+
+     return result;
 }
 
-NAN_METHOD(PendingTransaction::Dust) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
-    auto dust = std::to_string(obj->transaction->dust());
+Napi::Value PendingTransaction::TransactionsCount(const Napi::CallbackInfo& info) {
 
-    info.GetReturnValue().Set(Nan::New(dust.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(PendingTransaction::Fee) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
-    auto fee = std::to_string(obj->transaction->fee());
-
-    info.GetReturnValue().Set(Nan::New(fee.c_str()).ToLocalChecked());
-}
-
-NAN_METHOD(PendingTransaction::TransactionsIds) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
-
-    auto transactions = obj->transaction->txid();
-    auto result = Nan::New<Array>(transactions.size());
-
-    for (size_t i = 0; i < transactions.size(); ++i) {
-        auto id = Nan::New(transactions[i].c_str()).ToLocalChecked();
-        if (result->Set(Nan::GetCurrentContext(), i, id).IsNothing()) {
-            Nan::ThrowError("Couldn't make transactions list: unknown error");
-            return;
-        }
-    }
-
-    info.GetReturnValue().Set(result);
-}
-
-NAN_METHOD(PendingTransaction::TransactionsCount) {
-    PendingTransaction* obj = ObjectWrap::Unwrap<PendingTransaction>(info.Holder());
-    info.GetReturnValue().Set(Nan::New((uint32_t)obj->transaction->txCount()));
+     Napi::Env env = info.Env();
+     return Napi::Number::New(env, (uint32_t)this->transaction->txCount());
 }
 
 
