@@ -56,6 +56,7 @@ safexcore:
 #windows
 safexcore-win-build: libnode-win safexcore
 	mkdir -p safexcore/build
+	cd safexcore/contrib/depends && $(MAKE) HOST=x86_64-w64-mingw32
 	cd safexcore/build && cmake -DARCH="x86-64" \
 	 -DBUILD_64=ON  -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=OFF -DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true \
 	  -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps -DCMAKE_TOOLCHAIN_FILE=$(CURDIR)/safexcore/contrib/depends/x86_64-w64-mingw32/share/toolchain.cmake ..
