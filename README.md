@@ -24,10 +24,11 @@ Install prerequisites (example for ubuntu below)
 ```sh
 $ sudo apt-get install libpcsclite-dev
 ```
+Note: For Windows build install mingw toolchain
 
-Run build:
+Run build with build_type specified or export it before the command:
 ```sh
-$ npm run build
+$ build_type="linux" npm run build
 ```
 
 Link your local build (using [`npm link`](https://docs.npmjs.com/cli/link) command):
