@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nan.h>
+#include <napi.h>
 
 #include <map>
 #include <mutex>
@@ -9,43 +9,34 @@
 
 #include "safexnativewallet.h"
 
-#if _MSC_VER //windows node-gyp build
-#include <windows_wrapper.h>
-#include <winwallet.h>
-#include <winwalletlistener.h>
-#include <winwalletmanager.h>
-#include <winpendingtransaction.h>
-#endif
 
 namespace exawallet {
 
 
-using CopyablePersistentFunction = Nan::CopyablePersistentTraits<v8::Function>::CopyablePersistent;
+//using CopyablePersistentFunction = Napi::CopyablePersistentTraits<v8::Function>::CopyablePersistent;
 
-class Wallet : public node::ObjectWrap, public SafexNativeWalletListener {
+class Wallet : public Napi::ObjectWrap<Wallet>, public SafexNativeWalletListener {
 public:
-    static NAN_MODULE_INIT(Init);
+    static Napi::Object Init(Napi::Env env, Napi::Object exports);
+    static Napi::Object NewInstance(Napi::Env env,  SafexNativeWallet* wallet);
 
-    static v8::Local<v8::Object> NewInstance(SafexNativeWallet* wallet);
+    static Napi::Value WalletExists(const Napi::CallbackInfo& info);
+    static void CreateWallet(const Napi::CallbackInfo& info);
+    static void CreateWalletFromKeys(const Napi::CallbackInfo& info);
+    static void OpenWallet(const Napi::CallbackInfo& info);
+    static void RecoveryWallet(const Napi::CallbackInfo& info);
+    static Napi::Value GenPaymentId(const Napi::CallbackInfo& info);
+    static Napi::Value PaymentIdValid(const Napi::CallbackInfo& info);
+    static Napi::Value AddressValid(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(WalletExists);
-    static NAN_METHOD(CreateWallet);
-    static NAN_METHOD(CreateWalletFromKeys);
-    static NAN_METHOD(OpenWallet);
-    static NAN_METHOD(RecoveryWallet);
-    static NAN_METHOD(GenPaymentId);
-    static NAN_METHOD(PaymentIdValid);
-    static NAN_METHOD(AddressValid);
 
-    static NAN_METHOD(Close);
-
-    // returns either callback or empty maybe.
-    v8::MaybeLocal<v8::Function> FindCallback(const std::string& name);
+    explicit Wallet(SafexNativeWallet* wallet, const Napi::CallbackInfo& info): wallet_(wallet), Napi::ObjectWrap<Wallet>(info) {}
+    explicit Wallet( const Napi::CallbackInfo& info): wallet_(nullptr), Napi::ObjectWrap<Wallet>(info) {}
+    ~Wallet();
 
  private:
 
-    explicit Wallet(SafexNativeWallet* wallet): wallet_(wallet) {}
-    ~Wallet();
+
 
     virtual void moneySpent(const std::string &txId, uint64_t amount) override;
     virtual void moneyReceived(const std::string &txId, uint64_t amount) override;
@@ -60,81 +51,83 @@ public:
     virtual void updated() override;
     virtual void refreshed() override;
 
-    static NAN_METHOD(New);
-    static NAN_METHOD(On);
-    static NAN_METHOD(Off);
+    void Close(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(Address);
-    static NAN_METHOD(Seed);
-    static NAN_METHOD(SetSeedLanguage);
-    static NAN_METHOD(Store);
-    static NAN_METHOD(Path);
-    static NAN_METHOD(NetType);
+    void On(const Napi::CallbackInfo& info);
+    void Off(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(SecretViewKey);
-    static NAN_METHOD(PublicViewKey);
-    static NAN_METHOD(SecretSpendKey);
-    static NAN_METHOD(PublicSpendKey);
+    Napi::Value Address(const Napi::CallbackInfo& info);
+    Napi::Value Seed(const Napi::CallbackInfo& info);
+    void        SetSeedLanguage(const Napi::CallbackInfo& info);
+    void        Store(const Napi::CallbackInfo& info);
+    Napi::Value Path(const Napi::CallbackInfo& info);
+    Napi::Value NetType(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(SetPassword);
+    Napi::Value SecretViewKey(const Napi::CallbackInfo& info);
+    Napi::Value PublicViewKey(const Napi::CallbackInfo& info);
+    Napi::Value SecretSpendKey(const Napi::CallbackInfo& info);
+    Napi::Value PublicSpendKey(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(SetRefreshFromBlockHeight);
-    static NAN_METHOD(GetRefreshFromBlockHeight);
+    Napi::Value SetPassword(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(RescanBlockchain);
-    static NAN_METHOD(RescanBlockchainAsync);
+    void SetRefreshFromBlockHeight(const Napi::CallbackInfo& info);
+    Napi::Value GetRefreshFromBlockHeight(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(Connected);
-    static NAN_METHOD(SetTrustedDaemon);
-    static NAN_METHOD(TrustedDaemon);
+    void RescanBlockchain(const Napi::CallbackInfo& info);
+    void RescanBlockchainAsync(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(Balance);
-    static NAN_METHOD(UnlockedBalance);
-    static NAN_METHOD(TokenBalance);
-    static NAN_METHOD(UnlockedTokenBalance);
-    static NAN_METHOD(StakedTokenBalance);
-    static NAN_METHOD(UnlockedStakedTokenBalance);
-    static NAN_METHOD(GetMyInterest);
+    Napi::Value Connected(const Napi::CallbackInfo& info);
+    void SetTrustedDaemon(const Napi::CallbackInfo& info);
+    Napi::Value TrustedDaemon(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(BlockChainHeight);
-    static NAN_METHOD(DaemonBlockChainHeight);
+    Napi::Value Balance(const Napi::CallbackInfo& info);
+    Napi::Value UnlockedBalance(const Napi::CallbackInfo& info);
+    Napi::Value TokenBalance(const Napi::CallbackInfo& info);
+    Napi::Value UnlockedTokenBalance(const Napi::CallbackInfo& info);
+    Napi::Value StakedTokenBalance(const Napi::CallbackInfo& info);
+    Napi::Value UnlockedStakedTokenBalance(const Napi::CallbackInfo& info);
+    Napi::Value GetMyInterest(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(Synchronized);
+    Napi::Value BlockChainHeight(const Napi::CallbackInfo& info);
+    Napi::Value DaemonBlockChainHeight(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(DefaultMixin);
-    static NAN_METHOD(SetDefaultMixin);
+    Napi::Value Synchronized(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(StartRefresh);
-    static NAN_METHOD(PauseRefresh);
+    Napi::Value DefaultMixin(const Napi::CallbackInfo& info);
+    void SetDefaultMixin(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(TransactionHistory);
+    Napi::Value StartRefresh(const Napi::CallbackInfo& info);
+    Napi::Value PauseRefresh(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(CreateTransaction);
-    static NAN_METHOD(CreateAdvancedTransaction);
+    Napi::Value TransactionHistory(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(CreateSafexAccount);
-    static NAN_METHOD(GetSafexAccounts);
-    static NAN_METHOD(GetSafexAccount);
-    static NAN_METHOD(RecoverSafexAccount);
-    static NAN_METHOD(RemoveSafexAccount);
+    void CreateTransaction(const Napi::CallbackInfo& info);
+    void CreateAdvancedTransaction(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(GetMySafexOffers);
-    static NAN_METHOD(ListSafexOffers);
+    Napi::Value CreateSafexAccount(const Napi::CallbackInfo& info);
+    Napi::Value GetSafexAccounts(const Napi::CallbackInfo& info);
+    Napi::Value GetSafexAccount(const Napi::CallbackInfo& info);
+    Napi::Value RecoverSafexAccount(const Napi::CallbackInfo& info);
+    Napi::Value RemoveSafexAccount(const Napi::CallbackInfo& info);
 
-    static NAN_METHOD(SignMessage);
-    static NAN_METHOD(VerifySignedMessage);
+    Napi::Value GetMySafexOffers(const Napi::CallbackInfo& info);
+    Napi::Value ListSafexOffers(const Napi::CallbackInfo& info);
+
+    Napi::Value SignMessage(const Napi::CallbackInfo& info);
+    Napi::Value VerifySignedMessage(const Napi::CallbackInfo& info);
 
     // AddressBook methods
-    static NAN_METHOD(AddressBook_GetAll);
-    static NAN_METHOD(AddressBook_AddRow);
-    static NAN_METHOD(AddressBook_DeleteRow);
-    static NAN_METHOD(AddressBook_ErrorString);
-    static NAN_METHOD(AddressBook_LookupPID);
+    Napi::Value AddressBook_GetAll(const Napi::CallbackInfo& info);
+    Napi::Value AddressBook_AddRow(const Napi::CallbackInfo& info);
+    Napi::Value AddressBook_DeleteRow(const Napi::CallbackInfo& info);
+    Napi::Value AddressBook_ErrorString(const Napi::CallbackInfo& info);
+    Napi::Value AddressBook_LookupPID(const Napi::CallbackInfo& info);
 
-    static Nan::Persistent<v8::Function> constructor;
+    static Napi::FunctionReference constructor;
+
 
     SafexNativeWallet* wallet_ = nullptr;
-    std::map<std::string, CopyablePersistentFunction> callbacks_;
+    std::map<std::string, Napi::ThreadSafeFunction> callbacks_;
 };
 
 } //namespace exawallet

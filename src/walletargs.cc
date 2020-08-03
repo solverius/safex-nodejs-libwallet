@@ -2,10 +2,10 @@
 
 #include <stdexcept>
 
-#include <nan.h>
+#include <napi.h>
 #include <string>
 
-using namespace v8;
+using namespace Napi;
 
 namespace exawallet {
 
@@ -13,70 +13,64 @@ const uint32_t CreateTransactionArgs::DEFAULT_MIXIN = 6;
 const uint32_t CreateAdvancedTransactionArgs::DEFAULT_MIXIN = 6;
 
 template<typename T>
-T convertValue(Local<Value> value);
-
-bool hasProperty(Local<Context> context, Local<Object> obj, Local<String> name) {
-    auto maybe = obj->HasOwnProperty(context, name);
-    bool has = false;
-    maybe.To(&has);
-    return has;
-}
+T convertValue(Napi::Value value);
 
 template<typename T>
-bool getRequiredProperty(Local<Object> obj, const char* name, T& value) {
-    Local<Context> context = Nan::GetCurrentContext();
+bool getRequiredProperty(Napi::Object obj, const char* name, T& value) {
 
-    auto key = Nan::New(name).ToLocalChecked();
-    bool has = hasProperty(context, obj, key);
+    bool has = obj.HasOwnProperty(name);
     if (!has){
         return false;
     }
 
-    auto valueLocal = obj->Get(context, key).ToLocalChecked();
+    auto valueLocal = obj[name];
     value = convertValue<T>(valueLocal);
     return true;
 }
 
 template<typename T>
-T getOptionalProperty(Local<Object> obj, const char* name, const T& defaultValue) {
-    Local<Context> context = Nan::GetCurrentContext();
+T getOptionalProperty(Napi::Object obj, const char* name, const T& defaultValue) {
 
-    auto key = Nan::New(name).ToLocalChecked();
-    bool has = hasProperty(context, obj, key);
+    bool has = obj.HasOwnProperty(name);
     if (!has){
         return defaultValue;
     }
 
-    auto valueLocal = obj->Get(context, key).ToLocalChecked();
+    auto valueLocal = obj[name];
     return convertValue<T>(valueLocal);
 }
 
 template<>
-std::string convertValue<std::string>(Local<Value> value) {
-    Nan::Utf8String str(value);
-    return *str;
+std::string convertValue<std::string>(Napi::Value value) {
+    std::string str = value.As<Napi::String>();
+    return str;
 }
 
 template<>
-double convertValue<double>(Local<Value> value) {
-    return value->ToNumber(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+double convertValue<double>(Napi::Value value) {
+    return value.ToNumber().DoubleValue();
 }
 
 template<>
-uint32_t convertValue<uint32_t>(Local<Value> value) {
-    return value->ToUint32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+uint32_t convertValue<uint32_t>(Napi::Value value) {
+    return value.ToNumber().Uint32Value();
 }
 
 template<>
-uint64_t convertValue<uint64_t>(Local<Value> value) {
-    return value->ToUint32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+uint64_t convertValue<uint64_t>(Napi::Value value) {
+    return value.ToNumber().Int64Value();
 }
 
-std::string CreateWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
-    if (args.Length() != 1 || !args[0]->IsObject()) {
+std::string CreateWalletArgs::Init(const Napi::CallbackInfo& args) {
+
+    Napi::Value val = args[0];
+
+    if (!val.IsObject()) {
         return "Argument must be an object";
     }
-    auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
+    Napi::Env env = args.Env();
+
+    auto obj = Napi::Object(env, args[0]);
     if (!getRequiredProperty<std::string>(obj, "path", path)) {
         return std::string("Required property not found: path");
     }
@@ -104,11 +98,16 @@ std::string CreateWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args)
     return {};
 }
 
-  std::string CreateWalletFromKeysArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
-      if (args.Length() != 1 || !args[0]->IsObject()) {
+  std::string CreateWalletFromKeysArgs::Init(const Napi::CallbackInfo& args) {
+
+      Napi::Value val = args[0];
+
+      if (!val.IsObject()) {
           return "Argument must be an object";
       }
-      auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
+      Napi::Env env = args.Env();
+
+      auto obj = Napi::Object(env, args[0]);
       if (!getRequiredProperty<std::string>(obj, "path", path)) {
           return std::string("Required property not found: path");
       }
@@ -150,18 +149,24 @@ std::string CreateWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args)
       return {};
   }
 
-std::string OpenWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
-    if (args.Length() != 1 || !args[0]->IsObject()) {
+std::string OpenWalletArgs::Init(const Napi::CallbackInfo& args) {
+
+    Napi::Value val = args[0];
+
+    if (!val.IsObject()) {
         return "Argument must be an object";
     }
+    Napi::Env env = args.Env();
 
-    auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
+    auto obj = Napi::Object(env, args[0]);
     if (!getRequiredProperty<std::string>(obj, "path", path)) {
         return std::string("Required property not found: path");
     }
+
     if (!getRequiredProperty<std::string>(obj, "password", password)) {
         return std::string("Required property not found: password");
     }
+
     if (!getRequiredProperty<std::string>(obj, "daemonAddress", daemonAddress)) {
         return std::string("Required property not found: daemonAddress");
     }
@@ -181,18 +186,24 @@ std::string OpenWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
 }
 
 
-std::string RecoveryWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
-    if (args.Length() != 1 || !args[0]->IsObject()) {
+std::string RecoveryWalletArgs::Init(const Napi::CallbackInfo& args) {
+
+    Napi::Value val = args[0];
+
+    if (!val.IsObject()) {
         return "Argument must be an object";
     }
+    Napi::Env env = args.Env();
 
-    auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
+    auto obj = Napi::Object(env, args[0]);
     if (!getRequiredProperty<std::string>(obj, "path", path)) {
         return std::string("Required property not found: path");
     }
+
     if (!getRequiredProperty<std::string>(obj, "password", password)) {
         return std::string("Required property not found: password");
     }
+
     if (!getRequiredProperty<std::string>(obj, "daemonAddress", daemonAddress)) {
         return std::string("Required property not found: daemonAddress");
     }
@@ -218,12 +229,16 @@ std::string RecoveryWalletArgs::Init(const Nan::FunctionCallbackInfo<Value>& arg
 }
 
 
-std::string CreateTransactionArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
-    if (args.Length() != 1 || !args[0]->IsObject()) {
+std::string CreateTransactionArgs::Init(const Napi::CallbackInfo& args) {
+
+    Napi::Value val = args[0];
+
+    if (!val.IsObject()) {
         return "Argument must be an object";
     }
+    Napi::Env env = args.Env();
 
-    auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
+    auto obj = Napi::Object(env, args[0]);
 
     if (!getRequiredProperty<std::string>(obj, "address", address)) {
         return std::string("Required property not found: address");
@@ -244,12 +259,16 @@ std::string CreateTransactionArgs::Init(const Nan::FunctionCallbackInfo<Value>& 
     return {};
 }
 
-std::string CreateAdvancedTransactionArgs::Init(const Nan::FunctionCallbackInfo<Value>& args) {
-    if (args.Length() != 1 || !args[0]->IsObject()) {
+std::string CreateAdvancedTransactionArgs::Init(const Napi::CallbackInfo& args) {
+
+    Napi::Value val = args[0];
+
+    if (!val.IsObject()) {
         return "Argument must be an object";
     }
+    Napi::Env env = args.Env();
 
-    auto obj = Nan::To<v8::Object>(args[0]).ToLocalChecked();
+    auto obj = Napi::Object(env, args[0]);
 
     address = getOptionalProperty<std::string>(obj, "address", "");
 

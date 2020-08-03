@@ -1,4 +1,5 @@
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 #include "wallet.h"
 #include "pendingtransaction.h"
 
@@ -8,15 +9,18 @@ extern void mlog_set_log(const char *log);
 
 namespace exawallet {
 
-NAN_METHOD(SetupLog) {
-    if (info.Length() == 0 || !info[0]->IsNumber()) {
-        Nan::ThrowError("Log level arument must be 0 - 4 integer");
-        return;
+Napi::Value SetupLog(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    if (info.Length() == 0 || !info[0].IsNumber()) {
+        Napi::Error::New(env, "Log level arument must be 0 - 4 integer").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
     const char* configureString = nullptr;
-    auto level = v8::Integer::Cast(*info[0]);
-    switch (level->Value()) {
+    auto level = info[0].As<Napi::Number>();
+    switch (level.ToNumber().Uint32Value()) {
     case 0:
         configureString = "0";
         break;
@@ -33,50 +37,52 @@ NAN_METHOD(SetupLog) {
         configureString = "4";
         break;
     default:
-        Nan::ThrowError("Log level arument must be 0 - 4 integer");
-        return;
+        Napi::Error::New(env, "Log level arument must be 0 - 4 integer").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
     if (info.Length() == 1) {
         mlog_configure("", true);
         mlog_set_log(configureString);
-        return;
+        return Napi::Value();
     }
 
 
-    if (!info[1]->IsString()) {
-        Nan::ThrowError("Filename argument is expected");
-        return;
+    if (!info[1].IsString()) {
+        Napi::Error::New(env, "Filename argument is expected").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
-    Nan::Utf8String filename(info[1]);
-    mlog_configure(*filename, false);
+    std::string filename = info[1].As<Napi::String>();
+    mlog_configure(filename, false);
     mlog_set_log(configureString);
 }
 
 
 
-NAN_MODULE_INIT(Init) {
-    Wallet::Init(target);
-    PendingTransaction::Init(target);
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+    Wallet::Init(env, exports);
+    PendingTransaction::Init(env, exports);
 
 
-    //Monero libwallet generates too much logs in stdout by default
+    //Safex libwallet generates too much logs in stdout by default
     mlog_set_log("0");
     mlog_configure("", false);
 
-    Nan::SetMethod(target, "createWallet", Wallet::CreateWallet);
-    Nan::SetMethod(target, "createWalletFromKeys", Wallet::CreateWalletFromKeys);
-    Nan::SetMethod(target, "walletExists", Wallet::WalletExists);
-    Nan::SetMethod(target, "openWallet", Wallet::OpenWallet);
-    Nan::SetMethod(target, "recoveryWallet", Wallet::RecoveryWallet);
-    Nan::SetMethod(target, "genPaymentId", Wallet::GenPaymentId);
-    Nan::SetMethod(target, "paymentIdValid", Wallet::PaymentIdValid);
-    Nan::SetMethod(target, "addressValid", Wallet::AddressValid);
-    Nan::SetMethod(target, "setupLog", SetupLog);
+    exports.Set(Napi::String::New(env, "createWallet"), Napi::Function::New(env, Wallet::CreateWallet));
+    exports.Set(Napi::String::New(env, "createWalletFromKeys"), Napi::Function::New(env, Wallet::CreateWalletFromKeys));
+    exports.Set(Napi::String::New(env, "walletExists"), Napi::Function::New(env, Wallet::WalletExists));
+    exports.Set(Napi::String::New(env, "openWallet"), Napi::Function::New(env, Wallet::OpenWallet));
+    exports.Set(Napi::String::New(env, "recoveryWallet"), Napi::Function::New(env, Wallet::RecoveryWallet));
+    exports.Set(Napi::String::New(env, "genPaymentId"), Napi::Function::New(env, Wallet::GenPaymentId));
+    exports.Set(Napi::String::New(env, "paymentIdValid"), Napi::Function::New(env, Wallet::PaymentIdValid));
+    exports.Set(Napi::String::New(env, "addressValid"), Napi::Function::New(env, Wallet::AddressValid));
+    exports.Set(Napi::String::New(env, "setupLog"), Napi::Function::New(env, SetupLog));
+
+     return exports;
 }
 
 
-NODE_MODULE(NODE_GYP_MODULE_NAME, Init)
+NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)
 
 } //namespace exawallet
