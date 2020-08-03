@@ -45,7 +45,7 @@
     "host": "https://github.com/ddabek/safex-nodejs-libwallet/releases/download/"
   },
   "scripts": {
-    "build": "node-pre-gyp configure build",
+    "build": "./install.sh",
     "publish": "node-pre-gyp configure build package",
     "publishGithub": "node-pre-gyp-github publish",
     "prepublishOnly": "npm ls",
