@@ -48,6 +48,19 @@ if(BUILD_WIN)
         ${CMAKE_SOURCE_DIR}/deps/libwallet_api.dll.a
         ${LIBNODE}
         )
+elseif(APPLE)
+    target_link_libraries(${PROJECT_NAME}
+        ${CMAKE_SOURCE_DIR}/deps/libwallet_merged.a
+        ${CMAKE_SOURCE_DIR}/deps/libunbound.a
+        ${CMAKE_SOURCE_DIR}/deps/libepee.a
+        ${CMAKE_SOURCE_DIR}/deps/libeasylogging.a
+        ${CMAKE_SOURCE_DIR}/deps/liblmdb.a
+        ssl
+        z
+        crypto
+        "-framework PCSC"
+        ${BOOST_LIBS}
+        )
 else()
     target_link_libraries(${PROJECT_NAME}
         ${CMAKE_SOURCE_DIR}/deps/libwallet_merged.a
