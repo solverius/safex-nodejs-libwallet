@@ -12,7 +12,8 @@ file(GLOB BOOST_LIBS
 )
 
 if(BUILD_WIN)
-    set(WIN_DELAY_LOAD_HOOK ${CMAKE_CURRENT_SOURCE_DIR}/node_modules/node-gyp/src/win_delay_load_hook.cc)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNODE_HOST_BINARY=node.exe")
+    set(WIN_DELAY_LOAD_HOOK ${CMAKE_CURRENT_SOURCE_DIR}/win_delay_load_hook.cc)
     set(LIBNODE ${CMAKE_CURRENT_SOURCE_DIR}/deps/libnode.a)
 endif()
 
