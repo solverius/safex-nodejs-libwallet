@@ -28,9 +28,6 @@
   "dependencies": {
     "node-addon-api": "^3.0.0",
     "cmake-js": "",
-    "node-pre-gyp": "^0.14.0",
-    "aws-sdk": "^2.495.0",
-    "node-gyp": "^6.1.0",
     "rimraf": "^2.6.2",
     "tap": "^14.4.2"
   },

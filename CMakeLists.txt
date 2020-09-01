@@ -56,9 +56,9 @@ elseif(APPLE)
         ${CMAKE_SOURCE_DIR}/deps/libepee.a
         ${CMAKE_SOURCE_DIR}/deps/libeasylogging.a
         ${CMAKE_SOURCE_DIR}/deps/liblmdb.a
-        ssl
+        /usr/local/opt/openssl@1.1/lib/libssl.a
+        /usr/local/opt/openssl@1.1/lib/libcrypto.a
         z
-        crypto
         "-framework PCSC"
         ${BOOST_LIBS}
         )
