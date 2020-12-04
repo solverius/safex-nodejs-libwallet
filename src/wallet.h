@@ -87,6 +87,8 @@ public:
     Napi::Value StakedTokenBalance(const Napi::CallbackInfo& info);
     Napi::Value UnlockedStakedTokenBalance(const Napi::CallbackInfo& info);
     Napi::Value GetMyInterest(const Napi::CallbackInfo& info);
+    Napi::Value GetMyFeedbackTokens(const Napi::CallbackInfo& info);
+    Napi::Value GetMyFeedbacks(const Napi::CallbackInfo& info);
 
     Napi::Value BlockChainHeight(const Napi::CallbackInfo& info);
     Napi::Value DaemonBlockChainHeight(const Napi::CallbackInfo& info);
