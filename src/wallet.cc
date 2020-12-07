@@ -127,6 +127,27 @@ Napi::Object makeInterstObject(Napi::Env env, const std::pair<uint64_t, uint64_t
     return result;
 }
 
+Napi::Object makeFeedbackTokenObject(Napi::Env env, const std::pair<std::string, std::string>& feedbackTokenData) {
+    auto result = Napi::Object::New(env);
+
+    result.Set("offerID", feedbackTokenData.first);
+    result.Set("offerTitle", feedbackTokenData.second);
+
+    return result;
+}
+
+
+Napi::Object makeFeedbackObject(Napi::Env env, const SafexNativeSafexFeedback& feedbackData) {
+    auto result = Napi::Object::New(env);
+
+    result.Set("offerID", feedbackData.getOffer_id());
+    result.Set("offerTitle", feedbackData.getTitle());
+    result.Set("ratingGiven", feedbackData.getRating());  
+    result.Set("comment", feedbackData.getComment());
+
+    return result;
+}
+
 Napi::Object makeSafexAccountObject(Napi::Env env, const SafexNativeSafexAccount& safexAccount) {
 
     auto result = Napi::Object::New(env);
@@ -292,6 +313,8 @@ Napi::Object Wallet::Init(Napi::Env env, Napi::Object exports) {
                 InstanceMethod("stakedTokenBalance", &Wallet::StakedTokenBalance),
                 InstanceMethod("unlockedStakedTokenBalance", &Wallet::UnlockedStakedTokenBalance),
                 InstanceMethod("getMyInterest", &Wallet::GetMyInterest),
+                InstanceMethod("getMyFeedbackTokens", &Wallet::GetMyFeedbackTokens),
+                InstanceMethod("getMyFeedbacks", &Wallet::GetMyFeedbacks),
                 InstanceMethod("blockchainHeight", &Wallet::BlockChainHeight),
                 InstanceMethod("daemonBlockchainHeight", &Wallet::DaemonBlockChainHeight),
                 InstanceMethod("synchronized", &Wallet::Synchronized),
@@ -667,6 +690,43 @@ Napi::Value Wallet::GetMyInterest(const Napi::CallbackInfo& info) {
 
 }
 
+Napi::Value Wallet::GetMyFeedbackTokens(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    std::vector<std::pair<std::string, std::string>> feedback_tokens = this->wallet_->getMyFeedbacksToGive();
+
+    auto result = Napi::Array::New(env, feedback_tokens.size());
+    for (size_t i = 0; i < feedback_tokens.size(); ++i) {
+        const auto& output = feedback_tokens[i];
+
+        auto feedbackTokenObj = makeFeedbackTokenObject(env, output);
+
+        result[i] = feedbackTokenObj;
+    }
+
+    return result;
+
+}
+
+Napi::Value Wallet::GetMyFeedbacks(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    std::vector<SafexNativeSafexFeedback> feedbacks = this->wallet_->getMyFeedbacksGiven();
+
+    auto result = Napi::Array::New(env, feedbacks.size());
+    for (size_t i = 0; i < feedbacks.size(); ++i) {
+        const auto& output = feedbacks[i];
+
+        auto feedbackObj = makeFeedbackObject(env, output);
+
+        result[i] = feedbackObj;
+    }
+
+    return result;
+
+}
 Napi::Value Wallet::BlockChainHeight(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 

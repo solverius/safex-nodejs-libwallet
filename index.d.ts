@@ -103,6 +103,18 @@ declare namespace monero {
     collectedInterest: string;
   };
 
+  type FeedbackToken = {
+    offerID: string;
+    offerTitle: string;
+  };
+
+  type Feedback = {
+    offerID: string;
+    offerTitle: string;
+    ratingGiven: number;
+    comment: string;
+  };
+
   interface Wallet {
     address(): string;
     seed(): string;
@@ -164,6 +176,8 @@ declare namespace monero {
       safex_feedback_comment?: string,
     }): Promise<Transaction>;
     getMyInterest(): InterestInfo[];
+    getMyFeedbackTokens(): FeedbackToken[];
+    getMyFeedbacks(): Feedback[];
     history(): TransactionInfo[];
     path(): string;
     network(): Network;
