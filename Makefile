@@ -50,7 +50,7 @@ deps-win: libnode-win safexcore-win-build
 	mkdir -p deps
 
 safexcore:
-	git clone --depth 1 -b mainnet_candidate --recurse-submodules https://github.com/safex/safexcore
+	git clone --depth 1 -b master --recurse-submodules https://github.com/safex/safexcore
 	cp safexcore/src/wallet/api/wallet_api.h include
 
 
