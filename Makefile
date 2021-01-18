@@ -1,8 +1,8 @@
 SAFEX_BRANCH?="node_wallet"
 SAFEX_BUILD_TYPE?=Debug
 
-BOOST_VERSION=1.66.0
-BOOST_DIRNAME=boost_1_66_0
+BOOST_VERSION=1.72.0
+BOOST_DIRNAME=boost_1_72_0
 
 PWD=${shell pwd}
 BOOST_LIBS=chrono,date_time,filesystem,program_options,regex,serialization,system,thread,locale
@@ -23,10 +23,9 @@ clean:
 
 
 ${BOOST_DIRNAME}:
-	git clone --depth 1 -b boost-1.66.0 \
-	--recurse-submodules --shallow-submodules \
-	https://github.com/boostorg/boost.git ${BOOST_DIRNAME}
-	cd ${BOOST_DIRNAME}/tools/build && git apply ../../../mac_fix.patch
+	curl -L -o "${BOOST_DIRNAME}.tar.gz" \
+		https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
+	tar xf ${BOOST_DIRNAME}.tar.gz
 
 boost: ${BOOST_DIRNAME}
 	cd ${BOOST_DIRNAME} && ./bootstrap.sh --prefix=${PWD}/boost
