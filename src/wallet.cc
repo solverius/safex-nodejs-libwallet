@@ -115,6 +115,9 @@ Napi::Object makeTransactionInfoObject(Napi::Env env, const SafexNativeTransacti
     result.Set("timestamp", transaction->timestamp());
     result.Set("paymentId", transaction->paymentId());
 
+    uint32_t transactionType = static_cast<uint32_t>(transaction->transactionType());
+    result.Set("transactionType", transactionType);
+
     return result;
 }
 
