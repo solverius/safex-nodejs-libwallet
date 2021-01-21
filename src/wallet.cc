@@ -317,7 +317,7 @@ Napi::Object Wallet::Init(Napi::Env env, Napi::Object exports) {
                 InstanceMethod("unlockedTokenBalance", &Wallet::UnlockedTokenBalance),
                 InstanceMethod("stakedTokenBalance", &Wallet::StakedTokenBalance),
                 InstanceMethod("unlockedStakedTokenBalance", &Wallet::UnlockedStakedTokenBalance),
-                InstanceMethod("getMyInterest", &Wallet::GetMyInterest),
+                InstanceMethod("getMyStake", &Wallet::GetMyInterest),
                 InstanceMethod("getMyFeedbackTokens", &Wallet::GetMyFeedbackTokens),
                 InstanceMethod("getMyFeedbacks", &Wallet::GetMyFeedbacks),
                 InstanceMethod("blockchainHeight", &Wallet::BlockChainHeight),
