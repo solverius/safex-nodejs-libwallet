@@ -121,11 +121,13 @@ Napi::Object makeTransactionInfoObject(Napi::Env env, const SafexNativeTransacti
     return result;
 }
 
-Napi::Object makeInterstObject(Napi::Env env, const std::pair<uint64_t, uint64_t>& interestData) {
+Napi::Object makeInterstObject(Napi::Env env, const std::pair<uint64_t, std::pair<uint64_t, uint64_t>>& interestData) {
     auto result = Napi::Object::New(env);
 
     result.Set("tokenStaked", std::to_string(interestData.first));
-    result.Set("collectedInterest", std::to_string(interestData.second));
+    result.Set("collectedInterest", std::to_string(interestData.second.first));
+    result.Set("blockHeight", std::to_string(interestData.second.second));
+
 
     return result;
 }
@@ -315,7 +317,7 @@ Napi::Object Wallet::Init(Napi::Env env, Napi::Object exports) {
                 InstanceMethod("unlockedTokenBalance", &Wallet::UnlockedTokenBalance),
                 InstanceMethod("stakedTokenBalance", &Wallet::StakedTokenBalance),
                 InstanceMethod("unlockedStakedTokenBalance", &Wallet::UnlockedStakedTokenBalance),
-                InstanceMethod("getMyInterest", &Wallet::GetMyInterest),
+                InstanceMethod("getMyStake", &Wallet::GetMyInterest),
                 InstanceMethod("getMyFeedbackTokens", &Wallet::GetMyFeedbackTokens),
                 InstanceMethod("getMyFeedbacks", &Wallet::GetMyFeedbacks),
                 InstanceMethod("blockchainHeight", &Wallet::BlockChainHeight),
@@ -676,7 +678,7 @@ Napi::Value Wallet::GetMyInterest(const Napi::CallbackInfo& info) {
 
     Napi::Env env = info.Env();
 
-            std::vector<std::pair<uint64_t, uint64_t>> interest_per_output;
+            std::vector<std::pair<uint64_t, std::pair<uint64_t, uint64_t>>> interest_per_output;
 
             uint64_t total_interest = this->wallet_->getMyInterest(interest_per_output);
 
