@@ -16,20 +16,24 @@ void CreateWalletTask::Execute() {
     auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     if (manager->walletExists(args_.path)) {
         SetError("Wallet already exists: " + args_.path);
+        return;
     }
 
     wallet_ = manager->createWallet(args_.path, args_.password, args_.language, args_.nettype);
 
     if (!wallet_) {
         SetError( "WalletManager returned null wallet pointer");
+        return;
     }
 
     if (!wallet_->errorString().empty()) {
         SetError( wallet_->errorString());
+        return;
     }
 
     if (!wallet_->init(args_.daemonAddress)) {
         SetError("Couldn't init wallet");
+        return;
     }
 
     wallet_->setTrustedDaemon(true);
@@ -47,6 +51,7 @@ void CreateWalletFromKeysTask::Execute() {
   auto manager = SafexNativeWalletManagerFactory::getWalletManager();
   if (manager->walletExists(args_.path)) {
       SetError( "Wallet already exists: " + args_.path);
+      return;
   }
 
   wallet_ = manager->createWalletFromKeys(args_.path, args_.password, args_.language, args_.nettype, args_.restoreHeight, args_.addressString, args_.viewKeyString, args_.spendKeyString);
@@ -54,20 +59,23 @@ void CreateWalletFromKeysTask::Execute() {
 
   if (!wallet_) {
       SetError( "WalletManager returned null wallet pointer");
+      return;
   }
 
   if (!wallet_->errorString().empty()) {
       SetError( wallet_->errorString());
+      return;
   }
 
   if (!wallet_->init(args_.daemonAddress)) {
       SetError( "Couldn't init wallet");
+      return;
   }
 
   wallet_->setTrustedDaemon(true);
   wallet_->startRefresh();
 
-return;
+  return;
 }
 
 void CreateWalletFromKeysTask::OnOK() {
@@ -79,20 +87,24 @@ void OpenWalletTask::Execute() {
     auto manager = SafexNativeWalletManagerFactory::getWalletManager();
     if (!manager->walletExists(args_.path)) {
         SetError( "wallet does not exist: " + args_.path);
+        return;
     }
 
     wallet_ = manager->openWallet(args_.path, args_.password, args_.nettype);
 
     if (!wallet_) {
         SetError( "WalletManager returned null wallet pointer");
+        return;
     }
 
     if (!wallet_->errorString().empty()) {
         SetError( wallet_->errorString());
+        return;
     }
 
     if (!wallet_->init(args_.daemonAddress)) {
         SetError( "Couldn't init wallet");
+        return;
     }
 
     //set refresh height as latest block wallet has seen - 1 day
@@ -101,7 +113,7 @@ void OpenWalletTask::Execute() {
 
     wallet_->setTrustedDaemon(true);
     wallet_->startRefresh();
-return;
+	return;
 }
 
 void OpenWalletTask::OnOK() {
@@ -126,14 +138,17 @@ void RecoveryWalletTask::Execute() {
 
     if (!wallet_) {
         SetError( "WalletManager returned null wallet pointer");
+        return;
     }
 
     if (!wallet_->errorString().empty()) {
         SetError( wallet_->errorString());
+        return;
     }
     
     if (!wallet_->init(args_.daemonAddress)) {
         SetError( "Couldn't init wallet");
+        return;
     }
 
     wallet_->setTrustedDaemon(true);
