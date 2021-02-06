@@ -96,6 +96,7 @@ struct CreateAdvancedTransactionArgs {
     uint64_t    safexPurchaseQuantity;
     uint64_t    safexFeedbackStarsGiven;
     std::string safexFeedbackComment;
+    uint64_t    safexStakedTokenHeight;
     uint64_t amount;
     std::string paymentId;
     uint32_t mixin;
