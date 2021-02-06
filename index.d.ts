@@ -101,6 +101,7 @@ declare namespace monero {
   type InterestInfo = {
     tokenStaked: string;
     collectedInterest: string;
+    blockHeight: string;
   };
 
   type FeedbackToken = {
@@ -174,8 +175,9 @@ declare namespace monero {
       safex_purchase_quantity?: number,
       safex_feedback_stars_given?: number,
       safex_feedback_comment?: string,
+      safex_staked_token_height?: number,
     }): Promise<Transaction>;
-    getMyInterest(): InterestInfo[];
+    getMyStake(): InterestInfo[];
     getMyFeedbackTokens(): FeedbackToken[];
     getMyFeedbacks(): Feedback[];
     history(): TransactionInfo[];

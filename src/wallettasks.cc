@@ -215,7 +215,7 @@ void CreateAdvancedTransactionTask::Execute() {
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
 
     } else if(args_.tx_type==Safex::TransactionType::UnstakeTokenTransaction){
-        Safex::UnstakeTokenCommand s{args_.address,args_.amount};
+        Safex::UnstakeTokenCommand s{args_.address, args_.amount, args_.safexStakedTokenHeight};
         transaction_ = wallet_->createAdvancedTransaction(args_.address, args_.paymentId, args_.amount, args_.mixin, args_.priority, 0 /*subaddr account*/,{} /*subaddr indices*/, s);
 
     } else if(args_.tx_type==Safex::TransactionType::CreatePricePegTransaction){

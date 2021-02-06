@@ -311,6 +311,8 @@ std::string CreateAdvancedTransactionArgs::Init(const Napi::CallbackInfo& args) 
     safexFeedbackStarsGiven = getOptionalProperty<uint64_t>(obj, "safex_feedback_stars_given", 0);
     safexFeedbackComment = getOptionalProperty<std::string>(obj, "safex_feedback_comment", "");
 
+    safexStakedTokenHeight = getOptionalProperty<uint64_t>(obj, "safex_staked_token_height", 0);
+
     amount = std::stoull(amountStr);
     paymentId = getOptionalProperty<std::string>(obj, "paymentId", "");
     mixin = getOptionalProperty<uint32_t>(obj, "mixin", DEFAULT_MIXIN);
