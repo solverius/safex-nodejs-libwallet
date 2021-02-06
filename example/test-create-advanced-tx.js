@@ -5,7 +5,7 @@ const fs = require('fs');
 if(fs.existsSync('index.log'))
 	fs.unlinkSync('index.log')
 
-safex.setupLog(3, "index.log");
+// safex.setupLog(3, "index.log");
 
 var wallet;
 var sent = false;
@@ -42,7 +42,7 @@ const nextTick = () => {
 var lastHeight = 0;
 
 	console.log("wallet doesn't exist. creating new one: " + wallet_path);
-	safex.createWalletFromKeys(args, AsyncWorkerCompletion);
+	safex.openWallet(args, AsyncWorkerCompletion);
 
 	function AsyncWorkerCompletion (err, w) {
     if (err) {
@@ -84,9 +84,9 @@ var lastHeight = 0;
 
 				wallet.createAdvancedTransaction({
 					// * Create Safex account
-						'tx_type': '6',
-						'safex_username': 'saved',
-						'mixin': '1'
+						// 'tx_type': '6',
+						// 'safex_username': 'saved',
+						// 'mixin': '1'
 					// * Edit Safex account
 						// 	'tx_type': '7',
 						// 	'safex_username': 'saved',
@@ -114,9 +114,10 @@ var lastHeight = 0;
 						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
 						// 'amount': '100000000000000',
 					// * Unstake token
-						// 'tx_type': '4',
-						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
-						// 'amount': '100000000000000',
+						'tx_type': '4',
+						'address': 'SFXtzV7tt2KZqvpCWVWauC5Qf16o3dAwLKNd9hCNzoB21ELLNfFjAMjXRhsR3ohT1AeW8j3jL4gfRahR86x6aoiU5hm5ZJj7BSc', // testnet
+						'amount': '1000000000000',
+						'safex_staked_token_height': '1376',
 					// * Create Price Peg
 						// 'tx_type': '11',
 						// 'address': 'SFXtzS7mTDsA9Sgp8D9EfDJq1bqQtc6TVckF8QP94QH6XkUKs8WZq7D6fcR6DtvoCdUch3y5FdxT1NH3gnE2symR7mvo5aYXTkp', // testnet
