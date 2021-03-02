@@ -98,8 +98,8 @@ public:
     Napi::Value DefaultMixin(const Napi::CallbackInfo& info);
     void SetDefaultMixin(const Napi::CallbackInfo& info);
 
-    Napi::Value StartRefresh(const Napi::CallbackInfo& info);
-    Napi::Value PauseRefresh(const Napi::CallbackInfo& info);
+    void StartRefresh(const Napi::CallbackInfo& info);
+    void PauseRefresh(const Napi::CallbackInfo& info);
 
     Napi::Value TransactionHistory(const Napi::CallbackInfo& info);
 

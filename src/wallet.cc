@@ -881,12 +881,12 @@ void Wallet::SetDefaultMixin(const Napi::CallbackInfo& info) {
 
 }
 
-Napi::Value Wallet::StartRefresh(const Napi::CallbackInfo& info) {
+void Wallet::StartRefresh(const Napi::CallbackInfo& info) {
     this->wallet_->startRefresh();
 
 }
 
-Napi::Value Wallet::PauseRefresh(const Napi::CallbackInfo& info) {
+void Wallet::PauseRefresh(const Napi::CallbackInfo& info) {
     this->wallet_->pauseRefresh();
 }
 
