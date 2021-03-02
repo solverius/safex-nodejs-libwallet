@@ -1334,6 +1334,7 @@ Napi::Value Wallet::GetReserveProof(const Napi::CallbackInfo& info) {
     uint32_t account_index;
     uint64_t amount;
     std::string message;
+    bool token;
 
     auto obj = Napi::Object(env, info[0]);
 
@@ -1342,7 +1343,7 @@ Napi::Value Wallet::GetReserveProof(const Napi::CallbackInfo& info) {
         return env.Null(); 
     }
 
-    if (!getRequiredProperty<uint32_t>(obj, "account_index", account_index)) {
+    if (!getRequiredProperty<uint32_t>(obj, "accountIndex", account_index)) {
     	Napi::Error::New(env, "Required property not found: account_index").ThrowAsJavaScriptException();
         return env.Null(); 
     }
@@ -1355,9 +1356,11 @@ Napi::Value Wallet::GetReserveProof(const Napi::CallbackInfo& info) {
 
     amount = std::stoull(amount_str);
 
+    token = getOptionalProperty<bool>(obj, "token", false);
+
     message = getOptionalProperty<std::string>(obj, "message", "");
 
-    auto reserveProof = this->wallet_->getReserveProof(all, account_index, amount, message);
+    auto reserveProof = this->wallet_->getReserveProof(all, account_index, amount, message, token);
     if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
         Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
         return env.Null();

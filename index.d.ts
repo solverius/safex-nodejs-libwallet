@@ -240,7 +240,8 @@ declare namespace monero {
     getReserveProof(options: {
       all: boolean, 
       accountIndex: number, 
-      amount: string, 
+      amount: string,
+      token?: boolean, 
       message?: string,
     }): string;
     checkReserveProof(options: {
