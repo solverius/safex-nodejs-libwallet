@@ -13,8 +13,59 @@ namespace exawallet {
 
 namespace {
 
+template<typename T>
+T convertValue(Napi::Value value);
 
+template<typename T>
+bool getRequiredProperty(Napi::Object obj, const char* name, T& value) {
 
+    bool has = obj.HasOwnProperty(name);
+    if (!has){
+        return false;
+    }
+
+    auto valueLocal = obj[name];
+    value = convertValue<T>(valueLocal);
+    return true;
+}
+
+template<typename T>
+T getOptionalProperty(Napi::Object obj, const char* name, const T& defaultValue) {
+
+    bool has = obj.HasOwnProperty(name);
+    if (!has){
+        return defaultValue;
+    }
+
+    auto valueLocal = obj[name];
+    return convertValue<T>(valueLocal);
+}
+
+template<>
+std::string convertValue<std::string>(Napi::Value value) {
+    std::string str = value.As<Napi::String>();
+    return str;
+}
+
+template<>
+double convertValue<double>(Napi::Value value) {
+    return value.ToNumber().DoubleValue();
+}
+
+template<>
+uint32_t convertValue<uint32_t>(Napi::Value value) {
+    return value.ToNumber().Uint32Value();
+}
+
+template<>
+uint64_t convertValue<uint64_t>(Napi::Value value) {
+    return value.ToNumber().Int64Value();
+}
+
+template<>
+bool convertValue<bool>(Napi::Value value) {
+    return value.ToBoolean().Value();
+}
 
 std::string toStdString(const Napi::Value& val) {
     std::string nanStr = val.As<Napi::String>();
@@ -336,6 +387,14 @@ Napi::Object Wallet::Init(Napi::Env env, Napi::Object exports) {
                 InstanceMethod("removeSafexAccount", &Wallet::RemoveSafexAccount),
                 InstanceMethod("getMySafexOffers", &Wallet::GetMySafexOffers),
                 InstanceMethod("listSafexOffers", &Wallet::ListSafexOffers),
+                InstanceMethod("getTxKey", &Wallet::GetTxKey),
+                InstanceMethod("checkTxKey", &Wallet::CheckTxKey),
+                InstanceMethod("getTxProof", &Wallet::GetTxProof),
+                InstanceMethod("checkTxProof", &Wallet::CheckTxProof),
+                InstanceMethod("getSpendProof", &Wallet::GetSpendProof),
+                InstanceMethod("checkSpendProof", &Wallet::CheckSpendProof),
+                InstanceMethod("getReserveProof", &Wallet::GetReserveProof),
+                InstanceMethod("checkReserveProof", &Wallet::CheckReserveProof),
                 InstanceMethod("signMessage", &Wallet::SignMessage),
                 InstanceMethod("verifySignedMessage", &Wallet::VerifySignedMessage),
                 InstanceMethod("history", &Wallet::TransactionHistory),
@@ -1050,24 +1109,328 @@ Napi::Value Wallet::ListSafexOffers(const Napi::CallbackInfo& info) {
 
 }
 
+Napi::Value Wallet::GetTxKey(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "Function accepts string argument").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    auto txKey = this->wallet_->getTxKey(toStdString(info[0]));
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    return Napi::String::New(env, txKey.c_str());
+}
+
+
+
+Napi::Value Wallet::CheckTxKey(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    std::string txid;
+    std::string tx_key;
+    std::string address;
+
+    auto obj = Napi::Object(env, info[0]);
+
+    if (!getRequiredProperty<std::string>(obj, "txId", txid)) {
+    	Napi::Error::New(env, "Required property not found: txId").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    if (!getRequiredProperty<std::string>(obj, "txKey", tx_key)) {
+    	Napi::Error::New(env, "Required property not found: txKey").ThrowAsJavaScriptException();
+        return env.Null();    
+    }
+
+    if (!getRequiredProperty<std::string>(obj, "address", address)) {
+    	Napi::Error::New(env, "Required property not found: address").ThrowAsJavaScriptException();
+        return env.Null();    
+    }
+
+    uint64_t received_cash;
+    uint64_t received_token;
+    bool in_pool;
+    uint64_t confirmations;
+
+    bool valid = this->wallet_->checkTxKey(txid, tx_key, address, received_cash, received_token, in_pool, confirmations);
+
+    auto result = Napi::Object::New(env);
+
+    result.Set("receivedCash", convertAmount(env, received_cash));
+    result.Set("receivedToken", convertAmount(env, received_token));
+    result.Set("inPool", in_pool);
+    result.Set("confirmations", confirmations);
+    result.Set("valid", valid);
+
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    return result;
+}
+
+Napi::Value Wallet::GetTxProof(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    std::string txid;
+    std::string message;
+    std::string address;
+
+    auto obj = Napi::Object(env, info[0]);
+
+    if (!getRequiredProperty<std::string>(obj, "txId", txid)) {
+    	Napi::Error::New(env, "Required property not found: txId").ThrowAsJavaScriptException();
+        return env.Null();    
+    }
+
+    if (!getRequiredProperty<std::string>(obj, "address", address)) {
+    	Napi::Error::New(env, "Required property not found: address").ThrowAsJavaScriptException();
+        return env.Null();    
+    }
+
+    message = getOptionalProperty<std::string>(obj, "message", "");
+
+    auto txProof = this->wallet_->getTxProof(txid, address, message);
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    return Napi::String::New(env, txProof.c_str());
+
+}
+
+Napi::Value Wallet::CheckTxProof(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+
+    std::string txid;
+    std::string message;
+    std::string signature;
+    std::string address;
+
+    auto obj = Napi::Object(env, info[0]);
+
+    if (!getRequiredProperty<std::string>(obj, "txId", txid)) {
+    	Napi::Error::New(env, "Required property not found: txId").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    if (!getRequiredProperty<std::string>(obj, "address", address)) {
+    	Napi::Error::New(env, "Required property not found: address").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    if (!getRequiredProperty<std::string>(obj, "signature", signature)) {
+    	Napi::Error::New(env, "Required property not found: signature").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    message = getOptionalProperty<std::string>(obj, "message", "");
+
+    bool good;
+    uint64_t received_cash;
+    uint64_t received_token;
+    bool in_pool; 
+    uint64_t confirmations;
+
+
+    auto valid = this->wallet_->checkTxProof(txid, address, message, signature, good, received_cash, received_token, in_pool, confirmations);
+
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    auto result = Napi::Object::New(env);
+
+    result.Set("receivedCash", convertAmount(env, received_cash));
+    result.Set("receivedToken", convertAmount(env, received_token));
+    result.Set("inPool", in_pool);
+    result.Set("confirmations", confirmations);
+    result.Set("valid", good);
+
+    return result;
+}
+
+
+
+Napi::Value Wallet::GetSpendProof(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    std::string txid;
+    std::string message;
+
+    auto obj = Napi::Object(env, info[0]);
+
+    if (!getRequiredProperty<std::string>(obj, "txId", txid)) {
+    	Napi::Error::New(env, "Required property not found: txId").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    message = getOptionalProperty<std::string>(obj, "message", "");
+
+    auto spendProof = this->wallet_->getSpendProof(txid, message);
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    return Napi::String::New(env, spendProof.c_str());
+}
+
+Napi::Value Wallet::CheckSpendProof(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+
+    std::string txid;
+    std::string message;
+    std::string signature;
+
+    auto obj = Napi::Object(env, info[0]);
+
+    if (!getRequiredProperty<std::string>(obj, "txId", txid)) {
+    	Napi::Error::New(env, "Required property not found: txId").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    if (!getRequiredProperty<std::string>(obj, "signature", signature)) {
+    	Napi::Error::New(env, "Required property not found: signature").ThrowAsJavaScriptException();
+        return env.Null(); 
+	}
+
+    message = getOptionalProperty<std::string>(obj, "message", "");
+
+    bool good = false;
+
+    bool valid = this->wallet_->checkSpendProof(txid, message, signature, good);
+
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    return Napi::Boolean::New(env, good);
+
+}
+
+Napi::Value Wallet::GetReserveProof(const Napi::CallbackInfo& info) {
+
+    Napi::Env env = info.Env();
+
+    bool all;
+    uint32_t account_index;
+    uint64_t amount;
+    std::string message;
+
+    auto obj = Napi::Object(env, info[0]);
+
+    if (!getRequiredProperty<bool>(obj, "all", all)) {
+    	Napi::Error::New(env, "Required property not found: all").ThrowAsJavaScriptException();
+        return env.Null(); 
+    }
+
+    if (!getRequiredProperty<uint32_t>(obj, "account_index", account_index)) {
+    	Napi::Error::New(env, "Required property not found: account_index").ThrowAsJavaScriptException();
+        return env.Null(); 
+    }
+
+    std::string amount_str;
+    if (!getRequiredProperty<std::string>(obj, "amount", amount_str)) {
+    	Napi::Error::New(env, "Required property not found: amount").ThrowAsJavaScriptException();
+        return env.Null(); 
+    }
+
+    amount = std::stoull(amount_str);
+
+    message = getOptionalProperty<std::string>(obj, "message", "");
+
+    auto reserveProof = this->wallet_->getReserveProof(all, account_index, amount, message);
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    return Napi::String::New(env, reserveProof.c_str());
+}
+
+
+Napi::Value Wallet::CheckReserveProof(const Napi::CallbackInfo& info) {
+	
+    Napi::Env env = info.Env();
+
+    std::string address;
+    std::string message;
+    std::string signature;
+
+    auto obj = Napi::Object(env, info[0]);
+
+    if (!getRequiredProperty<std::string>(obj, "address", address)) {
+    	Napi::Error::New(env, "Required property not found: address").ThrowAsJavaScriptException();
+        return env.Null(); 
+	}
+
+    if (!getRequiredProperty<std::string>(obj, "signature", signature)) {
+    	Napi::Error::New(env, "Required property not found: signature").ThrowAsJavaScriptException();
+        return env.Null(); 
+    }
+
+    message = getOptionalProperty<std::string>(obj, "message", "");
+
+    bool good;
+    uint64_t total_cash;
+    uint64_t cash_spent;
+    uint64_t total_token;
+    uint64_t token_spent;
+
+
+    auto valid = this->wallet_->checkReserveProof(address, message, signature, good, total_cash, cash_spent, total_token, token_spent);
+
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    auto result = Napi::Object::New(env);
+
+    result.Set("totalCash", convertAmount(env, total_cash));
+    result.Set("cashSpent", convertAmount(env, cash_spent));
+    result.Set("totalToken", convertAmount(env, total_token));
+    result.Set("tokenSpent", convertAmount(env, token_spent));
+    result.Set("valid", good);
+
+    return result;
+}
+
 
 Napi::Value Wallet::SignMessage(const Napi::CallbackInfo& info) {
 
     Napi::Env env = info.Env();
 
+    if (info.Length() != 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "Function accepts string argument").ThrowAsJavaScriptException();
+        return env.Null();
+    }
 
-        if (info.Length() != 1 || !info[0].IsString()) {
-            Napi::TypeError::New(env, "Function accepts string argument").ThrowAsJavaScriptException();
-            return env.Null();
-        }
+    auto signature = this->wallet_->signMessage(toStdString(info[0]));
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
 
-        auto signature = this->wallet_->signMessage(toStdString(info[0]));
-        if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
-            Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
-            return env.Null();
-        }
-
-        return Napi::String::New(env, signature.c_str());
+    return Napi::String::New(env, signature.c_str());
 
 }
 
@@ -1075,23 +1438,23 @@ Napi::Value Wallet::VerifySignedMessage(const Napi::CallbackInfo& info) {
 
     Napi::Env env = info.Env();
 
-        if (info.Length() != 3 || !info[0].IsString() || !info[1].IsString() || !info[2].IsString()) {
-            Napi::TypeError::New(env, "Function accepts message, monero address and signature as string arguments").ThrowAsJavaScriptException();
-            return env.Null();
-        }
+    if (info.Length() != 3 || !info[0].IsString() || !info[1].IsString() || !info[2].IsString()) {
+        Napi::TypeError::New(env, "Function accepts message, Safex address and signature as string arguments").ThrowAsJavaScriptException();
+        return env.Null();
+    }
 
-        auto message = toStdString(info[0]);
-        auto address = toStdString(info[1]);
-        auto signature = toStdString(info[2]);
+    auto message = toStdString(info[0]);
+    auto address = toStdString(info[1]);
+    auto signature = toStdString(info[2]);
 
-        bool valid = this->wallet_->verifySignedMessage(message, address, signature);
+    bool valid = this->wallet_->verifySignedMessage(message, address, signature);
 
-        if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
-            Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
-            return env.Null();
-        }
+    if (this->wallet_->status() != Safex::Wallet::Status_Ok) {
+        Napi::TypeError::New(env, this->wallet_->errorString().c_str()).ThrowAsJavaScriptException();
+        return env.Null();
+    }
 
-        return Napi::Boolean::New(env, valid);
+    return Napi::Boolean::New(env, valid);
 
 }
 
