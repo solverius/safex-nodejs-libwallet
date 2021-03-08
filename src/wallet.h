@@ -98,8 +98,8 @@ public:
     Napi::Value DefaultMixin(const Napi::CallbackInfo& info);
     void SetDefaultMixin(const Napi::CallbackInfo& info);
 
-    Napi::Value StartRefresh(const Napi::CallbackInfo& info);
-    Napi::Value PauseRefresh(const Napi::CallbackInfo& info);
+    void StartRefresh(const Napi::CallbackInfo& info);
+    void PauseRefresh(const Napi::CallbackInfo& info);
 
     Napi::Value TransactionHistory(const Napi::CallbackInfo& info);
 
@@ -115,6 +115,15 @@ public:
     Napi::Value GetMySafexOffers(const Napi::CallbackInfo& info);
     Napi::Value ListSafexOffers(const Napi::CallbackInfo& info);
 
+    // Proofs and verification functions
+    Napi::Value GetTxKey(const Napi::CallbackInfo& info);
+    Napi::Value CheckTxKey(const Napi::CallbackInfo& info);
+    Napi::Value GetTxProof(const Napi::CallbackInfo& info);
+    Napi::Value CheckTxProof(const Napi::CallbackInfo& info);
+    Napi::Value GetSpendProof(const Napi::CallbackInfo& info);
+    Napi::Value CheckSpendProof(const Napi::CallbackInfo& info);
+    Napi::Value GetReserveProof(const Napi::CallbackInfo& info);
+    Napi::Value CheckReserveProof(const Napi::CallbackInfo& info);
     Napi::Value SignMessage(const Napi::CallbackInfo& info);
     Napi::Value VerifySignedMessage(const Napi::CallbackInfo& info);
 

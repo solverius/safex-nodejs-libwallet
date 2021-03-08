@@ -211,6 +211,44 @@ declare namespace monero {
     restoreMultisigTransaction(sign: string): Promise<Transaction>;
     close(storeWallet?: boolean): Promise<void>;
     // Personal wallet methods
+    getTxKey(txId: string): string;
+    checkTxKey(options: {
+      txId: string, 
+      txKey: string, 
+      address: string,
+      }): TxKeyCheck;
+    getTxProof(options: {
+      txId: string,
+      address: string,
+      message?: string,
+      }): string;
+    checkTxProof(options: {
+      txId: string, 
+      address: string, 
+      signature: string, 
+      message?: string,
+      }): TxProofCheck;
+    getSpendProof(options: {
+      txId: string, 
+      message?: string,
+      }): string;
+    checkSpendProof(options: {
+      txId: string, 
+      message?: string, 
+      signature: string,
+      }): boolean;
+    getReserveProof(options: {
+      all: boolean, 
+      accountIndex: number, 
+      amount: string,
+      token?: boolean, 
+      message?: string,
+    }): string;
+    checkReserveProof(options: {
+      address: string, 
+      signature: string, 
+      message?: string,
+    }): reserveProofCheck;
     signMessage(message: string): string;
     verifySignedMessage(message: string, address: string, signature: string): boolean;
     // Multisig wallet methods

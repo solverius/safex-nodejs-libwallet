@@ -56,6 +56,7 @@ Napi::Value SetupLog(const Napi::CallbackInfo& info) {
     std::string filename = info[1].As<Napi::String>();
     mlog_configure(filename, false);
     mlog_set_log(configureString);
+    return Napi::Value();
 }
 
 
