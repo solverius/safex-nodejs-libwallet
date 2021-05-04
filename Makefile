@@ -1,5 +1,4 @@
 SAFEX_BRANCH?="node_wallet"
-SAFEX_BUILD_TYPE?=Debug
 
 BOOST_VERSION=1.72.0
 BOOST_DIRNAME=boost_1_72_0
@@ -24,7 +23,7 @@ clean:
 
 ${BOOST_DIRNAME}:
 	curl -L -o "${BOOST_DIRNAME}.tar.gz" \
-		https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
+		https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/${BOOST_DIRNAME}.tar.gz/download
 	tar xf ${BOOST_DIRNAME}.tar.gz
 
 boost: ${BOOST_DIRNAME}
@@ -69,10 +68,9 @@ safexcore-build: boost safexcore
 	mkdir -p safexcore/build
 	cd safexcore/build && cmake -DBUILD_SHARED_LIBS=OFF -DBUILD_GUI_DEPS=ON \
 		-DBUILD_TESTS=OFF -DSTATIC=ON -DBOOST_ROOT=${PWD}/boost \
-		-DARCH="x86-64" -D \
-		-DBUILD_64=ON -D \
+		-DARCH="x86-64"  \
+		-DBUILD_64=ON  \
 		-DCMAKE_BUILD_TYPE=release \
-		-DCMAKE_BUILD_TYPE=${SAFEX_BUILD_TYPE} \
 		-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true \
 		-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${PWD}/deps \
 		..
