@@ -11,6 +11,6 @@ then
 else
 	mkdir -p $(pwd)/build;
 	make deps && cmake-js build --CDARCH='x86-64' --CDBUILD_WIN=OFF --CDBUILD_64=ON --arch=x86_64 -m;
-	mkdir -p mkdir -p $(pwd)/lib/binding;
+	mkdir -p $(pwd)/lib/binding;
 	cp build/Release/safex.node lib/binding/;
 fi
