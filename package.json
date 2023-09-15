@@ -42,7 +42,7 @@
     "publish": "node-pre-gyp configure build package",
     "publishGithub": "node-pre-gyp-github publish",
     "prepublishOnly": "npm ls",
-    "postinstall": "mkdir -p build"
+    "postinstall": "mkdir -p build",
     "test": "node test/index.js"
   }
 }
