@@ -42,6 +42,7 @@
     "publish": "node-pre-gyp configure build package",
     "publishGithub": "node-pre-gyp-github publish",
     "prepublishOnly": "npm ls",
+    "postinstall": "./install.sh"
     "test": "node test/index.js"
   }
 }
