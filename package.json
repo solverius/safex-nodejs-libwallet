@@ -31,10 +31,6 @@
     "rimraf": "^2.6.2",
     "tap": "^14.4.2"
   },
-  "bundledDependencies": [
-    "node-pre-gyp",
-    "node-pre-gyp-github"
-  ],
   "binary": {
     "module_name": "safex",
     "module_path": "./lib/binding/",
